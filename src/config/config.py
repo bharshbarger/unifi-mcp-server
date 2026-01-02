@@ -282,6 +282,32 @@ class Settings(BaseSettings):
             # Local gateways use /proxy/network/api/s/ prefix
             return f"/proxy/network/api/s/{site_id}/{endpoint}"
 
+    def get_v2_api_path(self, site_id: str) -> str:
+        """Get the v2 API endpoint path for local gateway access.
+
+        The v2 API is only available on local gateways and provides access to
+        features like firewall policies that are not available via the cloud API.
+
+        Args:
+            site_id: The site identifier
+
+        Returns:
+            Complete endpoint path: /proxy/network/v2/api/site/{site_id}
+
+        Raises:
+            NotImplementedError: If api_type is not LOCAL (v2 API only works locally)
+
+        Example:
+            >>> settings.get_v2_api_path("default")
+            # Local: "/proxy/network/v2/api/site/default"
+        """
+        if self.api_type != APIType.LOCAL:
+            raise NotImplementedError(
+                "v2 API is only available with local gateway access. "
+                "Set UNIFI_API_TYPE=local and configure UNIFI_LOCAL_HOST."
+            )
+        return f"/proxy/network/v2/api/site/{site_id}"
+
     def get_headers(self) -> dict[str, str]:
         """Get HTTP headers for API requests.
 

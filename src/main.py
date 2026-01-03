@@ -30,6 +30,7 @@ from .tools import traffic_matching_lists as tml_tools
 from .tools import vouchers as vouchers_tools
 from .tools import reference_data as ref_tools
 from .tools import vpn as vpn_tools
+from .tools import site_vpn as site_vpn_tools
 from .tools import wans as wans_tools
 from .tools import wifi as wifi_tools
 from .utils import get_logger
@@ -96,6 +97,31 @@ async def health_check() -> dict[str, str]:
         "version": "0.2.0",
         "api_type": settings.api_type.value,
     }
+
+
+# Register debug tool only if DEBUG is enabled
+if os.getenv("DEBUG", "").lower() in ("true", "1", "yes"):
+    @mcp.tool()
+    async def debug_api_request(endpoint: str, method: str = "GET") -> dict:
+        """Debug tool to query arbitrary UniFi API endpoints.
+
+        Args:
+            endpoint: API endpoint path (e.g., /proxy/network/api/s/default/rest/networkconf)
+            method: HTTP method (GET, POST, PUT, DELETE)
+
+        Returns:
+            Raw JSON response from the API
+        """
+        from .api import UniFiClient
+
+        async with UniFiClient(settings) as client:
+            await client.authenticate()
+            if method.upper() == "GET":
+                return await client.get(endpoint)
+            elif method.upper() == "DELETE":
+                return await client.delete(endpoint)
+            else:
+                return {"error": f"Method {method} requires json_data parameter (not implemented)"}
 
 
 # MCP Resources
@@ -1356,6 +1382,39 @@ async def list_vpn_servers(
 ) -> list[dict]:
     """List all VPN servers (read-only)."""
     return await vpn_tools.list_vpn_servers(site_id, settings, limit, offset)
+
+
+@mcp.tool()
+async def list_site_to_site_vpns(site_id: str) -> list[dict]:
+    """List all site-to-site IPsec VPN configurations."""
+    return await site_vpn_tools.list_site_to_site_vpns(site_id, settings)
+
+
+@mcp.tool()
+async def get_site_to_site_vpn(site_id: str, vpn_id: str) -> dict:
+    """Get details for a specific site-to-site VPN."""
+    return await site_vpn_tools.get_site_to_site_vpn(site_id, vpn_id, settings)
+
+
+@mcp.tool()
+async def update_site_to_site_vpn(
+    site_id: str,
+    vpn_id: str,
+    name: str | None = None,
+    enabled: bool | None = None,
+    ipsec_peer_ip: str | None = None,
+    remote_vpn_subnets: list[str] | None = None,
+    x_ipsec_pre_shared_key: str | None = None,
+    confirm: bool = False,
+    dry_run: bool = False,
+) -> dict:
+    """Update a site-to-site VPN configuration (requires confirm=True)."""
+    return await site_vpn_tools.update_site_to_site_vpn(
+        site_id, vpn_id, settings,
+        name=name, enabled=enabled, ipsec_peer_ip=ipsec_peer_ip,
+        remote_vpn_subnets=remote_vpn_subnets, x_ipsec_pre_shared_key=x_ipsec_pre_shared_key,
+        confirm=confirm, dry_run=dry_run,
+    )
 
 
 # RADIUS & Reference Data Tools

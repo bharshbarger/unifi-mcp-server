@@ -6,12 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.utils.audit import (
-    AuditLogger,
-    audit_action,
-    get_audit_logger,
-    log_audit,
-)
+from src.utils.audit import AuditLogger, audit_action, get_audit_logger, log_audit
 
 
 class TestAuditLoggerInit:

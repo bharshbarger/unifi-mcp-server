@@ -8,6 +8,7 @@ import puppeteer from 'puppeteer';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { delay } from '../utils/delay.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,7 +33,7 @@ async function debugLoginPage() {
     });
 
     // Wait for page to settle
-    await page.waitForTimeout(3000);
+    await delay(3000);
 
     console.log(`Current URL: ${page.url()}\n`);
 

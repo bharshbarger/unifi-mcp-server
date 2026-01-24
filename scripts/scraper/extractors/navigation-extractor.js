@@ -5,6 +5,7 @@
 
 import { waitForAnySelector, waitForStableElement } from '../utils/wait-for-selectors.js';
 import { takeScreenshot, debugSnapshot } from '../utils/screenshot-debugger.js';
+import { delay } from '../utils/delay.js';
 
 /**
  * Extract navigation structure from API docs page
@@ -17,7 +18,7 @@ export async function extractNavigationStructure(page, options = {}) {
 
   // Wait for page to be fully loaded
   await page.waitForLoadState?.('networkidle').catch(() => {});
-  await page.waitForTimeout(2000);
+  await delay(2000);
 
   // Take debug screenshot
   if (options.debug) {

@@ -3,6 +3,8 @@
  * Provides fallback strategies for dynamic content
  */
 
+import { delay } from './delay.js';
+
 /**
  * Wait for any of multiple selectors (first one wins)
  * @param {Page} page - Puppeteer page instance
@@ -25,7 +27,7 @@ export async function waitForAnySelector(page, selectors, options = {}) {
     }
 
     // Wait a bit before trying again
-    await page.waitForTimeout(100);
+    await delay(100);
   }
 
   throw new Error(`None of the selectors found: ${selectors.join(', ')}`);
@@ -131,7 +133,7 @@ export async function waitForStableElement(page, selector, options = {}) {
     }
 
     lastRect = rect;
-    await page.waitForTimeout(100);
+    await delay(100);
   }
 }
 

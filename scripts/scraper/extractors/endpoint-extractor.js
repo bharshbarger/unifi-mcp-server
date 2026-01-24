@@ -6,6 +6,7 @@
 import { waitForStableElement, retryWithBackoff } from '../utils/wait-for-selectors.js';
 import { takeScreenshot, debugSnapshot } from '../utils/screenshot-debugger.js';
 import { extractSchema, extractParameters, extractExamples } from './schema-extractor.js';
+import { delay } from '../utils/delay.js';
 
 /**
  * Extract details for a single endpoint
@@ -29,7 +30,7 @@ export async function extractEndpointDetails(page, endpoint, options = {}) {
   }
 
   // Wait for content to load
-  await page.waitForTimeout(1000);
+  await delay(1000);
 
   // Take screenshot if debugging
   if (options.debug) {
@@ -385,7 +386,7 @@ export async function extractAllEndpoints(page, endpoints, options = {}) {
 
     // Add delay between batches
     if (i + maxConcurrent < endpoints.length) {
-      await page.waitForTimeout(1000);
+      await delay(1000);
     }
   }
 

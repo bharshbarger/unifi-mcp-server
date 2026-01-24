@@ -6,6 +6,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { delay } from '../utils/delay.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -54,7 +55,7 @@ export async function validateSessionCookies(page, cookies) {
     });
 
     // Wait a bit for redirects
-    await page.waitForTimeout(2000);
+    await delay(2000);
 
     // Check if we're still authenticated (not redirected to login)
     const currentUrl = page.url();
@@ -138,7 +139,7 @@ export async function performLogin(page, credentials) {
   console.log('✓ Email/username entered');
 
   // Wait a moment for the page to react
-  await page.waitForTimeout(2000);
+  await delay(2000);
 
   // Check if passkey/WebAuthn prompt appears (bypasses password)
   const hasPasskey = await page.evaluate(() => {
@@ -164,7 +165,7 @@ export async function performLogin(page, credentials) {
     // Check every 5 seconds if authentication succeeded
     let authenticated = false;
     for (let i = 0; i < 24; i++) { // 24 * 5s = 120 seconds
-      await page.waitForTimeout(5000);
+      await delay(5000);
 
       const currentUrl = page.url();
       if (!currentUrl.includes('login') && !currentUrl.includes('auth')) {
@@ -234,7 +235,7 @@ export async function performLogin(page, credentials) {
 
   // Handle potential 2FA or additional verification (skip if passkey was used)
   if (!hasPasskey) {
-    await page.waitForTimeout(3000);
+    await delay(3000);
 
     // Check for traditional 2FA prompts (SMS, authenticator app codes)
     const has2FA = await page.evaluate(() => {
@@ -255,7 +256,7 @@ export async function performLogin(page, credentials) {
       // Wait for user to complete 2FA, checking every 5 seconds
       let twoFAComplete = false;
       for (let i = 0; i < 18; i++) { // 18 * 5s = 90 seconds
-        await page.waitForTimeout(5000);
+        await delay(5000);
 
         const currentUrl = page.url();
         if (!currentUrl.includes('verification') && !currentUrl.includes('2fa')) {

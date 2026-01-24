@@ -17,6 +17,7 @@ import { authenticateUniFi, clearSessionCookies } from './auth/unifi-login.js';
 import { extractNavigationStructure } from './extractors/navigation-extractor.js';
 import { extractAllEndpoints } from './extractors/endpoint-extractor.js';
 import { APISpecification, parseNavigation, mergeEndpointDetails } from './parsers/api-spec-parser.js';
+import { delay } from './utils/delay.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -128,7 +129,7 @@ async function main() {
       waitUntil: 'networkidle2',
       timeout: 30000
     });
-    await page.waitForTimeout(2000);
+    await delay(2000);
     spinner.succeed('API documentation loaded');
 
     // Extract navigation structure

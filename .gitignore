@@ -187,3 +187,11 @@ docs/bugs/
 
 # Git worktrees
 .worktrees/
+
+# API Scraper
+scripts/session-cookies.json
+scripts/screenshots/
+scripts/scraped-api-spec-*.json
+scripts/api-diff-*.json
+scripts/node_modules/
+scripts/package-lock.json

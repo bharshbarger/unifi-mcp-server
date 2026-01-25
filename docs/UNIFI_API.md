@@ -24,6 +24,7 @@ This document provides comprehensive reference documentation for the UniFi Netwo
 - [Traffic Matching Lists](#traffic-matching-lists)
 - [Quality of Service (QoS)](#quality-of-service-qos)
 - [Backup and Restore](#backup-and-restore)
+- [Site Manager API](#site-manager-api)
 - [Supporting Resources](#supporting-resources)
 
 ---
@@ -2533,6 +2534,462 @@ Retrieve the configured automated backup schedule for a site.
   "recommendation": "Use schedule_backups to configure automated backups"
 }
 ```
+
+---
+
+## Site Manager API
+
+**Implementation:** v0.2.0 Phase 5 (~60% complete)
+**Coverage:** 92.95% (33 tests passing)
+**Status:** Multi-site aggregation complete, OAuth/SSO pending
+
+The Site Manager API provides centralized management and monitoring capabilities across multiple UniFi sites. These tools enable comprehensive oversight of distributed network deployments through unified health metrics, performance comparisons, inventory management, and cross-site search functionality.
+
+**⚠️ Configuration Required:**
+```bash
+export UNIFI_SITE_MANAGER_ENABLED=true
+export UNIFI_API_KEY=<your-site-manager-api-key>
+export UNIFI_API_TYPE=cloud-ea  # or cloud-v1
+```
+
+### Overview
+
+The Site Manager API consists of 8 tools organized into three categories:
+
+**Basic Aggregation:**
+- List all sites with aggregated statistics
+- Get internet health metrics
+- Get site health summaries
+- List Vantage Points
+
+**Advanced Analytics:**
+- Get site inventory (comprehensive resource breakdown)
+- Compare site performance (rankings and metrics)
+- Get cross-site statistics
+
+**Search & Discovery:**
+- Search across sites (devices, clients, networks)
+
+---
+
+### Example Prompts for Site Manager
+
+```
+"Show me all my sites and their current health status"
+"Which site has the best uptime and performance?"
+"Find all Ubiquiti access points across all my locations"
+"Give me a complete inventory of devices at the downtown office"
+"Compare performance metrics between all my branch offices"
+"Search for the device with MAC address aa:bb:cc:dd:ee:ff across all sites"
+"Show me sites with degraded internet connectivity"
+"Which site has the most devices offline right now?"
+```
+
+---
+
+### List All Sites Aggregated ✅
+
+List all managed sites with aggregated statistics from the Site Manager API.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/sites`
+- **MCP Tool:** `list_all_sites_aggregated()`
+- **Implementation:** v0.2.0 Phase 5 (93% coverage)
+
+**Request:** No parameters required.
+
+**Response:** `200 OK`
+
+```json
+[
+  {
+    "site_id": "site-abc123",
+    "name": "Main Office",
+    "devices": 25,
+    "clients": 150,
+    "status": "healthy",
+    "uptime_percentage": 99.9
+  },
+  {
+    "site_id": "site-def456",
+    "name": "Branch Office",
+    "devices": 10,
+    "clients": 50,
+    "status": "degraded",
+    "uptime_percentage": 95.0
+  }
+]
+```
+
+---
+
+### Get Internet Health ✅
+
+Get internet connectivity health metrics across sites or for a specific site.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/internet/health` or `/v1/sites/{siteId}/internet/health`
+- **MCP Tool:** `get_internet_health(site_id=None)`
+- **Implementation:** v0.2.0 Phase 5 (93% coverage)
+
+**Request Body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `site_id` | string | No | Site identifier (None for aggregate) |
+
+**Response (Aggregate):** `200 OK`
+
+```json
+{
+  "site_id": null,
+  "latency_ms": 25.5,
+  "packet_loss_percent": 0.1,
+  "jitter_ms": 2.3,
+  "bandwidth_up_mbps": 100.0,
+  "bandwidth_down_mbps": 500.0,
+  "status": "healthy",
+  "last_tested": "2026-01-24T12:00:00Z"
+}
+```
+
+**Response (Specific Site):** `200 OK`
+
+```json
+{
+  "site_id": "site-abc123",
+  "latency_ms": 15.0,
+  "packet_loss_percent": 0.0,
+  "jitter_ms": 1.0,
+  "bandwidth_up_mbps": 50.0,
+  "bandwidth_down_mbps": 200.0,
+  "status": "healthy",
+  "last_tested": "2026-01-24T12:00:00Z"
+}
+```
+
+---
+
+### Get Site Health Summary ✅
+
+Get health summary for all sites or a specific site.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/sites/health` or `/v1/sites/{siteId}/health`
+- **MCP Tool:** `get_site_health_summary(site_id=None)`
+- **Implementation:** v0.2.0 Phase 5 (93% coverage)
+
+**Request Body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `site_id` | string | No | Site identifier (None for all sites) |
+
+**Response (All Sites):** `200 OK`
+
+```json
+[
+  {
+    "site_id": "site-abc123",
+    "site_name": "Main Office",
+    "status": "healthy",
+    "devices_online": 25,
+    "devices_total": 25,
+    "clients_active": 150,
+    "uptime_percentage": 99.9,
+    "last_updated": "2026-01-24T12:00:00Z"
+  },
+  {
+    "site_id": "site-def456",
+    "site_name": "Branch Office",
+    "status": "degraded",
+    "devices_online": 8,
+    "devices_total": 10,
+    "clients_active": 50,
+    "uptime_percentage": 95.0,
+    "last_updated": "2026-01-24T12:00:00Z"
+  }
+]
+```
+
+---
+
+### Get Cross-Site Statistics ✅
+
+Get aggregated statistics across all managed sites.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/sites/statistics`
+- **MCP Tool:** `get_cross_site_statistics()`
+- **Implementation:** v0.2.0 Phase 5 (93% coverage)
+
+**Request:** No parameters required.
+
+**Response:** `200 OK`
+
+```json
+{
+  "total_sites": 5,
+  "sites_healthy": 3,
+  "sites_degraded": 1,
+  "sites_down": 1,
+  "total_devices": 75,
+  "devices_online": 68,
+  "total_clients": 350,
+  "total_bandwidth_up_mbps": 500.0,
+  "total_bandwidth_down_mbps": 2500.0,
+  "site_summaries": [
+    {
+      "site_id": "site-abc123",
+      "site_name": "Main Office",
+      "status": "healthy",
+      "devices_online": 25,
+      "devices_total": 25,
+      "clients_active": 150,
+      "uptime_percentage": 99.9,
+      "last_updated": "2026-01-24T12:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### List Vantage Points ✅
+
+List all Vantage Points for network monitoring and testing.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/vantage-points`
+- **MCP Tool:** `list_vantage_points()`
+- **Implementation:** v0.2.0 Phase 5 (93% coverage)
+
+**Request:** No parameters required.
+
+**Response:** `200 OK`
+
+```json
+[
+  {
+    "vantage_point_id": "vp-123",
+    "name": "New York Office",
+    "location": "New York, NY",
+    "latitude": 40.7128,
+    "longitude": -74.0060,
+    "status": "active",
+    "site_ids": ["site-abc123", "site-def456"]
+  },
+  {
+    "vantage_point_id": "vp-456",
+    "name": "London Office",
+    "location": "London, UK",
+    "latitude": 51.5074,
+    "longitude": -0.1278,
+    "status": "active",
+    "site_ids": ["site-ghi789"]
+  }
+]
+```
+
+---
+
+### Get Site Inventory ✅ 🆕
+
+Get comprehensive inventory for a site or all sites.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/sites/{siteId}/inventory` or `/v1/sites/inventory`
+- **MCP Tool:** `get_site_inventory(site_id=None)`
+- **Implementation:** v0.2.0 Phase 5 (93% coverage)
+
+Provides detailed resource breakdown including device counts by type, networks, SSIDs, VPN tunnels, and firewall rules.
+
+**Request Body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `site_id` | string | No | Site identifier (None for all sites) |
+
+**Response (Specific Site):** `200 OK`
+
+```json
+{
+  "site_id": "site-abc123",
+  "site_name": "Main Office",
+  "device_count": 25,
+  "device_types": {
+    "uap": 15,
+    "usw": 8,
+    "ugw": 2
+  },
+  "client_count": 150,
+  "network_count": 8,
+  "ssid_count": 5,
+  "uplink_count": 2,
+  "vpn_tunnel_count": 4,
+  "firewall_rule_count": 45,
+  "last_updated": "2026-01-24T12:00:00Z"
+}
+```
+
+**Response (All Sites):** `200 OK`
+
+Returns an array of inventory objects for each site.
+
+---
+
+### Compare Site Performance ✅ 🆕
+
+Compare performance metrics across all sites with rankings.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/sites/performance/compare`
+- **MCP Tool:** `compare_site_performance()`
+- **Implementation:** v0.2.0 Phase 5 (93% coverage)
+
+Analyzes uptime, latency, bandwidth, and health status to identify best and worst performing sites.
+
+**Request:** No parameters required.
+
+**Response:** `200 OK`
+
+```json
+{
+  "total_sites": 3,
+  "best_performing_site": {
+    "site_id": "site-abc123",
+    "site_name": "Main Office",
+    "avg_latency_ms": 10.0,
+    "avg_bandwidth_up_mbps": 100.0,
+    "avg_bandwidth_down_mbps": 500.0,
+    "uptime_percentage": 99.9,
+    "device_online_percentage": 100.0,
+    "client_count": 150,
+    "health_status": "healthy"
+  },
+  "worst_performing_site": {
+    "site_id": "site-ghi789",
+    "site_name": "Remote Office",
+    "avg_latency_ms": 150.0,
+    "avg_bandwidth_up_mbps": 20.0,
+    "avg_bandwidth_down_mbps": 100.0,
+    "uptime_percentage": 80.0,
+    "device_online_percentage": 50.0,
+    "client_count": 20,
+    "health_status": "degraded"
+  },
+  "average_uptime": 91.63,
+  "average_latency_ms": 61.67,
+  "site_metrics": [
+    {
+      "site_id": "site-abc123",
+      "site_name": "Main Office",
+      "avg_latency_ms": 10.0,
+      "uptime_percentage": 99.9,
+      "health_status": "healthy"
+    },
+    {
+      "site_id": "site-def456",
+      "site_name": "Branch Office",
+      "avg_latency_ms": 25.0,
+      "uptime_percentage": 95.0,
+      "health_status": "healthy"
+    },
+    {
+      "site_id": "site-ghi789",
+      "site_name": "Remote Office",
+      "avg_latency_ms": 150.0,
+      "uptime_percentage": 80.0,
+      "health_status": "degraded"
+    }
+  ]
+}
+```
+
+**Use Cases:**
+- Identify sites needing infrastructure upgrades
+- Compare performance across geographic regions
+- Track improvement over time
+- SLA compliance monitoring
+
+---
+
+### Search Across Sites ✅ 🆕
+
+Search for devices, clients, or networks across all managed sites.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/sites/search`
+- **MCP Tool:** `search_across_sites(query, search_type='all')`
+- **Implementation:** v0.2.0 Phase 5 (93% coverage)
+
+Useful for locating resources in multi-site deployments. Supports search by name, MAC address, or IP address.
+
+**Request Body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `query` | string | Yes | Search query (name, MAC, IP) |
+| `search_type` | string | No | "device", "client", "network", or "all" (default: "all") |
+
+**Example Request:**
+
+```json
+{
+  "query": "ap-living",
+  "search_type": "device"
+}
+```
+
+**Response:** `200 OK`
+
+```json
+{
+  "total_results": 2,
+  "search_query": "ap-living",
+  "result_type": "device",
+  "results": [
+    {
+      "type": "device",
+      "site_id": "site-abc123",
+      "site_name": "Main Office",
+      "resource": {
+        "name": "AP-Living-Room",
+        "mac": "aa:bb:cc:dd:ee:01",
+        "type": "uap",
+        "model": "U6-Pro",
+        "ip": "192.168.1.10",
+        "status": "online"
+      }
+    },
+    {
+      "type": "device",
+      "site_id": "site-def456",
+      "site_name": "Branch Office",
+      "resource": {
+        "name": "AP-Living-Area",
+        "mac": "aa:bb:cc:dd:ee:02",
+        "type": "uap",
+        "model": "U6-Lite",
+        "ip": "192.168.2.10",
+        "status": "online"
+      }
+    }
+  ]
+}
+```
+
+**Search Types:**
+- `device` - Search devices by name or MAC address
+- `client` - Search clients by name, MAC, or IP address
+- `network` - Search networks by name
+- `all` - Search all resource types
+
+**Use Cases:**
+- Locate specific device across multiple locations
+- Find all instances of a client device
+- Identify which site has a particular resource
+- MAC address tracking for security investigations
 
 ---
 

@@ -2715,6 +2715,187 @@ async def monitor_devices():
 asyncio.run(monitor_devices())
 ```
 
+## Example AI Assistant Prompts
+
+This section provides example natural language prompts you can use with AI assistants (like Claude) that have access to the UniFi MCP Server. These demonstrate real-world use cases for the v0.2.0 features.
+
+### Network Topology & Visualization
+
+**Prompt:** "Show me a complete map of my network topology including all devices and how they're connected."
+
+The assistant will use `get_network_topology` to retrieve the full network graph, showing devices, clients, and interconnections.
+
+**Prompt:** "Export my network topology as a Graphviz DOT file so I can visualize it in a network diagram tool."
+
+Uses `export_topology` with `format="dot"` to generate a DOT format file compatible with Graphviz and similar visualization tools.
+
+**Prompt:** "Which devices are connected to my main switch on ports 5-10?"
+
+The assistant will use `get_port_mappings` to show exactly what's plugged into specific switch ports.
+
+### Quality of Service (QoS) Management
+
+**Prompt:** "I need to prioritize video conferencing traffic on my network. Create a QoS profile for Zoom, Teams, and WebEx with high priority."
+
+The assistant will use `create_qos_profile` to configure traffic prioritization for common video conferencing applications.
+
+**Prompt:** "Show me all active QoS profiles and their bandwidth allocations."
+
+Uses `list_qos_profiles` to display current QoS configuration and traffic shaping rules.
+
+**Prompt:** "Create a traffic route that sends all Netflix traffic through my secondary WAN during business hours (9 AM - 5 PM)."
+
+The assistant combines `create_traffic_route` with schedule configuration to implement time-based routing policies.
+
+**Prompt:** "Set up Pro AV mode on ports 5-8 for our conference room equipment with guaranteed 1 Gbps bandwidth."
+
+Uses QoS templates and port-based traffic shaping to ensure quality for professional audio/video equipment.
+
+### Backup & Disaster Recovery
+
+**Prompt:** "Create a full system backup of my UniFi controller right now and keep it for 90 days."
+
+The assistant will use `trigger_backup` with `backup_type="system"` and `retention_days=90`.
+
+**Prompt:** "Show me all backups from the last 7 days and their sizes."
+
+Uses `list_backups` and filters results to show recent backups with size information.
+
+**Prompt:** "Download my latest network backup to /tmp/emergency-backup.unf and verify the checksum."
+
+The assistant uses `download_backup` with checksum verification enabled for data integrity.
+
+**Prompt:** "Set up automatic daily backups at 2 AM with 30-day retention."
+
+Uses `configure_backup_schedule` to establish automated backup policies with cron expressions.
+
+**Prompt:** "What's the status of my last backup? Is it complete and cloud-synced?"
+
+The assistant uses `get_backup_status` to check backup completion and synchronization state.
+
+### RADIUS & Authentication
+
+**Prompt:** "Set up a RADIUS server for 802.1X authentication using my FreeRADIUS server at 192.168.1.50."
+
+The assistant will use `create_radius_profile` to configure RADIUS authentication for network access control.
+
+**Prompt:** "Create a RADIUS user account 'guest-wifi' with password for our guest portal."
+
+Uses `create_radius_account` to provision user credentials for RADIUS authentication.
+
+**Prompt:** "Configure the guest portal with a 4-hour session timeout and redirect users to our company website after login."
+
+The assistant uses `configure_guest_portal` to customize the captive portal experience.
+
+**Prompt:** "Show me all active RADIUS profiles and which ones have accounting enabled."
+
+Uses `list_radius_profiles` to display authentication server configurations.
+
+**Prompt:** "Create a hotspot package: '$5 for 24 hours with 5 GB data limit' for our café WiFi."
+
+The assistant uses `create_hotspot_package` to set up paid WiFi access with usage quotas.
+
+### Multi-Site Management
+
+**Prompt:** "Compare the device count and health status across all my sites."
+
+The assistant uses `aggregate_device_stats` to provide cross-site device analytics.
+
+**Prompt:** "Create a new site called 'Branch Office' with description 'Remote office in Austin, TX'."
+
+Uses `create_site` to provision a new UniFi site for multi-location management.
+
+**Prompt:** "Move the device 'AP-Office-2' from the default site to the 'Branch Office' site."
+
+The assistant uses `move_device_to_site` for cross-site device transfers.
+
+**Prompt:** "Show me aggregate client statistics across all sites - total count, by connection type, and by band."
+
+Uses `aggregate_client_stats` to provide organization-wide client analytics.
+
+**Prompt:** "Set up a site-to-site VPN between my main office and branch office."
+
+The assistant uses `configure_site_vpn` to establish secure inter-site connectivity.
+
+### Firewall & Traffic Control
+
+**Prompt:** "Block all BitTorrent traffic on my guest network during business hours."
+
+The assistant will create a traffic matching list for P2P protocols and a firewall rule with schedule.
+
+**Prompt:** "Create an ACL that allows only IT department devices (192.168.10.0/24) to access the server VLAN (192.168.20.0/24)."
+
+Uses `create_acl` to implement network segmentation and access control.
+
+**Prompt:** "Show me all traffic flows where clients are using more than 10 GB per day."
+
+The assistant uses `list_traffic_flows` with filtering to identify high-bandwidth users.
+
+**Prompt:** "Block the client at MAC address aa:bb:cc:dd:ee:ff for suspicious activity."
+
+Uses `block_traffic_flow` to immediately block a specific device.
+
+### Advanced Network Analysis
+
+**Prompt:** "Analyze my network topology and tell me the maximum depth from the gateway and identify any bottlenecks."
+
+The assistant uses `get_topology_statistics` to analyze network architecture and identify potential issues.
+
+**Prompt:** "Show me all wired connections and their link speeds, highlighting any that aren't running at 1 Gbps."
+
+Combines `get_device_connections` with filtering to identify underperforming network links.
+
+**Prompt:** "Export all my site configurations for documentation purposes."
+
+The assistant uses `export_site_config` to generate comprehensive site documentation.
+
+### Troubleshooting & Monitoring
+
+**Prompt:** "Why is my AP-Hallway showing as offline in the topology? Show me its last known connection details."
+
+The assistant uses `get_network_topology` and filters for the specific device to diagnose connectivity issues.
+
+**Prompt:** "Show me all QoS profiles that have applied rate limiting in the last hour."
+
+Uses `list_qos_profiles` combined with statistics to identify active traffic shaping.
+
+**Prompt:** "Which backup is most recent and has it been tested for restore capability?"
+
+The assistant uses `list_backups` and `get_backup_details` to validate backup integrity.
+
+**Prompt:** "Show me all RADIUS authentication failures in the last 24 hours."
+
+Uses `list_radius_accounts` or authentication logs to troubleshoot access issues.
+
+### Combining Multiple Operations
+
+**Prompt:** "I'm setting up a new branch office. Create a site, configure basic networks, set up QoS for VoIP, enable RADIUS authentication, and schedule daily backups."
+
+The assistant will orchestrate multiple MCP tools:
+1. `create_site` - Provision the site
+2. `create_network` - Set up VLANs
+3. `create_qos_profile` - Configure VoIP prioritization
+4. `create_radius_profile` - Enable 802.1X authentication
+5. `configure_backup_schedule` - Automate backups
+
+**Prompt:** "Audit my network: show me topology depth, list all QoS policies, count clients per site, check backup status, and verify all RADIUS servers are reachable."
+
+Demonstrates complex multi-tool queries combining:
+- `get_topology_statistics`
+- `list_qos_profiles`
+- `aggregate_client_stats`
+- `list_backups` + `get_backup_status`
+- `list_radius_profiles`
+
+### Best Practices for Prompts
+
+1. **Be Specific:** Instead of "configure my network," say "create a guest WiFi network with 4-hour timeout"
+2. **Include Context:** Mention site names, device IDs, IP ranges, or specific requirements
+3. **Specify Timing:** Use "right now," "schedule for 2 AM," or "during business hours"
+4. **Request Validation:** Ask for dry-run mode first: "Show me what would happen if..."
+5. **Combine Related Tasks:** Group related operations in a single prompt for better workflow
+6. **Ask for Summaries:** End with "and summarize the changes" to get a clear action report
+
 ## API Changelog
 
 ### Version 0.1.0 (Initial Release)

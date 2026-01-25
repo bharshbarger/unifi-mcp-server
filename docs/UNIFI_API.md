@@ -7,6 +7,7 @@ This document provides comprehensive reference documentation for the UniFi Netwo
 ## Table of Contents
 
 - [Getting Started](#getting-started)
+- [Example Prompts for MCP Interaction](#example-prompts-for-mcp-interaction)
 - [Filtering](#filtering)
 - [Error Handling](#error-handling)
 - [Application Info](#application-info)
@@ -21,6 +22,7 @@ This document provides comprehensive reference documentation for the UniFi Netwo
 - [Access Control (ACL Rules)](#access-control-acl-rules)
 - [DNS Policies](#dns-policies)
 - [Traffic Matching Lists](#traffic-matching-lists)
+- [Quality of Service (QoS)](#quality-of-service-qos)
 - [Supporting Resources](#supporting-resources)
 
 ---
@@ -53,6 +55,165 @@ https://{CONTROLLER_IP}/proxy/network/integration/v1
 **Local API:**
 ```
 https://{CONTROLLER_IP}/proxy/network/api
+```
+
+---
+
+## Example Prompts for MCP Interaction
+
+When using an AI assistant with the UniFi MCP Server, you can use natural language prompts to accomplish complex network management tasks. Here are example prompts organized by category:
+
+### Network Discovery & Monitoring
+
+```
+"Show me all offline devices on my network"
+"List all clients connected to the Guest WiFi network"
+"What devices are connected to the main switch in the living room?"
+"Show me devices with firmware updates available"
+"Which access points have the highest client load right now?"
+"Find all devices with uptime less than 24 hours"
+```
+
+### QoS & Traffic Management
+
+```
+"Create a QoS profile for Zoom video conferencing with 5 Mbps guaranteed bandwidth"
+"Set up a ProAV profile for our Dante audio system in the studio"
+"Configure Smart Queue Management on WAN1 for my 100 Mbps connection"
+"Create a traffic route to prioritize all UDP port 5060 traffic (SIP/VoIP)"
+"Show me all QoS profiles and their current bandwidth allocations"
+"Validate if my network can support SMPTE 2110 professional video"
+```
+
+### Firewall & Security
+
+```
+"Create a firewall rule to block all inbound traffic on port 445 (SMB)"
+"Set up a firewall policy to allow VPN traffic from the remote office subnet"
+"List all firewall rules that are currently blocking traffic"
+"Create a zone-based policy to isolate the IoT network from the main LAN"
+"Show me recent traffic flows from the Guest network to the internet"
+"Block all traffic from China and Russia to my web server"
+```
+
+### WiFi & Guest Access
+
+```
+"Create a guest WiFi network with a daily voucher system"
+"Generate 10 WiFi vouchers valid for 24 hours with 10 Mbps speed limit"
+"List all active guest clients and their bandwidth usage"
+"Create a separate SSID for IoT devices with device isolation enabled"
+"Show me WiFi channel utilization across all access points"
+"Set up a hotspot portal with social media authentication"
+```
+
+### Network Configuration
+
+```
+"Create a new VLAN 20 for the security cameras with 192.168.20.0/24 subnet"
+"Set up a static route to reach the remote office subnet via the VPN gateway"
+"Configure port forwarding for SSH (port 22) to my home server at 192.168.1.100"
+"Create a DHCP reservation for the printer at 192.168.1.50"
+"Show me all networks and their current IP address assignments"
+"Set up inter-VLAN routing between the main LAN and the security camera network"
+```
+
+### Site Management & Health
+
+```
+"Show me the overall health status of all my UniFi sites"
+"What's the internet connectivity status for the remote office location?"
+"List all sites and their WAN uplink speeds"
+"Show me any sites experiencing issues or alerts"
+"Compare network performance metrics across all sites"
+```
+
+### Backups & Recovery
+
+```
+"Create a full backup of my site configuration right now"
+"Schedule automatic backups every night at 2 AM"
+"List all available backups and their creation dates"
+"Restore the site configuration from the backup created on January 15th"
+"Validate the integrity of my most recent backup"
+```
+
+### Advanced Workflows
+
+```
+"Set up a home office network with:
+- Main LAN on VLAN 10
+- Guest WiFi on VLAN 20 (isolated)
+- IoT devices on VLAN 30 (restricted internet only)
+- Firewall rules to prevent cross-VLAN traffic
+- QoS to prioritize video conferencing"
+
+"Configure a ProAV network for live streaming:
+- Dedicated VLAN for NDI devices
+- QoS profile with 100 Mbps guaranteed bandwidth
+- Multicast support enabled
+- Traffic routes to prioritize NDI ports
+- Monitoring for packet loss and jitter"
+
+"Implement a secure remote access setup:
+- L2TP VPN server with strong encryption
+- Firewall rules to allow VPN traffic
+- QoS to ensure VPN performance
+- Traffic routes to route VPN clients through main gateway
+- Monitoring for active VPN connections"
+```
+
+### Troubleshooting & Diagnostics
+
+```
+"Why is my WiFi so slow in the bedroom? Show me the access point status and client connections"
+"Diagnose connectivity issues between the printer and my laptop"
+"Show me all firewall rules that might be blocking port 443"
+"Which device is consuming the most bandwidth right now?"
+"List all clients with poor WiFi signal strength (RSSI below -70 dBm)"
+"Find any device that's been disconnecting frequently"
+```
+
+### Batch Operations
+
+```
+"Reboot all access points in the main building"
+"Upgrade firmware on all switches to the latest version"
+"Create firewall rules to block the top 10 malicious IP addresses"
+"Generate 100 guest vouchers for the conference next week"
+"Apply the 'Video Conference' QoS profile to all Zoom traffic"
+```
+
+### Best Practices for Effective Prompts
+
+1. **Be Specific**: Include exact values (IP addresses, port numbers, VLAN IDs)
+2. **Use Context**: Reference existing configurations ("the Guest WiFi", "my main switch")
+3. **Request Confirmation**: Ask the AI to explain changes before applying them
+4. **Combine Operations**: Chain related tasks in a single conversational flow
+5. **Ask for Validation**: Request health checks or impact analysis before major changes
+6. **Leverage Dry-Run**: Ask the AI to show what would happen without actually making changes
+
+**Example Multi-Step Conversation:**
+
+```
+User: "I need to set up QoS for my Zoom calls. What do you recommend?"
+
+AI: "I recommend creating a QoS profile with priority level 5, DSCP marking 34 (AF41),
+     and guaranteed bandwidth of 5 Mbps down / 2 Mbps up. This ensures high-quality
+     video even during network congestion. Would you like me to create this?"
+
+User: "Yes, but first show me what the configuration would look like in dry-run mode."
+
+AI: [Shows dry-run output with exact configuration values]
+
+User: "Perfect, go ahead and create it. Also, create a traffic route to apply this
+      QoS profile to all UDP traffic on port 8801 (Zoom media)."
+
+AI: [Creates QoS profile and traffic route, confirms success]
+
+User: "Now validate that this is working correctly."
+
+AI: [Shows active traffic flows with DSCP marking applied, confirms QoS is active]
 ```
 
 ---
@@ -1416,6 +1577,516 @@ Get an existing traffic matching list on a site.
 - **Implementation:** Batch 1 (92.47% coverage)
 
 **Response:** `200 OK`
+
+---
+
+## Quality of Service (QoS)
+
+Manage Quality of Service profiles, ProAV (Professional Audio/Video) protocols, Smart Queue Management (bufferbloat mitigation), and policy-based traffic routing rules.
+
+### Overview
+
+UniFi's QoS system provides comprehensive traffic prioritization and shaping capabilities:
+
+- **QoS Profiles**: Define traffic priority levels (0-7) with DSCP marking (0-63) for bandwidth guarantees
+- **ProAV Protocols**: Pre-configured templates for professional audio/video standards (Dante, Q-SYS, SDVoE, AVB, RAVENNA, NDI, SMPTE 2110)
+- **Smart Queue Management (SQM)**: Bufferbloat mitigation using fq_codel or CAKE algorithms
+- **Traffic Routes**: Policy-based routing rules with match criteria (IP, port, protocol, VLAN) and actions (allow, deny, mark, shape)
+
+**Best Practices:**
+- Use priority levels 5-7 for real-time traffic (voice, video conferencing)
+- Apply DSCP marking EF (46) for voice, AF41 (34) for high-quality video
+- Enable SQM on WAN interfaces <300 Mbps for best bufferbloat mitigation
+- Use reference profiles (voice-first, video-conferencing, cloud-gaming) as starting points
+- Test QoS rules during peak hours to validate bandwidth guarantees
+
+### List QoS Profiles ✅
+
+Retrieve all QoS profiles configured for traffic prioritization and bandwidth shaping.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/sites/{siteId}/qos/profiles`
+- **MCP Tool:** `list_qos_profiles()`
+- **Implementation:** v0.2.0 Phase 3 (82% coverage)
+
+**Query Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `offset` | number | 0 | Number of items to skip |
+| `limit` | number | 100 | Maximum items to return |
+
+**Response:** `200 OK`
+
+```json
+{
+  "data": [
+    {
+      "_id": "profile-001",
+      "name": "Voice Priority",
+      "priority_level": 6,
+      "dscp_marking": 46,
+      "bandwidth_guaranteed_down_kbps": 256,
+      "bandwidth_guaranteed_up_kbps": 256,
+      "bandwidth_limit_down_kbps": 1024,
+      "bandwidth_limit_up_kbps": 512,
+      "enabled": true
+    }
+  ],
+  "total": 5,
+  "offset": 0,
+  "limit": 100
+}
+```
+
+---
+
+### Get QoS Profile ✅
+
+Retrieve detailed information about a specific QoS profile.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/sites/{siteId}/qos/profiles/{profileId}`
+- **MCP Tool:** `get_qos_profile()`
+- **Implementation:** v0.2.0 Phase 3 (82% coverage)
+
+**Response:** `200 OK`
+
+---
+
+### Create QoS Profile ✅
+
+Create a new QoS profile with comprehensive traffic shaping configuration.
+
+- **Method:** `POST`
+- **Endpoint:** `/v1/sites/{siteId}/qos/profiles`
+- **MCP Tool:** `create_qos_profile()`
+- **Implementation:** v0.2.0 Phase 3 (82% coverage)
+- **Requires:** `confirm=true`
+- **Supports:** `dry_run=true`
+
+**Request Body:**
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Unique profile name |
+| `priority_level` | number | Yes | 0-7 (0=lowest, 7=highest) |
+| `dscp_marking` | number | No | 0-63 (DSCP value) |
+| `bandwidth_guaranteed_down_kbps` | number | No | ≥0 |
+| `bandwidth_guaranteed_up_kbps` | number | No | ≥0 |
+| `bandwidth_limit_down_kbps` | number | No | ≥0 |
+| `bandwidth_limit_up_kbps` | number | No | ≥0 |
+| `enabled` | boolean | No | Default: true |
+| `schedule` | object | No | Time-based activation |
+
+**Example Request:**
+
+```json
+{
+  "name": "Video Conferencing Premium",
+  "priority_level": 5,
+  "dscp_marking": 34,
+  "bandwidth_guaranteed_down_kbps": 5000,
+  "bandwidth_guaranteed_up_kbps": 2000,
+  "bandwidth_limit_down_kbps": 10000,
+  "bandwidth_limit_up_kbps": 5000,
+  "enabled": true,
+  "schedule": {
+    "days_of_week": [1, 2, 3, 4, 5],
+    "start_time": "08:00",
+    "end_time": "18:00"
+  }
+}
+```
+
+**Response:** `201 Created`
+
+---
+
+### Update QoS Profile ✅
+
+Update an existing QoS profile's configuration.
+
+- **Method:** `PATCH`
+- **Endpoint:** `/v1/sites/{siteId}/qos/profiles/{profileId}`
+- **MCP Tool:** `update_qos_profile()`
+- **Implementation:** v0.2.0 Phase 3 (82% coverage)
+- **Requires:** `confirm=true`
+- **Supports:** `dry_run=true`
+
+**Request Body:** All fields optional (only provided fields are updated)
+
+**Response:** `200 OK`
+
+---
+
+### Delete QoS Profile ✅
+
+Delete a QoS profile from the site.
+
+- **Method:** `DELETE`
+- **Endpoint:** `/v1/sites/{siteId}/qos/profiles/{profileId}`
+- **MCP Tool:** `delete_qos_profile()`
+- **Implementation:** v0.2.0 Phase 3 (82% coverage)
+- **Requires:** `confirm=true`
+
+**Response:** `200 OK`
+
+---
+
+### List ProAV Templates ✅
+
+List available Professional Audio/Video protocol templates and reference QoS profiles.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/sites/{siteId}/qos/proav/templates`
+- **MCP Tool:** `list_proav_templates()`
+- **Implementation:** v0.2.0 Phase 3 (82% coverage)
+
+**Response:** `200 OK`
+
+```json
+{
+  "templates": [
+    {
+      "protocol": "dante",
+      "name": "Dante",
+      "description": "Audinate Dante professional audio over IP",
+      "priority_level": 6,
+      "dscp_marking": 46,
+      "bandwidth_requirement_mbps": 100,
+      "latency_requirement_ms": 5,
+      "recommendations": [
+        "Enable PTP (Precision Time Protocol) for clock synchronization",
+        "Use dedicated VLAN for Dante traffic",
+        "Multicast support required",
+        "Minimum 1 Gbps network recommended"
+      ]
+    }
+  ],
+  "total": 13
+}
+```
+
+**Available ProAV Protocols:**
+- **dante**: Audinate Dante (100 Mbps, 5ms latency, DSCP 46)
+- **q-sys**: Q-SYS by QSC (50 Mbps, 10ms latency, DSCP 34)
+- **sdvoe**: SDVoE (10 Gbps, 100µs latency, DSCP 46)
+- **avb**: Audio Video Bridging (100 Mbps, 2ms latency, DSCP 46)
+- **ravenna**: RAVENNA (100 Mbps, 1ms latency, DSCP 46)
+- **ndi**: NDI (Network Device Interface) (100 Mbps, 16ms latency, DSCP 34)
+- **smpte-2110**: SMPTE 2110 (10 Gbps, 1ms latency, DSCP 46)
+
+**Reference Profiles:**
+- **voice-first**: Voice-optimized (128 Kbps guaranteed, DSCP 46)
+- **video-conferencing**: Balanced video conferencing (5 Mbps guaranteed, DSCP 34)
+- **cloud-gaming**: Low-latency gaming (10 Mbps guaranteed, DSCP 28)
+- **streaming-media**: High-bandwidth streaming (25 Mbps guaranteed, DSCP 26)
+- **bulk-backup**: Bulk data transfer (no guarantee, DSCP 8)
+- **guest-best-effort**: Guest network (throttled to 10 Mbps, DSCP 0)
+
+---
+
+### Create ProAV Profile ✅
+
+Create a QoS profile from a ProAV or reference template with optional customizations.
+
+- **Method:** `POST`
+- **Endpoint:** `/v1/sites/{siteId}/qos/proav/profiles`
+- **MCP Tool:** `create_proav_profile()`
+- **Implementation:** v0.2.0 Phase 3 (82% coverage)
+- **Requires:** `confirm=true`
+
+**Request Body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `protocol` | string | Yes | ProAV protocol or reference profile name |
+| `name` | string | No | Custom name (defaults to protocol name) |
+| `priority_level` | number | No | Override template priority |
+| `dscp_marking` | number | No | Override template DSCP |
+| `bandwidth_multiplier` | number | No | Scale bandwidth (default: 1.0) |
+| `enabled` | boolean | No | Enable immediately (default: true) |
+
+**Example Request:**
+
+```json
+{
+  "protocol": "dante",
+  "name": "Dante Audio System - Studio A",
+  "bandwidth_multiplier": 1.5,
+  "enabled": true
+}
+```
+
+**Response:** `201 Created`
+
+---
+
+### Validate ProAV Profile ✅
+
+Validate that network infrastructure meets ProAV protocol requirements.
+
+- **Method:** `POST`
+- **Endpoint:** `/v1/sites/{siteId}/qos/proav/validate`
+- **MCP Tool:** `validate_proav_profile()`
+- **Implementation:** v0.2.0 Phase 3 (82% coverage)
+
+**Request Body:**
+
+| Field | Type | Required |
+|-------|------|----------|
+| `protocol` | string | Yes |
+| `bandwidth_mbps` | number | No |
+
+**Response:** `200 OK`
+
+```json
+{
+  "valid": true,
+  "protocol": "dante",
+  "requirements": {
+    "bandwidth_mbps": 100,
+    "latency_ms": 5,
+    "jitter_tolerance_ms": 1
+  },
+  "current_capacity": {
+    "bandwidth_mbps": 1000,
+    "estimated_latency_ms": 2
+  },
+  "warnings": [],
+  "recommendations": [
+    "Enable PTP (Precision Time Protocol) for clock synchronization",
+    "Use dedicated VLAN for Dante traffic"
+  ]
+}
+```
+
+---
+
+### Get Smart Queue Config ✅
+
+Retrieve Smart Queue Management (SQM) configuration for a WAN interface.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/sites/{siteId}/qos/smart-queue/{wanId}`
+- **MCP Tool:** `get_smart_queue_config()`
+- **Implementation:** v0.2.0 Phase 3 (82% coverage)
+
+**Response:** `200 OK`
+
+```json
+{
+  "_id": "wan-001",
+  "algorithm": "fq_codel",
+  "download_kbps": 100000,
+  "upload_kbps": 20000,
+  "overhead_bytes": 44,
+  "atm_mode": false,
+  "enabled": true
+}
+```
+
+---
+
+### Configure Smart Queue ✅
+
+Configure Smart Queue Management for bufferbloat mitigation on a WAN interface.
+
+- **Method:** `POST`
+- **Endpoint:** `/v1/sites/{siteId}/qos/smart-queue/{wanId}`
+- **MCP Tool:** `configure_smart_queue()`
+- **Implementation:** v0.2.0 Phase 3 (82% coverage)
+- **Requires:** `confirm=true`
+- **Supports:** `dry_run=true`
+
+**Request Body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `download_kbps` | number | Yes | Download bandwidth in Kbps |
+| `upload_kbps` | number | Yes | Upload bandwidth in Kbps |
+| `algorithm` | string | No | "fq_codel" or "cake" (default: fq_codel) |
+| `overhead_bytes` | number | No | Protocol overhead (default: 44) |
+| `atm_mode` | boolean | No | ATM cell overhead (default: false) |
+
+**Example Request:**
+
+```json
+{
+  "download_kbps": 95000,
+  "upload_kbps": 19000,
+  "algorithm": "cake",
+  "overhead_bytes": 44,
+  "atm_mode": false
+}
+```
+
+**Performance Note:** SQM is most effective for connections <300 Mbps. Above 300 Mbps, CPU overhead may impact performance.
+
+**Response:** `200 OK`
+
+---
+
+### Disable Smart Queue ✅
+
+Disable Smart Queue Management on a WAN interface.
+
+- **Method:** `DELETE`
+- **Endpoint:** `/v1/sites/{siteId}/qos/smart-queue/{wanId}`
+- **MCP Tool:** `disable_smart_queue()`
+- **Implementation:** v0.2.0 Phase 3 (82% coverage)
+- **Requires:** `confirm=true`
+
+**Response:** `200 OK`
+
+---
+
+### List Traffic Routes ✅
+
+List all policy-based traffic routing rules.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/sites/{siteId}/qos/routes`
+- **MCP Tool:** `list_traffic_routes()`
+- **Implementation:** v0.2.0 Phase 3 (82% coverage)
+
+**Query Parameters:**
+
+| Parameter | Type | Default |
+|-----------|------|---------|
+| `offset` | number | 0 |
+| `limit` | number | 100 |
+
+**Response:** `200 OK`
+
+```json
+{
+  "data": [
+    {
+      "_id": "route-001",
+      "name": "VoIP Priority Route",
+      "action": "mark",
+      "priority": 100,
+      "match_criteria": {
+        "source_ip": "192.168.1.0/24",
+        "destination_port": 5060,
+        "protocol": "udp"
+      },
+      "dscp_marking": 46,
+      "enabled": true
+    }
+  ],
+  "total": 12,
+  "offset": 0,
+  "limit": 100
+}
+```
+
+---
+
+### Create Traffic Route ✅
+
+Create a new policy-based traffic routing rule.
+
+- **Method:** `POST`
+- **Endpoint:** `/v1/sites/{siteId}/qos/routes`
+- **MCP Tool:** `create_traffic_route()`
+- **Implementation:** v0.2.0 Phase 3 (82% coverage)
+- **Requires:** `confirm=true`
+
+**Request Body:**
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Unique route name |
+| `action` | string | Yes | "allow", "deny", "mark", "shape" |
+| `priority` | number | No | 1-1000 (default: 100) |
+| `source_ip` | string | No | CIDR notation |
+| `destination_ip` | string | No | CIDR notation |
+| `source_port` | number | No | 1-65535 |
+| `destination_port` | number | No | 1-65535 |
+| `protocol` | string | No | "tcp", "udp", "icmp" |
+| `vlan_id` | number | No | 1-4094 |
+| `dscp_marking` | number | No | 0-63 (for "mark" action) |
+| `bandwidth_limit_kbps` | number | No | ≥0 (for "shape" action) |
+| `enabled` | boolean | No | Default: true |
+
+**Example Request:**
+
+```json
+{
+  "name": "Zoom QoS Priority",
+  "action": "mark",
+  "priority": 200,
+  "match_criteria": {
+    "destination_port": 8801,
+    "protocol": "udp"
+  },
+  "dscp_marking": 34,
+  "enabled": true
+}
+```
+
+**Response:** `201 Created`
+
+---
+
+### Update Traffic Route ✅
+
+Update an existing traffic routing rule.
+
+- **Method:** `PATCH`
+- **Endpoint:** `/v1/sites/{siteId}/qos/routes/{routeId}`
+- **MCP Tool:** `update_traffic_route()`
+- **Implementation:** v0.2.0 Phase 3 (82% coverage)
+- **Requires:** `confirm=true`
+
+**Response:** `200 OK`
+
+---
+
+### Delete Traffic Route ✅
+
+Delete a traffic routing rule.
+
+- **Method:** `DELETE`
+- **Endpoint:** `/v1/sites/{siteId}/qos/routes/{routeId}`
+- **MCP Tool:** `delete_traffic_route()`
+- **Implementation:** v0.2.0 Phase 3 (82% coverage)
+- **Requires:** `confirm=true`
+
+**Response:** `200 OK`
+
+---
+
+### DSCP Marking Reference
+
+Common DSCP values for traffic classification (RFC 4594):
+
+| DSCP | Binary | Decimal | Traffic Class | Use Case |
+|------|--------|---------|---------------|----------|
+| EF | 101110 | 46 | Expedited Forwarding | Voice, real-time interactive |
+| AF41 | 100010 | 34 | Assured Forwarding 4-1 | High-quality video conferencing |
+| AF31 | 011010 | 26 | Assured Forwarding 3-1 | Streaming media, broadcast video |
+| AF21 | 010010 | 18 | Assured Forwarding 2-1 | Bulk data, email |
+| CS1 | 001000 | 8 | Class Selector 1 | Background/scavenger traffic |
+| DF | 000000 | 0 | Default/Best Effort | Standard internet traffic |
+
+**Assured Forwarding Classes:**
+- **AF4x** (32-34): High priority, low drop precedence
+- **AF3x** (26-28): Medium priority
+- **AF2x** (18-20): Normal priority
+- **AF1x** (10-12): Low priority
+
+**Class Selectors (Backward Compatible):**
+- **CS7** (56): Network control
+- **CS6** (48): Internetwork control
+- **CS5** (40): Voice/video
+- **CS4** (32): Real-time interactive
+- **CS3** (24): Broadcast video
+- **CS2** (16): High-throughput data
+- **CS1** (8): Low-priority data
 
 ---
 

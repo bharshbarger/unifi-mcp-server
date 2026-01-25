@@ -196,3 +196,5 @@ scripts/api-diff-*.json
 scripts/node_modules/
 scripts/package-lock.json
 MagicMock/
+.mcpregistry_github_token
+.mcpregistry_registry_token

@@ -17,6 +17,7 @@ This document provides comprehensive reference documentation for the UniFi Netwo
 - [Networks](#networks)
 - [WiFi Broadcasts](#wifi-broadcasts)
 - [Hotspot](#hotspot)
+- [RADIUS & Guest Portal](#radius--guest-portal)
 - [Firewall](#firewall)
 - [Firewall Policies](#firewall-policies)
 - [Access Control (ACL Rules)](#access-control-acl-rules)
@@ -118,6 +119,21 @@ When using an AI assistant with the UniFi MCP Server, you can use natural langua
 "Create a DHCP reservation for the printer at 192.168.1.50"
 "Show me all networks and their current IP address assignments"
 "Set up inter-VLAN routing between the main LAN and the security camera network"
+```
+
+### RADIUS & Guest Portal
+
+```
+"Create a RADIUS profile for our corporate WiFi using the FreeRADIUS server"
+"Set up WPA2-Enterprise authentication with VLAN assignment enabled"
+"List all RADIUS user accounts for the guest network"
+"Create a RADIUS account for the contractor with 7-day expiration"
+"Configure the guest portal with a custom welcome message and company logo"
+"Set the guest WiFi session timeout to 4 hours with 5 Mbps download limit"
+"Create a hotspot package: 1 hour access for $5 with 1GB data quota"
+"Show me all active hotspot packages and their pricing"
+"Update the guest portal to require terms of service acceptance"
+"Enable redirect to our company website after guest login"
 ```
 
 ### Site Management & Health
@@ -932,6 +948,272 @@ Remove a specific Hotspot voucher.
 - **Endpoint:** `/v1/sites/{siteId}/hotspot/vouchers/{voucherId}`
 
 **Response:** `200 OK`
+
+---
+
+## RADIUS & Guest Portal
+
+Endpoints for managing RADIUS authentication profiles, guest portal configuration, and hotspot packages.
+
+### RADIUS Profile Management
+
+#### List RADIUS Profiles
+
+List all RADIUS authentication profiles for a site.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/sites/{siteId}/radius/profiles`
+- **Response:** `200 OK`
+
+**Response Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | RADIUS profile ID |
+| `name` | string | Profile name |
+| `auth_server` | string | Authentication server IP/hostname |
+| `auth_port` | integer | Authentication port (default: 1812) |
+| `acct_server` | string | Accounting server IP/hostname |
+| `acct_port` | integer | Accounting port (default: 1813) |
+| `vlan_enabled` | boolean | VLAN assignment enabled |
+| `enabled` | boolean | Profile is active |
+
+#### Get RADIUS Profile
+
+Retrieve a specific RADIUS profile.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/sites/{siteId}/radius/profiles/{profileId}`
+- **Response:** `200 OK`
+
+#### Create RADIUS Profile
+
+Create a new RADIUS authentication profile for WPA2-Enterprise.
+
+- **Method:** `POST`
+- **Endpoint:** `/v1/sites/{siteId}/radius/profiles`
+- **Response:** `201 Created`
+- **Requires Confirmation:** `confirm=true`
+
+**Request Body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Profile name |
+| `auth_server` | string | Yes | Authentication server IP/hostname |
+| `auth_port` | integer | No | Authentication port (default: 1812) |
+| `auth_secret` | string | Yes | Shared secret for authentication |
+| `acct_server` | string | No | Accounting server IP/hostname |
+| `acct_port` | integer | No | Accounting port (default: 1813) |
+| `acct_secret` | string | No | Shared secret for accounting |
+| `use_same_secret` | boolean | No | Use auth_secret for accounting (default: true) |
+| `vlan_enabled` | boolean | No | Enable VLAN assignment (default: false) |
+| `vlan_wlan_mode` | string | No | VLAN mode for WLAN |
+| `interim_update_interval` | integer | No | Accounting update interval in seconds |
+
+**Example Request:**
+
+```json
+{
+  "name": "Corporate RADIUS",
+  "auth_server": "radius.example.com",
+  "auth_port": 1812,
+  "auth_secret": "supersecret",
+  "acct_port": 1813,
+  "vlan_enabled": true
+}
+```
+
+#### Update RADIUS Profile
+
+Modify an existing RADIUS profile.
+
+- **Method:** `PATCH`
+- **Endpoint:** `/v1/sites/{siteId}/radius/profiles/{profileId}`
+- **Response:** `200 OK`
+- **Requires Confirmation:** `confirm=true`
+
+#### Delete RADIUS Profile
+
+Remove a RADIUS profile.
+
+- **Method:** `DELETE`
+- **Endpoint:** `/v1/sites/{siteId}/radius/profiles/{profileId}`
+- **Response:** `200 OK`
+- **Requires Confirmation:** `confirm=true`
+
+### RADIUS Account Management
+
+#### List RADIUS Accounts
+
+List all RADIUS user accounts (passwords redacted).
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/sites/{siteId}/radius/accounts`
+- **Response:** `200 OK`
+
+**Response Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Account ID |
+| `name` | string | Username |
+| `password` | string | ***REDACTED*** |
+| `enabled` | boolean | Account is active |
+| `vlan_id` | integer | Assigned VLAN ID |
+| `start_time` | integer | Activation timestamp (Unix) |
+| `end_time` | integer | Expiration timestamp (Unix) |
+
+#### Create RADIUS Account
+
+Create a new RADIUS user account for guest access.
+
+- **Method:** `POST`
+- **Endpoint:** `/v1/sites/{siteId}/radius/accounts`
+- **Response:** `201 Created`
+- **Requires Confirmation:** `confirm=true`
+
+**Request Body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Username |
+| `password` | string | Yes | Password |
+| `enabled` | boolean | No | Account enabled (default: true) |
+| `vlan_id` | integer | No | Assigned VLAN ID |
+| `start_time` | integer | No | Activation timestamp (Unix) |
+| `end_time` | integer | No | Expiration timestamp (Unix) |
+| `tunnel_type` | integer | No | RADIUS tunnel type |
+| `tunnel_medium_type` | integer | No | RADIUS tunnel medium type |
+
+#### Delete RADIUS Account
+
+Remove a RADIUS user account.
+
+- **Method:** `DELETE`
+- **Endpoint:** `/v1/sites/{siteId}/radius/accounts/{accountId}`
+- **Response:** `200 OK`
+- **Requires Confirmation:** `confirm=true`
+
+### Guest Portal Configuration
+
+#### Get Guest Portal Config
+
+Retrieve the current guest portal configuration.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/sites/{siteId}/guest-portal/config`
+- **Response:** `200 OK`
+
+**Response Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `enabled` | boolean | Guest portal enabled |
+| `portal_title` | string | Portal page title |
+| `auth_method` | string | Authentication method (none/password/voucher/radius/external) |
+| `session_timeout` | integer | Session timeout in minutes (0=unlimited) |
+| `redirect_enabled` | boolean | Redirect after authentication |
+| `redirect_url` | string | Redirect URL |
+| `terms_of_service_enabled` | boolean | Require ToS acceptance |
+| `download_limit_kbps` | integer | Download speed limit in kbps |
+| `upload_limit_kbps` | integer | Upload speed limit in kbps |
+
+#### Configure Guest Portal
+
+Customize guest portal settings.
+
+- **Method:** `PATCH`
+- **Endpoint:** `/v1/sites/{siteId}/guest-portal/config`
+- **Response:** `200 OK`
+- **Requires Confirmation:** `confirm=true`
+
+**Request Body (all fields optional):**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `portal_title` | string | Portal page title |
+| `auth_method` | string | Authentication method |
+| `password` | string | Portal password (if auth_method=password) |
+| `session_timeout` | integer | Session timeout in minutes |
+| `redirect_enabled` | boolean | Enable redirect after auth |
+| `redirect_url` | string | Redirect URL |
+| `terms_of_service_enabled` | boolean | Require ToS acceptance |
+| `terms_of_service_text` | string | Terms of service text |
+| `download_limit_kbps` | integer | Download speed limit |
+| `upload_limit_kbps` | integer | Upload speed limit |
+| `background_image_url` | string | Background image URL |
+| `logo_url` | string | Logo image URL |
+
+### Hotspot Package Management
+
+#### List Hotspot Packages
+
+List all available hotspot packages with time and bandwidth limits.
+
+- **Method:** `GET`
+- **Endpoint:** `/v1/sites/{siteId}/hotspot/packages`
+- **Response:** `200 OK`
+
+**Response Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Package ID |
+| `name` | string | Package name |
+| `duration_minutes` | integer | Duration in minutes |
+| `download_limit_kbps` | integer | Download speed limit in kbps |
+| `upload_limit_kbps` | integer | Upload speed limit in kbps |
+| `download_quota_mb` | integer | Download quota in MB |
+| `upload_quota_mb` | integer | Upload quota in MB |
+| `price` | float | Package price |
+| `currency` | string | Currency code |
+| `enabled` | boolean | Package is available |
+
+#### Create Hotspot Package
+
+Create a new hotspot package with pricing.
+
+- **Method:** `POST`
+- **Endpoint:** `/v1/sites/{siteId}/hotspot/packages`
+- **Response:** `201 Created`
+- **Requires Confirmation:** `confirm=true`
+
+**Request Body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Package name |
+| `duration_minutes` | integer | Yes | Duration in minutes |
+| `download_limit_kbps` | integer | No | Download speed limit in kbps |
+| `upload_limit_kbps` | integer | No | Upload speed limit in kbps |
+| `download_quota_mb` | integer | No | Download quota in MB |
+| `upload_quota_mb` | integer | No | Upload quota in MB |
+| `price` | float | No | Package price |
+| `currency` | string | No | Currency code (default: USD) |
+
+**Example Request:**
+
+```json
+{
+  "name": "1 Hour Premium",
+  "duration_minutes": 60,
+  "download_limit_kbps": 10000,
+  "upload_limit_kbps": 5000,
+  "download_quota_mb": 500,
+  "price": 5.99,
+  "currency": "USD"
+}
+```
+
+#### Delete Hotspot Package
+
+Remove a hotspot package.
+
+- **Method:** `DELETE`
+- **Endpoint:** `/v1/sites/{siteId}/hotspot/packages/{packageId}`
+- **Response:** `200 OK`
+- **Requires Confirmation:** `confirm=true`
 
 ---
 

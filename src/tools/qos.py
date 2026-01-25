@@ -350,7 +350,7 @@ async def delete_qos_profile(
 
         await audit_action(
             settings,
-            action="delete_qos_profile",
+            action_type="delete_qos_profile",
             resource_type="qos_profile",
             resource_id=profile_id,
             details={"deleted": True},
@@ -1056,7 +1056,7 @@ async def delete_traffic_route(
 
         await audit_action(
             settings,
-            action="delete_traffic_route",
+            action_type="delete_traffic_route",
             resource_type="traffic_route",
             resource_id=route_id,
             details={"deleted": True},

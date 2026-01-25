@@ -128,12 +128,12 @@ async def create_radius_profile(
             payload["acct_secret"] = acct_secret
 
         if dry_run:
-            logger.info(f"[DRY RUN] Would create RADIUS profile with payload: {payload}")
             # Redact secrets in dry run output
             payload_safe = payload.copy()
             payload_safe["auth_secret"] = "***REDACTED***"
             if "acct_secret" in payload_safe:
                 payload_safe["acct_secret"] = "***REDACTED***"
+            logger.info(f"[DRY RUN] Would create RADIUS profile with payload: {payload_safe}")
             return {"dry_run": True, "payload": payload_safe}
 
         response = await client.post(

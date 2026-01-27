@@ -147,7 +147,7 @@ async def test_get_client_details_missing(settings, env: TestEnvironment) -> dic
     try:
         fake_mac = "00:00:00:00:00:00"  # Non-existent MAC
 
-        result = await clients.get_client_details(
+        await clients.get_client_details(
             site_id=env.site_id,
             client_mac=fake_mac,
             settings=settings,

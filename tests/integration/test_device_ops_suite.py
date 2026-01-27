@@ -29,7 +29,7 @@ async def test_restart_device_without_confirmation(
 
     try:
         # Attempt to restart without confirm=True (using fake MAC)
-        result = await device_control.restart_device(
+        await device_control.restart_device(
             site_id=env.site_id,
             device_mac="00:00:00:00:00:01",  # Fake MAC for validation test
             settings=settings,

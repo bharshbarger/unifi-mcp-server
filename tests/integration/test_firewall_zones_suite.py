@@ -30,7 +30,7 @@ async def test_local_api_requirement(settings, env: TestEnvironment) -> dict[str
 
     try:
         # Attempt to list zones on cloud API (should raise ValidationError)
-        result = await firewall_zones.list_firewall_zones(
+        await firewall_zones.list_firewall_zones(
             site_id=env.site_id,
             settings=settings,
         )
@@ -111,7 +111,7 @@ async def test_create_firewall_zone_without_confirmation(
 
     try:
         # Attempt to create zone without confirm=True
-        result = await firewall_zones.create_firewall_zone(
+        await firewall_zones.create_firewall_zone(
             site_id=env.site_id,
             name=f"{TEST_PREFIX}TEST_ZONE",
             settings=settings,

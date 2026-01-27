@@ -79,7 +79,7 @@ async def test_get_dpi_statistics_time_ranges(settings, env: TestEnvironment) ->
 
         return {
             "status": "PASS",
-            "message": f"DPI statistics work across time ranges",
+            "message": "DPI statistics work across time ranges",
             "details": {
                 "tested_ranges": list(results.keys()),
                 "application_counts": results,
@@ -101,7 +101,7 @@ async def test_get_dpi_statistics_invalid_time_range(
         return {"status": "SKIP", "message": "Cloud APIs do not support DPI statistics"}
 
     try:
-        result = await dpi.get_dpi_statistics(
+        await dpi.get_dpi_statistics(
             site_id=env.site_id,
             settings=settings,
             time_range="invalid",  # Invalid time range

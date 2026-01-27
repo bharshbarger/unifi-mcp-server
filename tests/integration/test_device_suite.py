@@ -170,7 +170,7 @@ async def test_get_device_details_missing(settings, env: TestEnvironment) -> dic
     try:
         fake_id = "000000000000000000000000"  # Non-existent ObjectId format
 
-        result = await devices.get_device_details(
+        await devices.get_device_details(
             site_id=env.site_id,
             device_id=fake_id,
             settings=settings,

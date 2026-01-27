@@ -29,7 +29,7 @@ async def test_block_client_without_confirmation(
 
     try:
         # Attempt to block without confirm=True (using fake MAC)
-        result = await client_management.block_client(
+        await client_management.block_client(
             site_id=env.site_id,
             client_mac="00:00:00:00:00:01",  # Fake MAC for validation test
             settings=settings,

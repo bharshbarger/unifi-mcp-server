@@ -115,7 +115,7 @@ async def test_create_firewall_rule_without_confirmation(
 
     try:
         # Attempt to create rule without confirm=True
-        result = await firewall.create_firewall_rule(
+        await firewall.create_firewall_rule(
             site_id=env.site_id,
             name=f"{TEST_PREFIX}TEST_RULE",
             action="drop",
@@ -305,7 +305,7 @@ async def test_delete_firewall_rule_missing(settings, env: TestEnvironment) -> d
     try:
         fake_id = "000000000000000000000000"  # Non-existent ObjectId format
 
-        result = await firewall.delete_firewall_rule(
+        await firewall.delete_firewall_rule(
             site_id=env.site_id,
             rule_id=fake_id,
             settings=settings,
@@ -383,7 +383,7 @@ async def test_create_firewall_rule_invalid_action(settings, env: TestEnvironmen
         return {"status": "SKIP", "message": "Cloud APIs do not support firewall management"}
 
     try:
-        result = await firewall.create_firewall_rule(
+        await firewall.create_firewall_rule(
             site_id=env.site_id,
             name=f"{TEST_PREFIX}INVALID_ACTION",
             action="invalid_action",  # Invalid action
@@ -421,7 +421,7 @@ async def test_create_firewall_rule_invalid_protocol(
         return {"status": "SKIP", "message": "Cloud APIs do not support firewall management"}
 
     try:
-        result = await firewall.create_firewall_rule(
+        await firewall.create_firewall_rule(
             site_id=env.site_id,
             name=f"{TEST_PREFIX}INVALID_PROTOCOL",
             action="drop",

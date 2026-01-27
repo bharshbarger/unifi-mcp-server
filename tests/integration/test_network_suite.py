@@ -158,7 +158,7 @@ async def test_get_network_details_missing(settings, env: TestEnvironment) -> di
     try:
         fake_id = "000000000000000000000000"  # Non-existent ObjectId format
 
-        result = await networks.get_network_details(
+        await networks.get_network_details(
             site_id=env.site_id,
             network_id=fake_id,
             settings=settings,

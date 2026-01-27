@@ -115,7 +115,7 @@ async def test_create_port_forward_without_confirmation(
 
     try:
         # Attempt to create rule without confirm=True
-        result = await port_forwarding.create_port_forward(
+        await port_forwarding.create_port_forward(
             site_id=env.site_id,
             name=f"{TEST_PREFIX}TEST_FORWARD",
             dst_port=TEST_PORT,
@@ -235,7 +235,7 @@ async def test_delete_port_forward_missing(settings, env: TestEnvironment) -> di
     try:
         fake_id = "000000000000000000000000"  # Non-existent ObjectId format
 
-        result = await port_forwarding.delete_port_forward(
+        await port_forwarding.delete_port_forward(
             site_id=env.site_id,
             rule_id=fake_id,
             settings=settings,
@@ -312,7 +312,7 @@ async def test_create_port_forward_invalid_ip(settings, env: TestEnvironment) ->
         return {"status": "SKIP", "message": "Cloud APIs do not support port forwarding"}
 
     try:
-        result = await port_forwarding.create_port_forward(
+        await port_forwarding.create_port_forward(
             site_id=env.site_id,
             name=f"{TEST_PREFIX}INVALID_IP",
             dst_port=TEST_PORT,

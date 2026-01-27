@@ -489,7 +489,7 @@ async def test_block_flow_source_ip_without_confirmation(
 
     try:
         # Attempt to block without confirm=True
-        result = await traffic_flows.block_flow_source_ip(
+        await traffic_flows.block_flow_source_ip(
             site_id=env.site_id,
             flow_id="test_flow_id",
             settings=settings,

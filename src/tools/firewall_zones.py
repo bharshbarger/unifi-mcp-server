@@ -4,7 +4,6 @@ from typing import Any
 
 from ..api.client import UniFiClient
 from ..config import APIType, Settings
-from ..models import FirewallZone
 from ..models.zbf_matrix import ZoneNetworkAssignment
 from ..utils import ValidationError, audit_action, get_logger, validate_confirmation
 

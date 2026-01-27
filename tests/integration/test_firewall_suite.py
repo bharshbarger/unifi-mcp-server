@@ -377,7 +377,9 @@ async def test_create_firewall_rule_dry_run(settings, env: TestEnvironment) -> d
 
 
 @pytest.mark.integration
-async def test_create_firewall_rule_invalid_action(settings, env: TestEnvironment) -> dict[str, Any]:
+async def test_create_firewall_rule_invalid_action(
+    settings, env: TestEnvironment
+) -> dict[str, Any]:
     """Test create_firewall_rule with invalid action (should fail validation)."""
     if env.api_type in ["cloud-v1", "cloud-ea"]:
         return {"status": "SKIP", "message": "Cloud APIs do not support firewall management"}

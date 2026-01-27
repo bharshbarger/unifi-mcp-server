@@ -57,26 +57,26 @@ def discover_test_suites():
     suites = []
 
     # Week 1: Safe read-only test suites
-    suites.append(create_device_suite())        # Device management (8 tests)
-    suites.append(create_client_suite())        # Client management (8 tests)
-    suites.append(create_network_suite())       # Network configuration (7 tests)
-    suites.append(create_cloud_suite())         # Site management (10 tests)
+    suites.append(create_device_suite())  # Device management (8 tests)
+    suites.append(create_client_suite())  # Client management (8 tests)
+    suites.append(create_network_suite())  # Network configuration (7 tests)
+    suites.append(create_cloud_suite())  # Site management (10 tests)
 
     # Topology suite (existing)
-    suites.append(create_topology_suite())      # Network topology (8 tests)
+    suites.append(create_topology_suite())  # Network topology (8 tests)
 
     # Week 2: Medium risk test suites
-    suites.append(create_firewall_suite())            # Firewall management (9 tests)
-    suites.append(create_port_forwarding_suite())     # Port forwarding (7 tests)
-    suites.append(create_dpi_suite())                 # DPI statistics (5 tests)
+    suites.append(create_firewall_suite())  # Firewall management (9 tests)
+    suites.append(create_port_forwarding_suite())  # Port forwarding (7 tests)
+    suites.append(create_dpi_suite())  # DPI statistics (5 tests)
 
     # Week 3: High risk test suites
-    suites.append(create_traffic_flows_suite())       # Traffic flow monitoring (11 tests)
-    suites.append(create_firewall_zones_suite())      # Firewall zones (8 tests)
+    suites.append(create_traffic_flows_suite())  # Traffic flow monitoring (11 tests)
+    suites.append(create_firewall_zones_suite())  # Firewall zones (8 tests)
 
     # Week 4: Destructive operations test suites (DRY-RUN ONLY)
-    suites.append(create_device_ops_suite())          # Device operations (5 tests)
-    suites.append(create_client_ops_suite())          # Client operations (4 tests)
+    suites.append(create_device_ops_suite())  # Device operations (5 tests)
+    suites.append(create_client_ops_suite())  # Client operations (4 tests)
 
     return suites
 

@@ -106,7 +106,9 @@ async def test_locate_device_dry_run(settings, env: TestEnvironment) -> dict[str
         )
 
         assert result.get("dry_run") is True, "Must be dry-run mode"
-        assert "would_enable" in result or "would_disable" in result, "Should indicate planned action"
+        assert (
+            "would_enable" in result or "would_disable" in result
+        ), "Should indicate planned action"
 
         return {
             "status": "PASS",

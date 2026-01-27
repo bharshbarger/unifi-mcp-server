@@ -165,7 +165,9 @@ async def test_create_and_delete_firewall_zone(settings, env: TestEnvironment) -
             site_id=env.site_id,
             settings=settings,
         )
-        assert any(z.get("id") == zone_id or z.get("_id") == zone_id for z in zones), "Created zone must be in list"
+        assert any(
+            z.get("id") == zone_id or z.get("_id") == zone_id for z in zones
+        ), "Created zone must be in list"
 
         # Delete the zone
         delete_result = await firewall_zones.delete_firewall_zone(
@@ -402,7 +404,9 @@ async def test_delete_firewall_zone_dry_run(settings, env: TestEnvironment) -> d
             site_id=env.site_id,
             settings=settings,
         )
-        assert any(z.get("id") == zone_id or z.get("_id") == zone_id for z in zones), "Dry-run must not delete zone"
+        assert any(
+            z.get("id") == zone_id or z.get("_id") == zone_id for z in zones
+        ), "Dry-run must not delete zone"
 
         return {
             "status": "PASS",

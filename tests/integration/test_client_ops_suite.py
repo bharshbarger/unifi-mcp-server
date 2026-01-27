@@ -16,9 +16,7 @@ from tests.integration.test_harness import TestEnvironment, TestSuite
 
 
 @pytest.mark.integration
-async def test_block_client_without_confirmation(
-    settings, env: TestEnvironment
-) -> dict[str, Any]:
+async def test_block_client_without_confirmation(settings, env: TestEnvironment) -> dict[str, Any]:
     """Test block_client without confirmation flag (should fail)."""
     # Skip on cloud APIs - client management is local only
     if env.api_type in ["cloud-v1", "cloud-ea"]:

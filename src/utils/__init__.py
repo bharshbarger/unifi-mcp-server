@@ -32,6 +32,7 @@ from .sanitize import (
     sanitize_sensitive_data,
 )
 from .validators import (
+    coerce_bool,
     validate_confirmation,
     validate_device_id,
     validate_ip_address,
@@ -68,6 +69,7 @@ __all__ = [
     "sanitize_log_message",
     "sanitize_sensitive_data",
     # Validators
+    "coerce_bool",
     "validate_mac_address",
     "validate_ip_address",
     "validate_port",

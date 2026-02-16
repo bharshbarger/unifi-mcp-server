@@ -65,8 +65,8 @@ async def create_port_forward(
     src: str = "any",
     enabled: bool = True,
     log: bool = False,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Create a port forwarding rule.
 
@@ -187,8 +187,8 @@ async def delete_port_forward(
     site_id: str,
     rule_id: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Delete a port forwarding rule.
 

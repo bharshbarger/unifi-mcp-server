@@ -29,8 +29,8 @@ async def create_network(
     dhcp_dns_3: str | None = None,
     dhcp_dns_4: str | None = None,
     domain_name: str | None = None,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Create a new network/VLAN.
 
@@ -78,6 +78,7 @@ async def create_network(
     network_data = {
         "name": name,
         "purpose": purpose,
+        "vlan_enabled": True,
         "vlan": vlan_id,
         "ip_subnet": subnet,
         "dhcpd_enabled": dhcp_enabled,
@@ -129,7 +130,10 @@ async def create_network(
             response = await client.post(
                 f"/ea/sites/{site_id}/rest/networkconf", json_data=network_data
             )
-            created_network: dict[str, Any] = response.get("data", [{}])[0]
+            if isinstance(response, list):
+                created_network: dict[str, Any] = response[0] if response else {}
+            else:
+                created_network = response.get("data", [{}])[0]
 
             logger.info(f"Created network '{name}' in site '{site_id}'")
             log_audit(
@@ -168,8 +172,8 @@ async def update_network(
     dhcp_dns_3: str | None = None,
     dhcp_dns_4: str | None = None,
     domain_name: str | None = None,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Update an existing network.
 
@@ -262,6 +266,7 @@ async def update_network(
             if name is not None:
                 update_data["name"] = name
             if vlan_id is not None:
+                update_data["vlan_enabled"] = True
                 update_data["vlan"] = vlan_id
             if subnet is not None:
                 update_data["ip_subnet"] = subnet
@@ -317,8 +322,8 @@ async def delete_network(
     site_id: str,
     network_id: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Delete a network.
 
@@ -359,7 +364,10 @@ async def delete_network(
 
             # Verify network exists before deleting
             response = await client.get(f"/ea/sites/{site_id}/rest/networkconf")
-            networks_data: list[dict[str, Any]] = response.get("data", [])
+            if isinstance(response, list):
+                networks_data: list[dict[str, Any]] = response
+            else:
+                networks_data = response.get("data", [])
 
             network_exists = any(net.get("_id") == network_id for net in networks_data)
             if not network_exists:

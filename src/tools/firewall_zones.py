@@ -56,8 +56,8 @@ async def create_firewall_zone(
     settings: Settings,
     description: str | None = None,
     network_ids: list[str] | None = None,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Create a new firewall zone.
 
@@ -125,8 +125,8 @@ async def update_firewall_zone(
     name: str | None = None,
     description: str | None = None,
     network_ids: list[str] | None = None,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Update an existing firewall zone.
 
@@ -206,8 +206,8 @@ async def assign_network_to_zone(
     zone_id: str,
     network_id: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Dynamically assign a network to a zone.
 
@@ -348,8 +348,8 @@ async def delete_firewall_zone(
     site_id: str,
     zone_id: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Delete a firewall zone.
 
@@ -403,8 +403,8 @@ async def unassign_network_from_zone(
     zone_id: str,
     network_id: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Remove a network from a firewall zone.
 

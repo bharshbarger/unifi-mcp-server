@@ -63,8 +63,17 @@ async def create_firewall_rule(
     enabled: bool = True,
     ruleset: str = "WAN_IN",
     rule_index: int = 2000,
-    confirm: bool = False,
-    dry_run: bool = False,
+    src_networkconf_id: str | None = None,
+    src_networkconf_type: str = "NETv4",
+    dst_networkconf_id: str | None = None,
+    dst_networkconf_type: str = "NETv4",
+    state_established: bool = False,
+    state_related: bool = False,
+    state_new: bool = False,
+    state_invalid: bool = False,
+    logging: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Create a new firewall rule.
 
@@ -73,13 +82,22 @@ async def create_firewall_rule(
         name: Rule name
         action: Action to take (accept, drop, reject)
         settings: Application settings
-        source: Source network/IP (CIDR notation)
-        destination: Destination network/IP (CIDR notation)
+        source: Source IP address (CIDR notation or single IP)
+        destination: Destination IP address (CIDR notation or single IP)
         protocol: Protocol (tcp, udp, icmp, all)
         port: Destination port number
         enabled: Enable the rule immediately
-        ruleset: Ruleset to apply rule to (WAN_IN, WAN_OUT, LAN_IN, etc.)
+        ruleset: Ruleset to apply rule to (WAN_IN, WAN_OUT, LAN_IN, LAN_OUT, etc.)
         rule_index: Position in firewall chain (higher = lower priority)
+        src_networkconf_id: Source network configuration ID (for inter-VLAN rules)
+        src_networkconf_type: Source network type (default: NETv4)
+        dst_networkconf_id: Destination network configuration ID (for inter-VLAN rules)
+        dst_networkconf_type: Destination network type (default: NETv4)
+        state_established: Match established connections
+        state_related: Match related connections
+        state_new: Match new connections
+        state_invalid: Match invalid connections
+        logging: Enable logging for matched traffic
         confirm: Confirmation flag (must be True to execute)
         dry_run: If True, validate but don't create the rule
 
@@ -105,24 +123,29 @@ async def create_firewall_rule(
         if protocol.lower() not in valid_protocols:
             raise ValueError(f"Invalid protocol '{protocol}'. Must be one of: {valid_protocols}")
 
-    # Build rule data with required defaults
-    rule_data = {
+    # Build rule data
+    rule_data: dict[str, Any] = {
         "name": name,
         "action": action.lower(),
         "enabled": enabled,
         "ruleset": ruleset,
         "rule_index": rule_index,
-        # Required default fields
         "setting_preference": "auto",
-        "src_networkconf_type": "NETv4",
-        "dst_networkconf_type": "NETv4",
-        "state_new": False,
-        "state_established": False,
-        "state_invalid": False,
-        "state_related": False,
-        "logging": False,
+        "src_networkconf_type": src_networkconf_type,
+        "dst_networkconf_type": dst_networkconf_type,
+        "state_new": state_new,
+        "state_established": state_established,
+        "state_invalid": state_invalid,
+        "state_related": state_related,
+        "logging": logging,
         "protocol_match_excepted": False,
     }
+
+    if src_networkconf_id is not None:
+        rule_data["src_networkconf_id"] = src_networkconf_id
+
+    if dst_networkconf_id is not None:
+        rule_data["dst_networkconf_id"] = dst_networkconf_id
 
     if source:
         rule_data["src_address"] = source
@@ -205,8 +228,8 @@ async def update_firewall_rule(
     protocol: str | None = None,
     port: int | None = None,
     enabled: bool | None = None,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Update an existing firewall rule.
 
@@ -343,8 +366,8 @@ async def delete_firewall_rule(
     site_id: str,
     rule_id: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Delete a firewall rule.
 

@@ -19,8 +19,8 @@ async def block_client(
     site_id: str,
     client_mac: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Block a client from accessing the network.
 
@@ -108,8 +108,8 @@ async def unblock_client(
     site_id: str,
     client_mac: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Unblock a previously blocked client.
 
@@ -187,8 +187,8 @@ async def reconnect_client(
     site_id: str,
     client_mac: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Force a client to reconnect (disconnect and re-authenticate).
 
@@ -287,8 +287,8 @@ async def authorize_guest(
     settings: Settings,
     upload_limit_kbps: int | None = None,
     download_limit_kbps: int | None = None,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Authorize a guest client for network access.
 
@@ -393,8 +393,8 @@ async def limit_bandwidth(
     settings: Settings,
     upload_limit_kbps: int | None = None,
     download_limit_kbps: int | None = None,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Apply bandwidth restrictions to a client.
 

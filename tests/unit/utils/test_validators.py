@@ -4,6 +4,7 @@ import pytest
 
 from src.utils.exceptions import ValidationError
 from src.utils.validators import (
+    coerce_bool,
     validate_confirmation,
     validate_device_id,
     validate_ip_address,
@@ -177,13 +178,73 @@ class TestValidateDeviceId:
             validate_device_id("507f1f77bcf86cd79943901g")
 
 
+class TestCoerceBool:
+    def test_bool_true(self):
+        assert coerce_bool(True) is True
+
+    def test_bool_false(self):
+        assert coerce_bool(False) is False
+
+    def test_string_true(self):
+        assert coerce_bool("true") is True
+
+    def test_string_true_uppercase(self):
+        assert coerce_bool("True") is True
+
+    def test_string_true_mixed_case(self):
+        assert coerce_bool("TRUE") is True
+
+    def test_string_false(self):
+        assert coerce_bool("false") is False
+
+    def test_string_false_uppercase(self):
+        assert coerce_bool("False") is False
+
+    def test_string_one(self):
+        assert coerce_bool("1") is True
+
+    def test_string_zero(self):
+        assert coerce_bool("0") is False
+
+    def test_string_yes(self):
+        assert coerce_bool("yes") is True
+
+    def test_string_no(self):
+        assert coerce_bool("no") is False
+
+    def test_none(self):
+        assert coerce_bool(None) is False
+
+    def test_empty_string(self):
+        assert coerce_bool("") is False
+
+    def test_int_one(self):
+        assert coerce_bool(1) is True
+
+    def test_int_zero(self):
+        assert coerce_bool(0) is False
+
+
 class TestValidateConfirmation:
     def test_valid_confirm_true(self):
         validate_confirmation(True, "test_operation")
 
+    def test_valid_confirm_string_true(self):
+        validate_confirmation("true", "test_operation")
+
+    def test_valid_confirm_string_true_uppercase(self):
+        validate_confirmation("True", "test_operation")
+
+    def test_valid_confirm_string_one(self):
+        validate_confirmation("1", "test_operation")
+
     def test_invalid_confirm_false(self):
         with pytest.raises(ValidationError, match="requires confirmation"):
             validate_confirmation(False, "test_operation")
+
+    def test_invalid_confirm_string_false(self):
+        with pytest.raises(ValidationError, match="requires confirmation"):
+            validate_confirmation("false", "test_operation")
 
     def test_invalid_confirm_none(self):
         with pytest.raises(ValidationError, match="requires confirmation"):

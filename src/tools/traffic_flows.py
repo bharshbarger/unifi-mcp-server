@@ -603,8 +603,8 @@ async def block_flow_source_ip(
     settings: Settings,
     duration: str = "permanent",
     expires_in_hours: int | None = None,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict:
     """Block source IP address from a traffic flow.
 
@@ -704,8 +704,8 @@ async def block_flow_destination_ip(
     settings: Settings,
     duration: str = "permanent",
     expires_in_hours: int | None = None,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict:
     """Block destination IP address from a traffic flow.
 
@@ -805,8 +805,8 @@ async def block_flow_application(
     settings: Settings,
     use_zbf: bool = True,
     zone_id: str | None = None,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict:
     """Block application identified in a traffic flow.
 

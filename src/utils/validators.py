@@ -1,8 +1,11 @@
 """Input validation functions for UniFi MCP Server."""
 
+import logging
 import re
 
 from .exceptions import ValidationError
+
+logger = logging.getLogger(__name__)
 
 
 def validate_mac_address(mac: str) -> str:
@@ -117,17 +120,38 @@ def validate_device_id(device_id: str) -> str:
     return device_id.lower()
 
 
-def validate_confirmation(confirm: bool | None, operation: str) -> None:
+def coerce_bool(value) -> bool:
+    """Coerce a value to bool, handling MCP JSON-RPC string serialization.
+
+    MCP clients may send boolean parameters as strings ("true"/"false")
+    rather than native booleans due to JSON-RPC serialization differences.
+
+    Args:
+        value: Value to coerce (bool, str, None, or other)
+
+    Returns:
+        Boolean value
+    """
+    if isinstance(value, str):
+        return value.lower() in ("true", "1", "yes")
+    return bool(value)
+
+
+def validate_confirmation(confirm, operation: str) -> None:
     """Validate that confirmation is provided for mutating operations.
 
     Args:
-        confirm: Confirmation flag
+        confirm: Confirmation flag (bool or string from MCP serialization)
         operation: Operation name
 
     Raises:
         ValidationError: If confirmation is not provided
     """
-    if not confirm:
+    logger.warning(
+        "validate_confirmation called: confirm=%r (type=%s), operation=%s",
+        confirm, type(confirm).__name__, operation,
+    )
+    if not coerce_bool(confirm):
         raise ValidationError(
             f"Operation '{operation}' requires confirmation. Set confirm=true to proceed."
         )

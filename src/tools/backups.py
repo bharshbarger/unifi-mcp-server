@@ -15,8 +15,8 @@ async def trigger_backup(
     backup_type: str,
     settings: Settings,
     retention_days: int = 30,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Trigger a backup operation on the UniFi controller.
 
@@ -353,8 +353,8 @@ async def delete_backup(
     site_id: str,
     backup_filename: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Delete a backup file from the controller.
 
@@ -449,8 +449,8 @@ async def restore_backup(
     backup_filename: str,
     settings: Settings,
     create_pre_restore_backup: bool = True,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Restore the UniFi controller from a backup file.
 
@@ -881,8 +881,8 @@ async def schedule_backups(
     day_of_week: int | None = None,
     day_of_month: int | None = None,
     cloud_backup_enabled: bool = False,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Configure automated backup schedule for a site.
 

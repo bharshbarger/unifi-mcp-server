@@ -34,8 +34,8 @@ async def list_radius_profiles(
         if not client.is_authenticated:
             await client.authenticate()
 
-        response = await client.get(f"/integration/v1/sites/{site_id}/radius/profiles")
-        data = response.get("data", [])
+        response = await client.get(f"/ea/sites/{site_id}/rest/radiusprofile")
+        data = response if isinstance(response, list) else response.get("data", [])
 
         return [RADIUSProfile(**profile).model_dump() for profile in data]
 
@@ -61,8 +61,8 @@ async def get_radius_profile(
         if not client.is_authenticated:
             await client.authenticate()
 
-        response = await client.get(f"/integration/v1/sites/{site_id}/radius/profiles/{profile_id}")
-        data = response.get("data", response)
+        response = await client.get(f"/ea/sites/{site_id}/rest/radiusprofile/{profile_id}")
+        data = response if isinstance(response, list) else response.get("data", response)
 
         return RADIUSProfile(**data).model_dump()  # type: ignore[no-any-return]
 
@@ -79,8 +79,8 @@ async def create_radius_profile(
     acct_secret: str | None = None,
     use_same_secret: bool = True,
     vlan_enabled: bool = False,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict:
     """Create a new RADIUS profile.
 
@@ -147,9 +147,9 @@ async def create_radius_profile(
             return {"dry_run": True, "payload": payload_safe}
 
         response = await client.post(
-            f"/integration/v1/sites/{site_id}/radius/profiles", json_data=payload
+            f"/ea/sites/{site_id}/rest/radiusprofile", json_data=payload
         )
-        data = response.get("data", response)
+        data = response if isinstance(response, list) else response.get("data", response)
 
         # Audit the action
         await audit_action(
@@ -177,8 +177,8 @@ async def update_radius_profile(
     acct_secret: str | None = None,
     vlan_enabled: bool | None = None,
     enabled: bool | None = None,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict:
     """Update an existing RADIUS profile.
 
@@ -256,9 +256,9 @@ async def update_radius_profile(
             return {"dry_run": True, "profile_id": profile_id, "payload": payload_safe}
 
         response = await client.put(
-            f"/integration/v1/sites/{site_id}/radius/profiles/{profile_id}", json_data=payload
+            f"/ea/sites/{site_id}/rest/radiusprofile/{profile_id}", json_data=payload
         )
-        data = response.get("data", response)
+        data = response if isinstance(response, list) else response.get("data", response)
 
         # Audit the action
         await audit_action(
@@ -277,8 +277,8 @@ async def delete_radius_profile(
     site_id: str,
     profile_id: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict:
     """Delete a RADIUS profile.
 
@@ -304,7 +304,7 @@ async def delete_radius_profile(
             logger.info(f"[DRY RUN] Would delete RADIUS profile {profile_id}")
             return {"dry_run": True, "profile_id": profile_id}
 
-        await client.delete(f"/integration/v1/sites/{site_id}/radius/profiles/{profile_id}")
+        await client.delete(f"/ea/sites/{site_id}/rest/radiusprofile/{profile_id}")
 
         # Audit the action
         await audit_action(
@@ -343,13 +343,13 @@ async def list_radius_accounts(
         if not client.is_authenticated:
             await client.authenticate()
 
-        response = await client.get(f"/integration/v1/sites/{site_id}/radius/accounts")
-        data = response.get("data", [])
+        response = await client.get(f"/ea/sites/{site_id}/rest/account")
+        data = response if isinstance(response, list) else response.get("data", [])
 
         # Redact passwords in response
         for account in data:
-            if "password" in account:
-                account["password"] = "***REDACTED***"
+            if "x_password" in account:
+                account["x_password"] = "***REDACTED***"
 
         return [RADIUSAccount(**account).model_dump() for account in data]
 
@@ -360,19 +360,25 @@ async def create_radius_account(
     password: str,
     settings: Settings,
     vlan_id: int | None = None,
+    tunnel_type: int | None = None,
+    tunnel_medium_type: int | None = None,
     enabled: bool = True,
     note: str | None = None,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict:
-    """Create a new RADIUS account.
+    """Create a new RADIUS account (local credential).
+
+    Uses the /rest/account endpoint for local RADIUS user management.
 
     Args:
         site_id: Site identifier
         username: Account username
         password: Account password
         settings: Application settings
-        vlan_id: Assigned VLAN ID
+        vlan_id: Assigned VLAN ID (auto-sets tunnel_type=13 and tunnel_medium_type=6)
+        tunnel_type: RADIUS tunnel type (13 for VLAN, auto-set when vlan_id is provided)
+        tunnel_medium_type: RADIUS tunnel medium type (6 for 802, auto-set when vlan_id is provided)
         enabled: Account enabled status
         note: Admin notes
         confirm: Confirmation flag (required)
@@ -389,28 +395,40 @@ async def create_radius_account(
         if not client.is_authenticated:
             await client.authenticate()
 
-        # Build request payload
+        # Build request payload using correct API field names
         payload: dict[str, Any] = {
             "name": username,
-            "password": password,
-            "enabled": enabled,
+            "x_password": password,
         }
 
         if vlan_id is not None:
-            payload["vlan_id"] = vlan_id
+            payload["vlan"] = vlan_id
+            # Auto-set tunnel attributes for VLAN assignment if not explicitly provided
+            payload["tunnel_type"] = tunnel_type if tunnel_type is not None else 13
+            payload["tunnel_medium_type"] = tunnel_medium_type if tunnel_medium_type is not None else 6
+        else:
+            if tunnel_type is not None:
+                payload["tunnel_type"] = tunnel_type
+            if tunnel_medium_type is not None:
+                payload["tunnel_medium_type"] = tunnel_medium_type
+
         if note:
             payload["note"] = note
 
         if dry_run:
             logger.info(f"[DRY RUN] Would create RADIUS account with username: {username}")
             payload_safe = payload.copy()
-            payload_safe["password"] = "***REDACTED***"
+            payload_safe["x_password"] = "***REDACTED***"
             return {"dry_run": True, "payload": payload_safe}
 
         response = await client.post(
-            f"/integration/v1/sites/{site_id}/radius/accounts", json_data=payload
+            f"/ea/sites/{site_id}/rest/account", json_data=payload
         )
-        data = response.get("data", response)
+        data = response if isinstance(response, list) else response.get("data", response)
+
+        # Handle list response (auto-unwrapped)
+        if isinstance(data, list):
+            data = data[0] if data else {}
 
         # Audit the action
         await audit_action(
@@ -423,7 +441,8 @@ async def create_radius_account(
         )
 
         # Redact password before returning
-        data["password"] = "***REDACTED***"
+        if "x_password" in data:
+            data["x_password"] = "***REDACTED***"
 
         return RADIUSAccount(**data).model_dump()  # type: ignore[no-any-return]
 
@@ -432,8 +451,8 @@ async def delete_radius_account(
     site_id: str,
     account_id: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict:
     """Delete a RADIUS account.
 
@@ -459,7 +478,7 @@ async def delete_radius_account(
             logger.info(f"[DRY RUN] Would delete RADIUS account {account_id}")
             return {"dry_run": True, "account_id": account_id}
 
-        await client.delete(f"/integration/v1/sites/{site_id}/radius/accounts/{account_id}")
+        await client.delete(f"/ea/sites/{site_id}/rest/account/{account_id}")
 
         # Audit the action
         await audit_action(
@@ -499,7 +518,7 @@ async def get_guest_portal_config(
             await client.authenticate()
 
         response = await client.get(f"/integration/v1/sites/{site_id}/guest-portal/config")
-        data = response.get("data", response)
+        data = response if isinstance(response, list) else response.get("data", response)
 
         return GuestPortalConfig(**data).model_dump()  # type: ignore[no-any-return]
 
@@ -515,8 +534,8 @@ async def configure_guest_portal(
     redirect_url: str | None = None,
     terms_of_service_enabled: bool | None = None,
     terms_of_service_text: str | None = None,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict:
     """Configure guest portal settings.
 
@@ -590,7 +609,7 @@ async def configure_guest_portal(
         response = await client.put(
             f"/integration/v1/sites/{site_id}/guest-portal/config", json_data=payload
         )
-        data = response.get("data", response)
+        data = response if isinstance(response, list) else response.get("data", response)
 
         # Audit the action
         await audit_action(
@@ -630,7 +649,7 @@ async def list_hotspot_packages(
             await client.authenticate()
 
         response = await client.get(f"/integration/v1/sites/{site_id}/hotspot/packages")
-        data = response.get("data", [])
+        data = response if isinstance(response, list) else response.get("data", [])
 
         return [HotspotPackage(**package).model_dump() for package in data]
 
@@ -646,8 +665,8 @@ async def create_hotspot_package(
     upload_quota_mb: int | None = None,
     price: float | None = None,
     currency: str = "USD",
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict:
     """Create a new hotspot package.
 
@@ -702,7 +721,7 @@ async def create_hotspot_package(
         response = await client.post(
             f"/integration/v1/sites/{site_id}/hotspot/packages", json_data=payload
         )
-        data = response.get("data", response)
+        data = response if isinstance(response, list) else response.get("data", response)
 
         # Audit the action
         await audit_action(
@@ -721,8 +740,8 @@ async def delete_hotspot_package(
     site_id: str,
     package_id: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict:
     """Delete a hotspot package.
 

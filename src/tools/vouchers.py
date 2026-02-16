@@ -82,8 +82,8 @@ async def create_vouchers(
     upload_quota_mb: int | None = None,
     download_quota_mb: int | None = None,
     note: str | None = None,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict:
     """Create new hotspot vouchers.
 
@@ -156,8 +156,8 @@ async def delete_voucher(
     site_id: str,
     voucher_id: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict:
     """Delete a specific voucher.
 
@@ -202,8 +202,8 @@ async def bulk_delete_vouchers(
     site_id: str,
     filter_expr: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict:
     """Bulk delete vouchers using a filter expression.
 

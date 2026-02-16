@@ -19,8 +19,8 @@ async def restart_device(
     site_id: str,
     device_mac: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Restart a UniFi device.
 
@@ -115,8 +115,8 @@ async def locate_device(
     device_mac: str,
     settings: Settings,
     enabled: bool = True,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Enable or disable LED locate mode on a device.
 
@@ -220,8 +220,8 @@ async def upgrade_device(
     device_mac: str,
     settings: Settings,
     firmware_url: str | None = None,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Trigger firmware upgrade for a device.
 

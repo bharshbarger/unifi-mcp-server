@@ -96,8 +96,8 @@ async def create_traffic_matching_list(
     name: str,
     items: list[str],
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Create a new traffic matching list.
 
@@ -189,8 +189,8 @@ async def update_traffic_matching_list(
     list_type: str | None = None,
     name: str | None = None,
     items: list[str] | None = None,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Update an existing traffic matching list.
 
@@ -298,8 +298,8 @@ async def delete_traffic_matching_list(
     site_id: str,
     list_id: str,
     settings: Settings,
-    confirm: bool = False,
-    dry_run: bool = False,
+    confirm: bool | str = False,
+    dry_run: bool | str = False,
 ) -> dict[str, Any]:
     """Delete a traffic matching list.
 

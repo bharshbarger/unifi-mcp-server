@@ -12,7 +12,7 @@ A Model Context Protocol (MCP) server that exposes the UniFi Network Controller 
 
 ## 📋 Version Notice
 
-**Current Stable Release**: v0.2.1 (2026-01-26) 🎉
+**Current Stable Release**: v0.2.2 (2026-02-16) 🎉
 
 **Installation:**
 
@@ -20,17 +20,32 @@ A Model Context Protocol (MCP) server that exposes the UniFi Network Controller 
 pip install unifi-mcp-server
 ```
 
-**What's New in v0.2.1:**
+**What's New in v0.2.2:**
+
+- 🔌 **Port Profile Management** - 8 new tools for switch port configuration (PoE, VLAN, 802.1X, LLDP-MED)
+- 🔒 **Security Updates** - Critical dependency updates (FastMCP 2.14.5, MCP 1.26.0, cryptography 46.0.5)
+- 🐛 **API Fixes** - Corrected RADIUS, firewall, WLAN, and network configuration endpoints/payloads
+- 🛡️ **Security Hardening** - Removed PII, masked sensitive data, cleaned git history
+- 🧪 **1,068 Tests Passing** - 75 new tests, all passing across Python 3.10, 3.11, 3.12
+- 📋 **Code Quality** - Fixed all pre-commit hooks, improved type hints, Pydantic model validation
+
+**New Tools in v0.2.2:**
+- `list_port_profiles` - Paginated switch port profile listing
+- `get_port_profile` - Fetch port profile details by ID
+- `create_port_profile` - Create port profiles with full config (PoE, VLAN, 802.1X, LLDP-MED)
+- `update_port_profile` - Update port profiles with fetch-then-merge
+- `delete_port_profile` - Delete port profiles with verification
+- `get_device_port_overrides` - Get per-port overrides and port table for devices
+- `set_device_port_overrides` - Set port overrides with smart merge or full replace
+- `get_device_by_mac` - Look up devices by MAC address
+
+**Previous Release - v0.2.1 (2026-01-26):**
 
 - 🔧 **CI/CD Improvements** - Fixed all CI/CD pipeline failures
 - ✅ **Test Infrastructure** - Proper pytest configuration with integration markers
 - 🧪 **990 Tests Passing** - All unit tests passing across Python 3.10, 3.11, 3.12
-- 🔍 **Integration Tests** - 24 integration tests validated on local APIs
-- 📋 **Code Quality** - Black formatting, Ruff linting, pre-commit hooks all passing
 
-This is a maintenance release focused on improving the development and testing infrastructure. All 74 MCP tools from v0.2.0 remain unchanged.
-
-**Previous Major Release - v0.2.0 (2026-01-25):**
+**Major Release - v0.2.0 (2026-01-25):**
 
 - ✨ **74 MCP Tools** - All 7 feature phases complete
 - 📦 **Published on PyPI** - Easy installation with pip/uv
@@ -41,8 +56,6 @@ This is a maintenance release focused on improving the development and testing i
 - 🏢 **Site Management** - Multi-site provisioning and VPN (9 tools)
 - 🔐 **RADIUS & Guest Portal** - 802.1X authentication (6 tools)
 - 🗺️ **Network Topology** - Complete topology mapping and visualization (5 tools)
-- 🧪 **990 Tests** - 78.18% coverage with comprehensive validation
-- 📖 **30+ Example Prompts** - AI assistant usage examples
 
 See [CHANGELOG.md](CHANGELOG.md) for complete release notes and [VERIFICATION_REPORT.md](VERIFICATION_REPORT.md) for detailed verification.
 
@@ -90,6 +103,8 @@ The UniFi MCP Server supports **three distinct API modes** with different capabi
 - **Network Configuration**: Create, update, and delete networks, VLANs, and subnets with DHCP configuration
 - **Client Management**: Query, block, unblock, and reconnect clients with detailed analytics
 - **WiFi/SSID Management**: Create and manage wireless networks with WPA2/WPA3, guest networks, and VLAN isolation
+- **Port Profile Management** (v0.2.2): Switch port configuration with PoE, VLAN trunking, 802.1X, LLDP-MED, speed/duplex
+- **Device Port Overrides** (v0.2.2): Per-port configuration on individual switches with smart merge capabilities
 - **Port Forwarding**: Configure port forwarding rules for external access
 - **DPI Statistics**: Deep Packet Inspection analytics for bandwidth usage by application and category
 - **Multi-Site Support**: Work with multiple UniFi sites seamlessly
@@ -159,11 +174,11 @@ The UniFi MCP Server supports **three distinct API modes** with different capabi
 
 - **Async Support**: Built with async/await for high performance and concurrency
 - **MCP Protocol**: Standard Model Context Protocol for AI agent integration
-- **Comprehensive Testing**: 990 unit tests with 78.18% coverage (4,865 of 6,105 statements)
+- **Comprehensive Testing**: 1,068 unit tests with high coverage, all passing
 - **CI/CD Pipelines**: Automated testing, security scanning, and Docker builds (18 checks)
 - **Multi-Architecture**: Docker images for amd64, arm64, arm/v7 (32-bit ARM), and arm64/v8
-- **Zero Security Issues**: Clean scans from Bandit, Trivy, OSV Scanner, and Socket Security
-- **Quality Metrics**: Black formatting, Ruff linting, comprehensive type hints
+- **Security Hardened**: Updated critical dependencies (FastMCP, MCP SDK, cryptography)
+- **Quality Metrics**: Black formatting, Ruff linting, comprehensive type hints, Pydantic validation
 
 ## Quick Start
 

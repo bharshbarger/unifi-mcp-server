@@ -120,7 +120,7 @@ def validate_device_id(device_id: str) -> str:
     return device_id.lower()
 
 
-def coerce_bool(value) -> bool:
+def coerce_bool(value: bool | str | None) -> bool:
     """Coerce a value to bool, handling MCP JSON-RPC string serialization.
 
     MCP clients may send boolean parameters as strings ("true"/"false")
@@ -137,7 +137,7 @@ def coerce_bool(value) -> bool:
     return bool(value)
 
 
-def validate_confirmation(confirm, operation: str, dry_run=False) -> None:
+def validate_confirmation(confirm: bool | str | None, operation: str, dry_run: bool | str = False) -> None:
     """Validate that confirmation is provided for mutating operations.
 
     Skips validation when dry_run is True, allowing users to preview

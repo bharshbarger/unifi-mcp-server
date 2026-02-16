@@ -6,6 +6,7 @@ from .exceptions import (
     AuthenticationError,
     ConfigurationError,
     ConfirmationRequiredError,
+    DuplicateResourceError,
     NetworkError,
     RateLimitError,
     ResourceNotFoundError,
@@ -53,6 +54,7 @@ __all__ = [
     "ValidationError",
     "NetworkError",
     "ConfirmationRequiredError",
+    "DuplicateResourceError",
     # Audit
     "AuditLogger",
     "get_audit_logger",

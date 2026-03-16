@@ -496,15 +496,21 @@ async def get_device_port_overrides(
     async with UniFiClient(settings) as client:
         await client.authenticate()
 
-        response = await client.get(f"/ea/sites/{site_id}/rest/device/{device_id}")
-        devices: list[dict[str, Any]] = (
+        # Use stat/device to read device data (rest/device/{id} GET is not supported)
+        response = await client.get(f"/ea/sites/{site_id}/stat/device")
+        all_devices: list[dict[str, Any]] = (
             response if isinstance(response, list) else response.get("data", [])
         )
 
-        if not devices:
+        # Filter by _id or MAC address
+        device = next(
+            (d for d in all_devices if d.get("_id") == device_id or d.get("mac") == device_id),
+            None,
+        )
+
+        if not device:
             raise ResourceNotFoundError("device", device_id)
 
-        device = devices[0]
         logger.info(f"Retrieved port overrides for device '{device_id}' in site '{site_id}'")
 
         overrides = [
@@ -584,16 +590,19 @@ async def set_device_port_overrides(
         async with UniFiClient(settings) as client:
             await client.authenticate()
 
-            # Fetch existing device
-            response = await client.get(f"/ea/sites/{site_id}/rest/device/{device_id}")
-            devices: list[dict[str, Any]] = (
+            # Use stat/device to read device data (rest/device/{id} GET is not supported)
+            response = await client.get(f"/ea/sites/{site_id}/stat/device")
+            all_devices: list[dict[str, Any]] = (
                 response if isinstance(response, list) else response.get("data", [])
             )
 
-            if not devices:
-                raise ResourceNotFoundError("device", device_id)
+            device = next(
+                (d for d in all_devices if d.get("_id") == device_id or d.get("mac") == device_id),
+                None,
+            )
 
-            device = devices[0]
+            if not device:
+                raise ResourceNotFoundError("device", device_id)
 
             if merge:
                 # Merge by port_idx: new overrides take precedence
@@ -624,8 +633,11 @@ async def set_device_port_overrides(
 
             # PUT the full device with updated port_overrides
             device["port_overrides"] = final_overrides
+            # Use resolved _id for writes (device_id may be a MAC address)
+            resolved_id = device["_id"]
+            endpoint = settings.get_site_api_path(site_id, f"rest/device/{resolved_id}")
             response = await client.put(
-                f"/ea/sites/{site_id}/rest/device/{device_id}",
+                endpoint,
                 json_data=device,
             )
             if isinstance(response, list):

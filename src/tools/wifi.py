@@ -387,6 +387,15 @@ async def update_wlan(
                 update_data["hide_ssid"] = hide_ssid
             if wlan_bands is not None:
                 update_data["wlan_bands"] = wlan_bands
+                # Sync the legacy wlan_band field to match
+                if set(wlan_bands) == {"2g"}:
+                    update_data["wlan_band"] = "2g"
+                elif set(wlan_bands) == {"5g"}:
+                    update_data["wlan_band"] = "5g"
+                elif "6g" in wlan_bands and "2g" not in wlan_bands:
+                    update_data["wlan_band"] = "5g"
+                else:
+                    update_data["wlan_band"] = "both"
 
             response = await client.put(
                 f"/ea/sites/{site_id}/rest/wlanconf/{wlan_id}", json_data=update_data

@@ -247,6 +247,7 @@ async def update_wlan(
     wpa_enc: str | None = None,
     vlan_id: int | None = None,
     hide_ssid: bool | None = None,
+    wlan_bands: list[str] | None = None,
     confirm: bool | str = False,
     dry_run: bool | str = False,
 ) -> dict[str, Any]:
@@ -265,6 +266,7 @@ async def update_wlan(
         wpa_enc: New WPA encryption (tkip, ccmp, ccmp-tkip)
         vlan_id: New VLAN ID
         hide_ssid: Hide/show SSID from broadcast
+        wlan_bands: WiFi bands as list (e.g. ["2g"], ["5g"], ["2g", "5g", "6g"])
         confirm: Confirmation flag (must be True to execute)
         dry_run: If True, validate but don't update the WLAN
 
@@ -307,6 +309,17 @@ async def update_wlan(
     if vlan_id is not None and not 1 <= vlan_id <= 4094:
         raise ValidationError(f"Invalid VLAN ID {vlan_id}. Must be between 1 and 4094")
 
+    # Validate WLAN bands if provided
+    if wlan_bands is not None:
+        valid_bands = {"2g", "5g", "6g"}
+        invalid = set(wlan_bands) - valid_bands
+        if invalid:
+            raise ValidationError(
+                f"Invalid WLAN band(s): {invalid}. Must be from: {valid_bands}"
+            )
+        if not wlan_bands:
+            raise ValidationError("wlan_bands must contain at least one band")
+
     parameters = {
         "site_id": site_id,
         "wlan_id": wlan_id,
@@ -316,6 +329,7 @@ async def update_wlan(
         "is_guest": is_guest,
         "vlan_id": vlan_id,
         "hide_ssid": hide_ssid,
+        "wlan_bands": wlan_bands,
         "password": "***MASKED***" if password else None,
     }
 
@@ -371,6 +385,8 @@ async def update_wlan(
                 update_data["vlan_enabled"] = True
             if hide_ssid is not None:
                 update_data["hide_ssid"] = hide_ssid
+            if wlan_bands is not None:
+                update_data["wlan_bands"] = wlan_bands
 
             response = await client.put(
                 f"/ea/sites/{site_id}/rest/wlanconf/{wlan_id}", json_data=update_data

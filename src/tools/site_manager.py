@@ -88,7 +88,8 @@ async def get_internet_health(settings: Settings, site_id: str | None = None) ->
         logger.info(sanitize_log_message(f"Retrieving internet health metrics (site_id={site_id})"))
 
         response = await client.get_internet_health(site_id)
-        data = response if isinstance(response, list) else response.get("data", response)
+        resp_data = response if isinstance(response, list) else response.get("data", [response])
+        data = resp_data[0] if resp_data else {}
 
         return InternetHealthMetrics(**data).model_dump()  # type: ignore[no-any-return]
 
@@ -228,7 +229,8 @@ async def get_site_inventory(
         if site_id:
             # Get inventory for specific site
             site_response = await client.get(f"sites/{site_id}")
-            site_data = site_response if isinstance(site_response, list) else site_response.get("data", site_response)
+            resp_data = site_response if isinstance(site_response, list) else site_response.get("data", [site_response])
+            site_data = resp_data[0] if resp_data else {}
 
             # Fetch detailed counts (these would come from various endpoints)
             # For now, using available data from site response
@@ -502,7 +504,8 @@ async def get_isp_metrics(settings: Settings, site_id: str) -> dict[str, Any]:
         logger.info(sanitize_log_message(f"Retrieving ISP metrics for site: {site_id}"))
 
         response = await client.get_isp_metrics(site_id)
-        data = response if isinstance(response, list) else response.get("data", response)
+        resp_data = response if isinstance(response, list) else response.get("data", [response])
+        data = resp_data[0] if resp_data else {}
 
         return ISPMetrics(**data).model_dump()  # type: ignore[no-any-return]
 
@@ -580,7 +583,8 @@ async def get_sdwan_config(settings: Settings, config_id: str) -> dict[str, Any]
         logger.info(sanitize_log_message(f"Retrieving SD-WAN configuration: {config_id}"))
 
         response = await client.get_sdwan_config(config_id)
-        data = response if isinstance(response, list) else response.get("data", response)
+        resp_data = response if isinstance(response, list) else response.get("data", [response])
+        data = resp_data[0] if resp_data else {}
 
         return SDWANConfig(**data).model_dump()  # type: ignore[no-any-return]
 
@@ -601,7 +605,8 @@ async def get_sdwan_config_status(settings: Settings, config_id: str) -> dict[st
         logger.info(sanitize_log_message(f"Retrieving SD-WAN configuration status: {config_id}"))
 
         response = await client.get_sdwan_config_status(config_id)
-        data = response if isinstance(response, list) else response.get("data", response)
+        resp_data = response if isinstance(response, list) else response.get("data", [response])
+        data = resp_data[0] if resp_data else {}
 
         return SDWANConfigStatus(**data).model_dump()  # type: ignore[no-any-return]
 
@@ -650,7 +655,8 @@ async def get_host(settings: Settings, host_id: str) -> dict[str, Any]:
         logger.info(sanitize_log_message(f"Retrieving host details: {host_id}"))
 
         response = await client.get_host(host_id)
-        data = response if isinstance(response, list) else response.get("data", response)
+        resp_data = response if isinstance(response, list) else response.get("data", [response])
+        data = resp_data[0] if resp_data else {}
 
         return Host(**data).model_dump()  # type: ignore[no-any-return]
 
@@ -671,6 +677,7 @@ async def get_version_control(settings: Settings) -> dict[str, Any]:
         logger.info("Retrieving API version control information")
 
         response = await client.get_version_control()
-        data = response if isinstance(response, list) else response.get("data", response)
+        resp_data = response if isinstance(response, list) else response.get("data", [response])
+        data = resp_data[0] if resp_data else {}
 
         return VersionControl(**data).model_dump()  # type: ignore[no-any-return]

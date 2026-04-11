@@ -275,7 +275,8 @@ async def adopt_device(
         response = await client.post(
             f"/integration/v1/sites/{site_id}/devices/{device_id}/adopt", json_data=payload
         )
-        data = response if isinstance(response, list) else response.get("data", response)
+        resp_data = response if isinstance(response, list) else response.get("data", [response])
+        data = resp_data[0] if resp_data else {}
 
         # Audit the action
         await audit_action(
@@ -343,7 +344,8 @@ async def execute_port_action(
             f"/integration/v1/sites/{site_id}/devices/{device_id}/ports/{port_idx}/action",
             json_data=payload,
         )
-        data = response if isinstance(response, list) else response.get("data", response)
+        resp_data = response if isinstance(response, list) else response.get("data", [response])
+        data = resp_data[0] if resp_data else {}
 
         # Audit the action
         await audit_action(

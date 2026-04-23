@@ -17,6 +17,7 @@ from .tools import clients as clients_tools
 from .tools import content_filtering as content_filtering_tools
 from .tools import device_control as device_control_tools
 from .tools import devices as devices_tools
+from .tools import diagnostics as diagnostics_tools
 from .tools import dhcp_reservations as dhcp_tools
 from .tools import dns_management as dns_tools
 from .tools import dpi as dpi_tools
@@ -35,6 +36,7 @@ from .tools import reference_data as ref_tools
 from .tools import site_manager as site_manager_tools
 from .tools import site_vpn as site_vpn_tools
 from .tools import sites as sites_tools
+from .tools import switching as switching_tools
 from .tools import topology as topology_tools
 from .tools import traffic_flows as traffic_flows_tools
 from .tools import traffic_matching_lists as tml_tools
@@ -114,6 +116,7 @@ _TOOL_MODULES = [
     clients_tools,
     content_filtering_tools,
     device_control_tools,
+    diagnostics_tools,
     dhcp_tools,
     dns_tools,
     devices_tools,
@@ -133,6 +136,7 @@ _TOOL_MODULES = [
     site_manager_tools,
     site_vpn_tools,
     sites_tools,
+    switching_tools,
     topology_tools,
     traffic_flows_tools,
     tml_tools,

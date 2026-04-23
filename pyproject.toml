@@ -210,4 +210,9 @@ ignore = [
 "__init__.py" = ["F401"]
 "tests/*" = ["B011"]
 
+[dependency-groups]
+dev = [
+    "pytest-asyncio>=1.2.0",
+]
+
 # UV Package Manager Configuration

@@ -63,8 +63,8 @@ class SiteManagerClient:
             AuthenticationError: If authentication fails
         """
         try:
-            # Test authentication with sites endpoint
-            response = await self.client.get("/v1/sites")
+            # Test authentication with sites endpoint (relative to base_url /v1/)
+            response = await self.client.get("sites")
             if response.status_code == 200:
                 self._authenticated = True
                 self.logger.info("Successfully authenticated with Site Manager API")
@@ -92,9 +92,8 @@ class SiteManagerClient:
             await self.authenticate()
 
         try:
-            # Ensure endpoint starts with /v1/
-            if not endpoint.startswith("/v1/"):
-                endpoint = f"/v1/{endpoint.lstrip('/')}"
+            # base_url already includes /v1/ - pass endpoint as relative path
+            endpoint = endpoint.lstrip("/")
 
             response = await self.client.get(endpoint, params=params)
             response.raise_for_status()

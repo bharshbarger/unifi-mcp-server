@@ -21,6 +21,7 @@ from ..models.site_manager import (
     VersionControl,
 )
 from ..utils import get_logger, sanitize_log_message
+from ..utils.exceptions import ResourceNotFoundError
 
 logger = get_logger(__name__)
 
@@ -87,14 +88,22 @@ async def get_internet_health(settings: Settings, site_id: str | None = None) ->
     async with SiteManagerClient(settings) as client:
         logger.info(sanitize_log_message(f"Retrieving internet health metrics (site_id={site_id})"))
 
-        response = await client.get_internet_health(site_id)
-        if isinstance(response, list):
-            data = response[0] if response else {}
-        else:
-            _raw = response.get("data", response)
-            data = _raw[0] if isinstance(_raw, list) else _raw
+        try:
+            response = await client.get_internet_health(site_id)
+            if isinstance(response, list):
+                data = response[0] if response else {}
+            else:
+                _raw = response.get("data", response)
+                data = _raw[0] if isinstance(_raw, list) else _raw
 
-        return InternetHealthMetrics(**data).model_dump()  # type: ignore[no-any-return]
+            return InternetHealthMetrics(**data).model_dump()  # type: ignore[no-any-return]
+        except ResourceNotFoundError:
+            logger.warning("internet/health endpoint not available on this Site Manager API")
+            return {
+                "error": "internet/health endpoint not available",
+                "site_id": site_id,
+                "status": "unknown",
+            }
 
 
 @require_site_manager
@@ -114,16 +123,27 @@ async def get_site_health_summary(
     async with SiteManagerClient(settings) as client:
         logger.info(sanitize_log_message(f"Retrieving site health summary (site_id={site_id})"))
 
-        response = await client.get_site_health(site_id)
-        # Client now auto-unwraps the "data" field, so response is the actual data
-        data = response
+        try:
+            response = await client.get_site_health(site_id)
+            # Client now auto-unwraps the "data" field, so response is the actual data
+            data = response
 
-        if site_id:
-            return SiteHealthSummary(**data).model_dump()  # type: ignore[no-any-return]
-        else:
-            # Multiple sites - response is already a list or dict with sites
-            summaries = data.get("sites", []) if isinstance(data, dict) else data
-            return [SiteHealthSummary(**summary).model_dump() for summary in summaries]
+            if site_id:
+                return SiteHealthSummary(**data).model_dump()  # type: ignore[no-any-return]
+            else:
+                # Multiple sites - response is already a list or dict with sites
+                summaries = data.get("sites", []) if isinstance(data, dict) else data
+                return [SiteHealthSummary(**summary).model_dump() for summary in summaries]
+        except ResourceNotFoundError:
+            logger.warning("sites/health endpoint not available on this Site Manager API")
+            if site_id:
+                return {
+                    "error": "sites/health endpoint not available",
+                    "site_id": site_id,
+                    "status": "unknown",
+                }
+            else:
+                return []
 
 
 @require_site_manager
@@ -144,8 +164,12 @@ async def get_cross_site_statistics(settings: Settings) -> dict[str, Any]:
         sites_response = await client.list_sites()
         sites_data = sites_response if isinstance(sites_response, list) else sites_response.get("data", sites_response.get("sites", []))
 
-        health_response = await client.get_site_health()
-        health_data = health_response if isinstance(health_response, list) else health_response.get("data", health_response)
+        try:
+            health_response = await client.get_site_health()
+            health_data = health_response if isinstance(health_response, list) else health_response.get("data", health_response)
+        except ResourceNotFoundError:
+            logger.warning("sites/health endpoint not available; returning partial statistics")
+            health_data = []
 
         # Aggregate statistics
         total_sites = len(sites_data)
@@ -202,11 +226,15 @@ async def list_vantage_points(settings: Settings) -> list[dict[str, Any]]:
     async with SiteManagerClient(settings) as client:
         logger.info("Retrieving Vantage Points")
 
-        response = await client.list_vantage_points()
-        # Client now auto-unwraps the "data" field, so response is the actual data
-        data = response.get("vantage_points", []) if isinstance(response, dict) else response
+        try:
+            response = await client.list_vantage_points()
+            # Client now auto-unwraps the "data" field, so response is the actual data
+            data = response.get("vantage_points", []) if isinstance(response, dict) else response
 
-        return [VantagePoint(**vp).model_dump() for vp in data]
+            return [VantagePoint(**vp).model_dump() for vp in data]
+        except ResourceNotFoundError:
+            logger.warning("vantage-points endpoint not available on this Site Manager API")
+            return []
 
 
 @require_site_manager
@@ -231,11 +259,16 @@ async def get_site_inventory(
 
         if site_id:
             # Get inventory for specific site
-            site_response = await client.get(f"sites/{site_id}")
+            try:
+                site_response = await client.get(f"sites/{site_id}")
+            except ResourceNotFoundError:
+                logger.warning(f"sites/{site_id} endpoint not available; using list_sites fallback")
+                site_response = []
+
             if isinstance(site_response, list):
                 site_data = site_response[0] if site_response else {}
             else:
-                _raw = site_response.get("data", site_response)
+                _raw = site_response.get("data", site_response) if isinstance(site_response, dict) else site_response
                 site_data = _raw[0] if isinstance(_raw, list) else _raw
 
             # Fetch detailed counts (these would come from various endpoints)
@@ -297,12 +330,20 @@ async def compare_site_performance(settings: Settings) -> dict[str, Any]:
         logger.info("Comparing performance across sites")
 
         # Get site health data
-        health_response = await client.get_site_health()
-        health_data = health_response if isinstance(health_response, list) else health_response.get("data", health_response)
+        try:
+            health_response = await client.get_site_health()
+            health_data = health_response if isinstance(health_response, list) else health_response.get("data", health_response)
+        except ResourceNotFoundError:
+            logger.warning("sites/health endpoint not available")
+            health_data = []
 
         # Get internet health data for bandwidth/latency
-        internet_response = await client.get_internet_health()
-        internet_data = internet_response if isinstance(internet_response, list) else internet_response.get("data", internet_response)
+        try:
+            internet_response = await client.get_internet_health()
+            internet_data = internet_response if isinstance(internet_response, list) else internet_response.get("data", internet_response)
+        except ResourceNotFoundError:
+            logger.warning("internet/health endpoint not available")
+            internet_data = []
 
         site_metrics: list[SitePerformanceMetrics] = []
 
@@ -509,14 +550,18 @@ async def get_isp_metrics(settings: Settings, site_id: str) -> dict[str, Any]:
     async with SiteManagerClient(settings) as client:
         logger.info(sanitize_log_message(f"Retrieving ISP metrics for site: {site_id}"))
 
-        response = await client.get_isp_metrics(site_id)
-        if isinstance(response, list):
-            data = response[0] if response else {}
-        else:
-            _raw = response.get("data", response)
-            data = _raw[0] if isinstance(_raw, list) else _raw
+        try:
+            response = await client.get_isp_metrics(site_id)
+            if isinstance(response, list):
+                data = response[0] if response else {}
+            else:
+                _raw = response.get("data", response)
+                data = _raw[0] if isinstance(_raw, list) else _raw
 
-        return ISPMetrics(**data).model_dump()  # type: ignore[no-any-return]
+            return ISPMetrics(**data).model_dump()  # type: ignore[no-any-return]
+        except ResourceNotFoundError:
+            logger.warning("isp/metrics endpoint not available on this Site Manager API")
+            return {"error": "isp/metrics endpoint not available", "site_id": site_id}
 
 
 @require_site_manager
@@ -567,12 +612,16 @@ async def list_sdwan_configs(settings: Settings) -> list[dict[str, Any]]:
     async with SiteManagerClient(settings) as client:
         logger.info("Retrieving SD-WAN configurations")
 
-        response = await client.list_sdwan_configs()
-        data = response if isinstance(response, list) else response.get("data", response.get("configs", []))
+        try:
+            response = await client.list_sdwan_configs()
+            data = response if isinstance(response, list) else response.get("data", response.get("configs", []))
 
-        if isinstance(data, list):
-            return [SDWANConfig(**config).model_dump() for config in data]
-        else:
+            if isinstance(data, list):
+                return [SDWANConfig(**config).model_dump() for config in data]
+            else:
+                return []
+        except ResourceNotFoundError:
+            logger.warning("sdwan/configs endpoint not available on this Site Manager API")
             return []
 
 
@@ -649,7 +698,7 @@ async def list_hosts(
         data = response if isinstance(response, list) else response.get("data", response.get("hosts", []))
 
         if isinstance(data, list):
-            return [Host(**host).model_dump() for host in data]
+            return data  # type: ignore[no-any-return]
         else:
             return []
 
@@ -676,7 +725,7 @@ async def get_host(settings: Settings, host_id: str) -> dict[str, Any]:
             _raw = response.get("data", response)
             data = _raw[0] if isinstance(_raw, list) else _raw
 
-        return Host(**data).model_dump()  # type: ignore[no-any-return]
+        return data  # type: ignore[no-any-return]
 
 
 # Version Control Tool (added 2026-02-16)
@@ -694,11 +743,15 @@ async def get_version_control(settings: Settings) -> dict[str, Any]:
     async with SiteManagerClient(settings) as client:
         logger.info("Retrieving API version control information")
 
-        response = await client.get_version_control()
-        if isinstance(response, list):
-            data = response[0] if response else {}
-        else:
-            _raw = response.get("data", response)
-            data = _raw[0] if isinstance(_raw, list) else _raw
+        try:
+            response = await client.get_version_control()
+            if isinstance(response, list):
+                data = response[0] if response else {}
+            else:
+                _raw = response.get("data", response)
+                data = _raw[0] if isinstance(_raw, list) else _raw
 
-        return VersionControl(**data).model_dump()  # type: ignore[no-any-return]
+            return VersionControl(**data).model_dump()  # type: ignore[no-any-return]
+        except ResourceNotFoundError:
+            logger.warning("version endpoint not available on this Site Manager API")
+            return {"error": "version endpoint not available"}

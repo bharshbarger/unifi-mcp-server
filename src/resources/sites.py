@@ -37,8 +37,11 @@ class SitesResource:
             # Fetch sites from API
             response = await client.get("/ea/sites")
 
-            # Extract sites data
-            sites_data = response.get("data", [])
+            # Extract sites data - Cloud EA returns a raw list
+            if isinstance(response, list):
+                sites_data = response
+            else:
+                sites_data = response.get("data", [])
 
             # Apply pagination
             paginated_data = sites_data[offset : offset + limit]
@@ -63,11 +66,21 @@ class SitesResource:
             await client.authenticate()
 
             response = await client.get("/ea/sites")
-            sites_data = response.get("data", [])
+            # Cloud EA returns a raw list
+            if isinstance(response, list):
+                sites_data = response
+            else:
+                sites_data = response.get("data", [])
 
-            # Find the specific site
+            # Find the specific site - match on siteId, _id, name, meta.name, or internalReference
             for site_data in sites_data:
-                if site_data.get("_id") == site_id or site_data.get("name") == site_id:
+                if (
+                    site_data.get("siteId") == site_id
+                    or site_data.get("_id") == site_id
+                    or site_data.get("name") == site_id
+                    or site_data.get("meta", {}).get("name") == site_id
+                    or site_data.get("internalReference") == site_id
+                ):
                     return Site(**site_data)
 
             return None

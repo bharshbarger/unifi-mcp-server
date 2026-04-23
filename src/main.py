@@ -2,10 +2,11 @@
 
 import json
 import os
+from typing import Any
 
 from fastmcp import FastMCP
 
-from .config import Settings
+from .config import APIType, Settings
 from .resources import ClientsResource, DevicesResource, NetworksResource, SitesResource
 from .resources import site_manager as site_manager_resource
 from .tool_registry import register_module_tools
@@ -95,20 +96,15 @@ if os.getenv("AGNOST_ENABLED", "false").lower() in ("true", "1", "yes"):
         logger.warning("AGNOST_ENABLED is true but AGNOST_ORG_ID is not set")
 
 # ---------------------------------------------------------------------------
-# Resource handlers
+# Conditional tool modules based on API type
 # ---------------------------------------------------------------------------
 
-sites_resource = SitesResource(settings)
-devices_resource = DevicesResource(settings)
-clients_resource = ClientsResource(settings)
-networks_resource = NetworksResource(settings)
-site_manager_res = site_manager_resource.SiteManagerResource(settings)
+_CLOUD_TOOL_MODULES = [
+    sites_tools,
+    site_manager_tools,
+]
 
-# ---------------------------------------------------------------------------
-# Auto-register all tool modules
-# ---------------------------------------------------------------------------
-
-_TOOL_MODULES = [
+_LOCAL_TOOL_MODULES = [
     acls_tools,
     application_tools,
     backups_tools,
@@ -133,9 +129,7 @@ _TOOL_MODULES = [
     qos_tools,
     radius_tools,
     ref_tools,
-    site_manager_tools,
     site_vpn_tools,
-    sites_tools,
     switching_tools,
     topology_tools,
     traffic_flows_tools,
@@ -146,8 +140,34 @@ _TOOL_MODULES = [
     wifi_tools,
 ]
 
-for _module in _TOOL_MODULES:
-    register_module_tools(mcp, _module, settings)
+_TOOL_MODULES: list[Any] = []
+if settings.api_type in (APIType.CLOUD_V1, APIType.CLOUD_EA):
+    _TOOL_MODULES = list(_CLOUD_TOOL_MODULES)
+    logger.info(f"Cloud API mode ({settings.api_type.value}) - registering {_TOOL_MODULES} tool modules")
+    # get_site_statistics calls /ea/sites/{id}/devices, /sta, /rest/networkconf
+    # which all 404 on the live Cloud API
+    for _module in _TOOL_MODULES:
+        if _module is sites_tools:
+            register_module_tools(mcp, _module, settings, exclude=["get_site_statistics"])
+        else:
+            register_module_tools(mcp, _module, settings)
+else:
+    _TOOL_MODULES = list(_CLOUD_TOOL_MODULES) + list(_LOCAL_TOOL_MODULES)
+    logger.info(f"Local API mode - registering {_TOOL_MODULES} tool modules")
+    for _module in _TOOL_MODULES:
+        register_module_tools(mcp, _module, settings)
+
+# ---------------------------------------------------------------------------
+# Resource handlers
+# ---------------------------------------------------------------------------
+
+sites_resource = SitesResource(settings)
+site_manager_res = site_manager_resource.SiteManagerResource(settings)
+
+if settings.api_type == APIType.LOCAL:
+    devices_resource = DevicesResource(settings)
+    clients_resource = ClientsResource(settings)
+    networks_resource = NetworksResource(settings)
 
 # ---------------------------------------------------------------------------
 # Built-in tools (not in a module, or require special handling)
@@ -210,62 +230,61 @@ async def get_sites_resource() -> str:
     return "\n".join([f"Site: {s.name} ({s.id})" for s in sites])
 
 
-@mcp.resource("sites://{site_id}/devices")
-async def get_devices_resource(site_id: str) -> str:
-    """Get all devices for a site.
+if settings.api_type == APIType.LOCAL:
 
-    Args:
-        site_id: Site identifier
+    @mcp.resource("sites://{site_id}/devices")
+    async def get_devices_resource(site_id: str) -> str:
+        """Get all devices for a site.
 
-    Returns:
-        JSON string of devices list
-    """
-    devices = await devices_resource.list_devices(site_id)
-    return "\n".join([f"Device: {d.name or d.model} ({d.mac}) - {d.ip}" for d in devices])
+        Args:
+            site_id: Site identifier
 
+        Returns:
+            JSON string of devices list
+        """
+        devices = await devices_resource.list_devices(site_id)
+        return "\n".join([f"Device: {d.name or d.model} ({d.mac}) - {d.ip}" for d in devices])
 
-@mcp.resource("sites://{site_id}/clients")
-async def get_clients_resource(site_id: str) -> str:
-    """Get all clients for a site.
+    @mcp.resource("sites://{site_id}/clients")
+    async def get_clients_resource(site_id: str) -> str:
+        """Get all clients for a site.
 
-    Args:
-        site_id: Site identifier
+        Args:
+            site_id: Site identifier
 
-    Returns:
-        JSON string of clients list
-    """
-    clients = await clients_resource.list_clients(site_id, active_only=True)
-    return "\n".join([f"Client: {c.hostname or c.name or c.mac} ({c.ip})" for c in clients])
+        Returns:
+            JSON string of clients list
+        """
+        clients = await clients_resource.list_clients(site_id, active_only=True)
+        return "\n".join([f"Client: {c.hostname or c.name or c.mac} ({c.ip})" for c in clients])
 
+    @mcp.resource("sites://{site_id}/networks")
+    async def get_networks_resource(site_id: str) -> str:
+        """Get all networks for a site.
 
-@mcp.resource("sites://{site_id}/networks")
-async def get_networks_resource(site_id: str) -> str:
-    """Get all networks for a site.
+        Args:
+            site_id: Site identifier
 
-    Args:
-        site_id: Site identifier
+        Returns:
+            JSON string of networks list
+        """
+        networks = await networks_resource.list_networks(site_id)
+        return "\n".join(
+            [f"Network: {n.name} (VLAN {n.vlan_id or 'none'}) - {n.ip_subnet}" for n in networks]
+        )
 
-    Returns:
-        JSON string of networks list
-    """
-    networks = await networks_resource.list_networks(site_id)
-    return "\n".join(
-        [f"Network: {n.name} (VLAN {n.vlan_id or 'none'}) - {n.ip_subnet}" for n in networks]
-    )
+    @mcp.resource("sites://{site_id}/traffic/flows")
+    async def get_traffic_flows_resource(site_id: str) -> str:
+        """Get traffic flows for a site.
 
+        Args:
+            site_id: Site identifier
 
-@mcp.resource("sites://{site_id}/traffic/flows")
-async def get_traffic_flows_resource(site_id: str) -> str:
-    """Get traffic flows for a site.
-
-    Args:
-        site_id: Site identifier
-
-    Returns:
-        JSON string of traffic flows
-    """
-    flows = await traffic_flows_tools.get_traffic_flows(site_id, settings)
-    return json.dumps(flows, indent=2)
+        Returns:
+            JSON string of traffic flows
+        """
+        flows = await traffic_flows_tools.get_traffic_flows(site_id, settings)
+        return json.dumps(flows, indent=2)
 
 
 @mcp.resource("site-manager://sites")

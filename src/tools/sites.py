@@ -44,7 +44,9 @@ async def get_site_details(site_id: str, settings: Settings) -> dict[str, Any]:
         for site_data in sites_data:
             if (
                 site_data.get("_id") == site_id
+                or site_data.get("siteId") == site_id
                 or site_data.get("name") == site_id
+                or site_data.get("meta", {}).get("name") == site_id
                 or site_data.get("internalReference") == site_id
             ):
                 site = Site(**site_data)

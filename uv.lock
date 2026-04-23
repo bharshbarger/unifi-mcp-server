@@ -2516,6 +2516,11 @@ dev = [
     { name = "types-requests" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "pytest-asyncio" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "agnost", specifier = ">=0.1.12,!=0.1.13" },
@@ -2548,6 +2553,9 @@ requires-dist = [
     { name = "urllib3", specifier = ">=2.3.0" },
 ]
 provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest-asyncio", specifier = ">=1.2.0" }]
 
 [[package]]
 name = "urllib3"

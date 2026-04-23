@@ -185,6 +185,16 @@ temp/
 test-results/
 docs/bugs/
 
+# Ad-hoc test scripts and reports generated during development
+test_cloud_*.py
+cloud_*_test*.log
+CLOUD_API_TEST_REPORT.md
+audit.log
+
+# Agent workspace artifacts
+entities.json
+mempalace.yaml
+
 # Session work notes and local test results (may contain internal IPs)
 session-work.md
 TEST_RESULTS.md

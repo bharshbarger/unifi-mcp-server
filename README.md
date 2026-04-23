@@ -24,7 +24,7 @@ pip install unifi-mcp-server
 
 - 🚨 **Critical Startup Fix (issue #42)** - `ImportError: cannot import 'config' from 'agnost'` prevented the server from starting for all users, even when `AGNOST_ENABLED=false`. The fix moves agnost imports inside the conditional block with graceful error handling.
 - 📌 **Dependency Pin** - Excluded broken `agnost==0.1.13` from the version range (`>=0.1.12,!=0.1.13`)
-- 🧪 **1,160 Tests Passing** - 4 new regression tests covering all agnost import failure scenarios
+- 🧪 **1,325 Tests Passing** - 1219 unit + 106 integration tests, cloud-ea API compatibility fixes, Site Manager endpoint hardening
 
 **Previous Release - v0.2.3 (2026-02-18):**
 
@@ -67,12 +67,15 @@ The UniFi MCP Server supports **three distinct API modes** with different capabi
 
 ### Cloud Early Access API ⚠️
 
-**Limited to aggregate statistics** - UniFi cloud API in testing phase.
+**Site-centric access** - UniFi cloud API with limited but functional read-only capabilities.
 
-- ✅ **Site Information**: List sites with aggregate statistics (device counts, client counts, bandwidth)
+- ✅ **Site Management**: List sites, get site details (matches by `siteId`, `_id`, `name`, or `meta.name`)
+- ✅ **Site Manager API** (optional): Multi-site aggregation, host inventory, cross-site statistics
+  - Enable with `UNIFI_SITE_MANAGER_ENABLED=true`
+  - Gracefully degrades when endpoints are unavailable
 - ⚠️ **No Individual Device/Client Access**: Cannot query specific devices or clients
 - ⚠️ **No Configuration Changes**: Cannot modify networks, firewall rules, or settings
-- ⚙️ **Configuration**: `UNIFI_API_TYPE=cloud-ea`
+- ⚙️ **Configuration**: `UNIFI_API_TYPE=cloud-ea` + optional `UNIFI_SITE_MANAGER_ENABLED=true`
 - 📊 **Rate Limit**: 100 requests/minute
 
 ### Cloud V1 API ⚠️
@@ -166,7 +169,7 @@ The UniFi MCP Server supports **three distinct API modes** with different capabi
 
 - **Async Support**: Built with async/await for high performance and concurrency
 - **MCP Protocol**: Standard Model Context Protocol for AI agent integration
-- **Comprehensive Testing**: 1,068 unit tests with high coverage, all passing
+- **Comprehensive Testing**: 1,325 tests (1,219 unit + 106 integration) with high coverage, all passing
 - **CI/CD Pipelines**: Automated testing, security scanning, and Docker builds (18 checks)
 - **Multi-Architecture**: Docker images for amd64, arm64, arm/v7 (32-bit ARM), and arm64/v8
 - **Security Hardened**: Updated critical dependencies (FastMCP, MCP SDK, cryptography)
@@ -535,6 +538,9 @@ UNIFI_LOCAL_VERIFY_SSL=false
 # Cloud API Configuration (for cloud-ea or cloud-v1)
 # UNIFI_CLOUD_API_URL=https://api.ui.com
 
+# Site Manager API (cloud-ea only, optional)
+# UNIFI_SITE_MANAGER_ENABLED=true
+
 # Optional settings
 UNIFI_DEFAULT_SITE=default
 
@@ -797,6 +803,7 @@ After installing from PyPI (`pip install unifi-mcp-server`):
 - **For Cloud APIs**:
   - `UNIFI_CLOUD_API_URL`: Cloud API URL (default: <https://api.ui.com>)
   - `UNIFI_DEFAULT_SITE`: Default site ID (default: default)
+  - `UNIFI_SITE_MANAGER_ENABLED`: Enable Site Manager multi-site tools for cloud-ea (default: false)
 
 ### Programmatic Usage
 

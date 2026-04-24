@@ -21,9 +21,7 @@ logger = get_logger(__name__)
 
 def _ensure_local_api(settings: Settings) -> None:
     if settings.api_type != APIType.LOCAL:
-        raise NotImplementedError(
-            "DNS management tools require UNIFI_API_TYPE='local'."
-        )
+        raise NotImplementedError("DNS management tools require UNIFI_API_TYPE='local'.")
 
 
 def _unwrap(response: Any) -> list[dict[str, Any]]:
@@ -62,9 +60,7 @@ async def list_wan_dns(
         try:
             response = await client.get(f"/ea/sites/{site_id}/rest/networkconf")
         except APIError:
-            logger.exception(
-                sanitize_log_message(f"Failed to list networks for site {site_id}")
-            )
+            logger.exception(sanitize_log_message(f"Failed to list networks for site {site_id}"))
             raise
 
         items = _unwrap(response)
@@ -132,18 +128,12 @@ async def update_wan_dns(
         overrides["wan_dns_preference"] = "manual"
 
     if dry_run_bool:
-        logger.info(
-            sanitize_log_message(
-                f"DRY RUN: Would update WAN DNS on {wan_network_id}"
-            )
-        )
+        logger.info(sanitize_log_message(f"DRY RUN: Would update WAN DNS on {wan_network_id}"))
         return {"status": "dry_run", "wan_network_id": wan_network_id, "changes": overrides}
 
     async with UniFiClient(settings) as client:
         logger.info(
-            sanitize_log_message(
-                f"Updating WAN DNS on {wan_network_id} for site {site_id}"
-            )
+            sanitize_log_message(f"Updating WAN DNS on {wan_network_id} for site {site_id}")
         )
         if not client.is_authenticated:
             await client.authenticate()
@@ -153,11 +143,7 @@ async def update_wan_dns(
         try:
             response = await client.put(endpoint, json_data=overrides)
         except APIError:
-            logger.exception(
-                sanitize_log_message(
-                    f"Failed to update WAN DNS on {wan_network_id}"
-                )
-            )
+            logger.exception(sanitize_log_message(f"Failed to update WAN DNS on {wan_network_id}"))
             raise
 
         items = _unwrap(response)
@@ -196,18 +182,14 @@ async def get_dns_filter_settings(
     _ensure_local_api(settings)
 
     async with UniFiClient(settings) as client:
-        logger.info(
-            sanitize_log_message(f"Getting DNS filter settings for site {site_id}")
-        )
+        logger.info(sanitize_log_message(f"Getting DNS filter settings for site {site_id}"))
         if not client.is_authenticated:
             await client.authenticate()
 
         try:
             response = await client.get(f"/ea/sites/{site_id}/get/setting/ips")
         except APIError:
-            logger.exception(
-                sanitize_log_message("Failed to get DNS filter settings")
-            )
+            logger.exception(sanitize_log_message("Failed to get DNS filter settings"))
             raise
 
         items = _unwrap(response)
@@ -265,9 +247,7 @@ async def update_dns_filter(
         )
 
     async with UniFiClient(settings) as client:
-        logger.info(
-            sanitize_log_message(f"Updating DNS filter settings for site {site_id}")
-        )
+        logger.info(sanitize_log_message(f"Updating DNS filter settings for site {site_id}"))
         if not client.is_authenticated:
             await client.authenticate()
 
@@ -275,9 +255,7 @@ async def update_dns_filter(
         try:
             response = await client.get(f"/ea/sites/{site_id}/get/setting/ips")
         except APIError:
-            logger.exception(
-                sanitize_log_message("Failed to get current DNS filter settings")
-            )
+            logger.exception(sanitize_log_message("Failed to get current DNS filter settings"))
             raise
 
         items = _unwrap(response)
@@ -332,9 +310,7 @@ async def update_dns_filter(
             update_payload["dns_filters"] = dns_filters
 
         if dry_run_bool:
-            logger.info(
-                sanitize_log_message("DRY RUN: Would update DNS filter settings")
-            )
+            logger.info(sanitize_log_message("DRY RUN: Would update DNS filter settings"))
             return {
                 "status": "dry_run",
                 "settings_id": settings_id,
@@ -347,9 +323,7 @@ async def update_dns_filter(
                 json_data=update_payload,
             )
         except APIError:
-            logger.exception(
-                sanitize_log_message("Failed to update DNS filter settings")
-            )
+            logger.exception(sanitize_log_message("Failed to update DNS filter settings"))
             raise
 
         put_items = _unwrap(put_response)

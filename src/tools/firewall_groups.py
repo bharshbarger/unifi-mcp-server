@@ -107,9 +107,7 @@ async def list_firewall_groups(
         )
 
     async with UniFiClient(settings) as client:
-        logger.info(
-            sanitize_log_message(f"Listing firewall groups for site {site_id}")
-        )
+        logger.info(sanitize_log_message(f"Listing firewall groups for site {site_id}"))
         if not client.is_authenticated:
             await client.authenticate()
 
@@ -117,9 +115,7 @@ async def list_firewall_groups(
             response = await client.get(_endpoint(site_id))
         except APIError:
             logger.exception(
-                sanitize_log_message(
-                    f"Failed to list firewall groups for site {site_id}"
-                )
+                sanitize_log_message(f"Failed to list firewall groups for site {site_id}")
             )
             raise
 
@@ -138,11 +134,7 @@ async def get_firewall_group(
     _ensure_local_api(settings)
 
     async with UniFiClient(settings) as client:
-        logger.info(
-            sanitize_log_message(
-                f"Getting firewall group {group_id} for site {site_id}"
-            )
-        )
+        logger.info(sanitize_log_message(f"Getting firewall group {group_id} for site {site_id}"))
         if not client.is_authenticated:
             await client.authenticate()
 
@@ -151,11 +143,7 @@ async def get_firewall_group(
         except ResourceNotFoundError as err:
             raise ResourceNotFoundError("firewall_group", group_id) from err
         except APIError:
-            logger.exception(
-                sanitize_log_message(
-                    f"Failed to get firewall group {group_id}"
-                )
-            )
+            logger.exception(sanitize_log_message(f"Failed to get firewall group {group_id}"))
             raise
 
         data = _first_or_raise(response, group_id)
@@ -214,17 +202,11 @@ async def create_firewall_group(
     payload = create_model.model_dump()
 
     if dry_run_bool:
-        logger.info(
-            sanitize_log_message(f"DRY RUN: Would create firewall group '{name}'")
-        )
+        logger.info(sanitize_log_message(f"DRY RUN: Would create firewall group '{name}'"))
         return {"status": "dry_run", "payload": payload}
 
     async with UniFiClient(settings) as client:
-        logger.info(
-            sanitize_log_message(
-                f"Creating {group_type} '{name}' for site {site_id}"
-            )
-        )
+        logger.info(sanitize_log_message(f"Creating {group_type} '{name}' for site {site_id}"))
         if not client.is_authenticated:
             await client.authenticate()
 
@@ -326,11 +308,7 @@ async def update_firewall_group(
         overrides["group_members"] = list(group_members)
 
     async with UniFiClient(settings) as client:
-        logger.info(
-            sanitize_log_message(
-                f"Updating firewall group {group_id} for site {site_id}"
-            )
-        )
+        logger.info(sanitize_log_message(f"Updating firewall group {group_id} for site {site_id}"))
         if not client.is_authenticated:
             await client.authenticate()
 
@@ -346,11 +324,7 @@ async def update_firewall_group(
             merged.pop(field, None)
 
         if dry_run_bool:
-            logger.info(
-                sanitize_log_message(
-                    f"DRY RUN: Would update firewall group {group_id}"
-                )
-            )
+            logger.info(sanitize_log_message(f"DRY RUN: Would update firewall group {group_id}"))
             return {
                 "status": "dry_run",
                 "group_id": group_id,
@@ -359,9 +333,7 @@ async def update_firewall_group(
             }
 
         try:
-            response = await client.put(
-                _endpoint(site_id, group_id), json_data=merged
-            )
+            response = await client.put(_endpoint(site_id, group_id), json_data=merged)
         except ResourceNotFoundError as err:
             raise ResourceNotFoundError("firewall_group", group_id) from err
 
@@ -398,14 +370,10 @@ async def delete_firewall_group(
     confirm_bool = coerce_bool(confirm)
     dry_run_bool = coerce_bool(dry_run)
     if not dry_run_bool and not confirm_bool:
-        raise ValueError(
-            "This operation deletes a firewall group. Pass confirm=True to proceed."
-        )
+        raise ValueError("This operation deletes a firewall group. Pass confirm=True to proceed.")
 
     if dry_run_bool:
-        logger.info(
-            sanitize_log_message(f"DRY RUN: Would delete firewall group {group_id}")
-        )
+        logger.info(sanitize_log_message(f"DRY RUN: Would delete firewall group {group_id}"))
         return {
             "status": "dry_run",
             "group_id": group_id,
@@ -413,11 +381,7 @@ async def delete_firewall_group(
         }
 
     async with UniFiClient(settings) as client:
-        logger.info(
-            sanitize_log_message(
-                f"Deleting firewall group {group_id} from site {site_id}"
-            )
-        )
+        logger.info(sanitize_log_message(f"Deleting firewall group {group_id} from site {site_id}"))
         if not client.is_authenticated:
             await client.authenticate()
 

@@ -6,13 +6,13 @@ import pytest
 
 from src.tools.diagnostics import (
     get_network_references,
+    get_spectrum_scan,
     get_speed_test_history,
     get_speed_test_status,
-    get_spectrum_scan,
     list_spectrum_interference,
     run_speed_test,
 )
-from src.utils.exceptions import ResourceNotFoundError, ValidationError
+from src.utils.exceptions import ValidationError
 
 
 @pytest.fixture
@@ -48,8 +48,18 @@ class TestGetNetworkReferences:
         response = {
             "data": {
                 "referenceResources": [
-                    {"id": "ref-1", "name": "Main WiFi", "type": "wifi", "resource_type": "broadcast"},
-                    {"id": "ref-2", "name": "Port Profile 1", "type": "port_profile", "resource_type": "switching"},
+                    {
+                        "id": "ref-1",
+                        "name": "Main WiFi",
+                        "type": "wifi",
+                        "resource_type": "broadcast",
+                    },
+                    {
+                        "id": "ref-2",
+                        "name": "Port Profile 1",
+                        "type": "port_profile",
+                        "resource_type": "switching",
+                    },
                 ]
             }
         }

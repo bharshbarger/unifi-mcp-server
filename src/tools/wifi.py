@@ -197,7 +197,9 @@ async def create_wlan(
     }
 
     if dry_run:
-        logger.info(sanitize_log_message(f"DRY RUN: Would create WLAN '{name}' in site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(f"DRY RUN: Would create WLAN '{name}' in site '{site_id}'")
+        )
         log_audit(
             operation="create_wlan",
             parameters=parameters,
@@ -335,9 +337,7 @@ async def update_wlan(
         valid_bands = {"2g", "5g", "6g"}
         invalid = set(wlan_bands) - valid_bands
         if invalid:
-            raise ValidationError(
-                f"Invalid WLAN band(s): {invalid}. Must be from: {valid_bands}"
-            )
+            raise ValidationError(f"Invalid WLAN band(s): {invalid}. Must be from: {valid_bands}")
         if not wlan_bands:
             raise ValidationError("wlan_bands must contain at least one band")
 
@@ -360,7 +360,9 @@ async def update_wlan(
     }
 
     if dry_run:
-        logger.info(sanitize_log_message(f"DRY RUN: Would update WLAN '{wlan_id}' in site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(f"DRY RUN: Would update WLAN '{wlan_id}' in site '{site_id}'")
+        )
         log_audit(
             operation="update_wlan",
             parameters=parameters,
@@ -491,7 +493,9 @@ async def delete_wlan(
     parameters = {"site_id": site_id, "wlan_id": wlan_id}
 
     if dry_run:
-        logger.info(sanitize_log_message(f"DRY RUN: Would delete WLAN '{wlan_id}' from site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(f"DRY RUN: Would delete WLAN '{wlan_id}' from site '{site_id}'")
+        )
         log_audit(
             operation="delete_wlan",
             parameters=parameters,

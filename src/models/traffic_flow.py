@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Traffic flow models.
 
 These map the UniFi local v2 API ``/firewall-policies/../traffic-flows``
@@ -7,6 +5,8 @@ response shape, which is what the live controller returns.  The integration
 API does not expose traffic flows at all, so there is no cloud-mode
 equivalent for these models.
 """
+
+from __future__ import annotations
 
 from typing import Any, Literal
 
@@ -62,9 +62,7 @@ class TrafficFlowPolicy(BaseModel):
     """Reference to the firewall policy that matched a flow."""
 
     type: str | None = Field(None, description="Policy category, e.g. 'FIREWALL'")
-    internal_type: str | None = Field(
-        None, description="Internal match type, e.g. 'CONNTRACK'"
-    )
+    internal_type: str | None = Field(None, description="Internal match type, e.g. 'CONNTRACK'")
     id: str | None = Field(None, description="Policy id (when available)")
 
     model_config = ConfigDict(extra="allow")
@@ -89,9 +87,7 @@ class TrafficFlow(BaseModel):
     protocol: str = Field(..., description="Transport protocol (TCP/UDP/ICMP/...)")
     service: str | None = Field(None, description="Identified service, e.g. 'DNS', 'OTHER'")
     risk: str | None = Field(None, description="Risk classification (low/medium/high)")
-    source: TrafficFlowEndpoint = Field(
-        ..., description="Source endpoint (usually LAN client)"
-    )
+    source: TrafficFlowEndpoint = Field(..., description="Source endpoint (usually LAN client)")
     destination: TrafficFlowEndpoint = Field(
         ..., description="Destination endpoint (external IP or LAN peer)"
     )
@@ -101,15 +97,9 @@ class TrafficFlow(BaseModel):
     policies: list[TrafficFlowPolicy] = Field(
         default_factory=list, description="Firewall policies that matched this flow"
     )
-    duration_milliseconds: int | None = Field(
-        None, description="Flow duration in milliseconds"
-    )
-    flow_start_time: int | None = Field(
-        None, description="Flow start timestamp (epoch ms)"
-    )
-    flow_end_time: int | None = Field(
-        None, description="Flow end timestamp (epoch ms)"
-    )
+    duration_milliseconds: int | None = Field(None, description="Flow duration in milliseconds")
+    flow_start_time: int | None = Field(None, description="Flow start timestamp (epoch ms)")
+    flow_end_time: int | None = Field(None, description="Flow end timestamp (epoch ms)")
     time: int | None = Field(None, description="Flow record timestamp (epoch ms)")
     in_network: dict[str, Any] | None = Field(
         None,
@@ -142,9 +132,7 @@ class FlowStatistics(BaseModel):
     total_bytes_rx: int = Field(0, description="Total bytes received by sources")
     total_packets: int = Field(0, description="Total packets across all flows")
     unique_sources: int = Field(0, description="Distinct source endpoints (by id)")
-    unique_destinations: int = Field(
-        0, description="Distinct destination endpoints (by ip)"
-    )
+    unique_destinations: int = Field(0, description="Distinct destination endpoints (by ip)")
     protocol_breakdown: dict[str, int] = Field(
         default_factory=dict, description="Flow count per protocol"
     )
@@ -177,9 +165,7 @@ class FlowRuleReferenceMatch(BaseModel):
     source_zone_name: str | None = Field(None, description="Source zone name")
     destination_zone_name: str | None = Field(None, description="Destination zone name")
     source_network_name: str | None = Field(None, description="Source VLAN name")
-    flow_start_time: int | None = Field(
-        None, description="Flow start timestamp (epoch ms)"
-    )
+    flow_start_time: int | None = Field(None, description="Flow start timestamp (epoch ms)")
 
     model_config = ConfigDict(extra="allow")
 
@@ -197,9 +183,7 @@ class BlockFlowAction(BaseModel):
     duration: Literal["permanent", "temporary"] | None = Field(
         None, description="Block duration type"
     )
-    expires_at: str | None = Field(
-        None, description="Expiration timestamp for temporary blocks"
-    )
+    expires_at: str | None = Field(None, description="Expiration timestamp for temporary blocks")
     created_at: str = Field(..., description="Creation timestamp (ISO)")
 
     model_config = ConfigDict(extra="allow")

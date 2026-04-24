@@ -50,7 +50,11 @@ async def list_traffic_routes(
         List of traffic routing policies
     """
     async with UniFiClient(settings) as client:
-        logger.info(sanitize_log_message(f"Listing traffic routes for site {site_id} (limit={limit}, offset={offset})"))
+        logger.info(
+            sanitize_log_message(
+                f"Listing traffic routes for site {site_id} (limit={limit}, offset={offset})"
+            )
+        )
 
         if not client.is_authenticated:
             await client.authenticate()
@@ -154,7 +158,11 @@ async def create_traffic_route(
         route_data["bandwidth_limit_kbps"] = bandwidth_limit_kbps
 
     if dry_run:
-        logger.info(sanitize_log_message(f"[DRY RUN] Would create traffic route '{name}' for site {site_id}"))
+        logger.info(
+            sanitize_log_message(
+                f"[DRY RUN] Would create traffic route '{name}' for site {site_id}"
+            )
+        )
         return {"dry_run": True, "route": route_data}
 
     async with UniFiClient(settings) as client:
@@ -233,7 +241,11 @@ async def update_traffic_route(
         raise ValidationError("No update fields provided")
 
     if dry_run:
-        logger.info(sanitize_log_message(f"[DRY RUN] Would update traffic route {route_id} for site {site_id}"))
+        logger.info(
+            sanitize_log_message(
+                f"[DRY RUN] Would update traffic route {route_id} for site {site_id}"
+            )
+        )
         return {"dry_run": True, "route_id": route_id, "updates": update_data}
 
     async with UniFiClient(settings) as client:

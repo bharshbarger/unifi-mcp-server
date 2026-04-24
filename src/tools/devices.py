@@ -49,9 +49,7 @@ async def get_device_details(site_id: str, device_id: str, settings: Settings) -
         # Fast path: direct lookup on the integration API.
         try:
             response = await client.get(
-                settings.get_integration_path(
-                    f"sites/{resolved_site_id}/devices/{device_id}"
-                )
+                settings.get_integration_path(f"sites/{resolved_site_id}/devices/{device_id}")
             )
             if isinstance(response, dict):
                 device_data = response.get("data", response)
@@ -59,9 +57,7 @@ async def get_device_details(site_id: str, device_id: str, settings: Settings) -
                 # we hit a collection endpoint (mocked or otherwise) — fall
                 # through to the list scan below.
                 if isinstance(device_data, dict) and device_data:
-                    logger.info(
-                        sanitize_log_message(f"Retrieved device details for {device_id}")
-                    )
+                    logger.info(sanitize_log_message(f"Retrieved device details for {device_id}"))
                     return Device(**device_data).model_dump()  # type: ignore[no-any-return]
         except (ResourceNotFoundError, APIError) as e:
             # Direct lookup is a best-effort fast path. A 404 / missing-resource
@@ -82,19 +78,12 @@ async def get_device_details(site_id: str, device_id: str, settings: Settings) -
                 settings.get_integration_path(f"sites/{resolved_site_id}/devices"),
                 params={"offset": offset, "limit": 100},
             )
-            devices_data = (
-                response if isinstance(response, list) else response.get("data", [])
-            )
+            devices_data = response if isinstance(response, list) else response.get("data", [])
             if not devices_data:
                 break
             for device_data in devices_data:
-                if (
-                    device_data.get("id") == device_id
-                    or device_data.get("_id") == device_id
-                ):
-                    logger.info(
-                        sanitize_log_message(f"Retrieved device details for {device_id}")
-                    )
+                if device_data.get("id") == device_id or device_data.get("_id") == device_id:
+                    logger.info(sanitize_log_message(f"Retrieved device details for {device_id}"))
                     return Device(**device_data).model_dump()  # type: ignore[no-any-return]
             if len(devices_data) < 100:
                 break
@@ -241,7 +230,11 @@ async def search_devices(
         # Parse into Device models
         devices = [Device(**d).model_dump() for d in paginated]
 
-        logger.info(sanitize_log_message(f"Found {len(devices)} devices matching '{query}' in site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"Found {len(devices)} devices matching '{query}' in site '{site_id}'"
+            )
+        )
         return devices
 
 
@@ -283,7 +276,9 @@ async def list_pending_devices(
         # Parse into Device models
         devices = [Device(**d).model_dump() for d in devices_data]
 
-        logger.info(sanitize_log_message(f"Retrieved {len(devices)} pending devices for site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(f"Retrieved {len(devices)} pending devices for site '{site_id}'")
+        )
         return devices
 
 
@@ -415,5 +410,7 @@ async def execute_port_action(
             details={"action": action},
         )
 
-        logger.info(sanitize_log_message(f"Successfully executed port action '{action}' on port {port_idx}"))
+        logger.info(
+            sanitize_log_message(f"Successfully executed port action '{action}' on port {port_idx}")
+        )
         return {"success": True, "action": action, "port_idx": port_idx, "result": data}

@@ -11,7 +11,6 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
 GroupType = Literal["port-group", "address-group", "ipv6-address-group"]
 
 

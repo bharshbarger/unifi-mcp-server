@@ -31,7 +31,33 @@ RADIO_BAND_MAP = {
 # Valid channels per band
 VALID_CHANNELS = {
     "ng": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-    "na": [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 149, 153, 157, 161, 165],
+    "na": [
+        36,
+        40,
+        44,
+        48,
+        52,
+        56,
+        60,
+        64,
+        100,
+        104,
+        108,
+        112,
+        116,
+        120,
+        124,
+        128,
+        132,
+        136,
+        140,
+        144,
+        149,
+        153,
+        157,
+        161,
+        165,
+    ],
     "6e": list(range(1, 234, 4)),  # 6GHz channels
 }
 
@@ -351,9 +377,7 @@ def _resolve_radio(band: str) -> str:
     key = band.lower().strip()
     radio = RADIO_BAND_MAP.get(key)
     if not radio:
-        raise ValidationError(
-            f"Invalid radio band '{band}'. Use: 2.4, 5, 6 (or ng, na, 6e)"
-        )
+        raise ValidationError(f"Invalid radio band '{band}'. Use: 2.4, 5, 6 (or ng, na, 6e)")
     return radio
 
 
@@ -380,19 +404,13 @@ async def get_ap_radio_config(
     async with UniFiClient(settings) as client:
         await client.authenticate()
 
-        response = await client.get(
-            settings.get_site_api_path(site_id, "stat/device")
-        )
+        response = await client.get(settings.get_site_api_path(site_id, "stat/device"))
         all_devices: list[dict[str, Any]] = (
             response if isinstance(response, list) else response.get("data", [])
         )
 
         device = next(
-            (
-                d
-                for d in all_devices
-                if d.get("_id") == device_id or d.get("mac") == device_id
-            ),
+            (d for d in all_devices if d.get("_id") == device_id or d.get("mac") == device_id),
             None,
         )
 
@@ -408,9 +426,7 @@ async def get_ap_radio_config(
         radios = []
         for radio in radio_table:
             radio_name = radio.get("radio", radio.get("name", "unknown"))
-            band = {"ng": "2.4GHz", "na": "5GHz", "6e": "6GHz"}.get(
-                radio_name, radio_name
-            )
+            band = {"ng": "2.4GHz", "na": "5GHz", "6e": "6GHz"}.get(radio_name, radio_name)
             stats = stats_by_radio.get(radio_name, {})
             radios.append(
                 {
@@ -493,27 +509,25 @@ async def set_ap_radio_channel(
         valid = VALID_CHANNELS.get(radio, [])
         if valid and channel not in valid:
             band_label = {"ng": "2.4GHz", "na": "5GHz", "6e": "6GHz"}.get(radio, radio)
-            raise ValidationError(
-                f"Invalid channel {channel} for {band_label}. Valid: {valid}"
-            )
+            raise ValidationError(f"Invalid channel {channel} for {band_label}. Valid: {valid}")
 
     # Validate HT mode if provided
     if ht is not None:
         ht = str(ht)
-        valid_ht = {"ng": ["20", "40"], "na": ["20", "40", "80", "160"], "6e": ["20", "40", "80", "160"]}
+        valid_ht = {
+            "ng": ["20", "40"],
+            "na": ["20", "40", "80", "160"],
+            "6e": ["20", "40", "80", "160"],
+        }
         allowed = valid_ht.get(radio, [])
         if ht not in allowed:
-            raise ValidationError(
-                f"Invalid channel width '{ht}' for {radio}. Valid: {allowed}"
-            )
+            raise ValidationError(f"Invalid channel width '{ht}' for {radio}. Valid: {allowed}")
 
     # Validate tx_power_mode
     if tx_power_mode is not None:
         valid_modes = ["auto", "medium", "low", "high", "custom"]
         if tx_power_mode not in valid_modes:
-            raise ValidationError(
-                f"Invalid tx_power_mode '{tx_power_mode}'. Valid: {valid_modes}"
-            )
+            raise ValidationError(f"Invalid tx_power_mode '{tx_power_mode}'. Valid: {valid_modes}")
 
     parameters = {
         "site_id": site_id,
@@ -547,19 +561,13 @@ async def set_ap_radio_channel(
             await client.authenticate()
 
             # Fetch full device object via stat/device
-            response = await client.get(
-                settings.get_site_api_path(site_id, "stat/device")
-            )
+            response = await client.get(settings.get_site_api_path(site_id, "stat/device"))
             all_devices: list[dict[str, Any]] = (
                 response if isinstance(response, list) else response.get("data", [])
             )
 
             device = next(
-                (
-                    d
-                    for d in all_devices
-                    if d.get("_id") == device_id or d.get("mac") == device_id
-                ),
+                (d for d in all_devices if d.get("_id") == device_id or d.get("mac") == device_id),
                 None,
             )
 
@@ -569,8 +577,7 @@ async def set_ap_radio_channel(
             radio_table = device.get("radio_table", [])
             if not radio_table:
                 raise ValidationError(
-                    f"Device '{device_id}' has no radio_table — "
-                    "it may not be an access point"
+                    f"Device '{device_id}' has no radio_table — " "it may not be an access point"
                 )
 
             # Find the target radio entry
@@ -581,12 +588,9 @@ async def set_ap_radio_channel(
                     break
 
             if not target:
-                available = [
-                    e.get("radio", e.get("name")) for e in radio_table
-                ]
+                available = [e.get("radio", e.get("name")) for e in radio_table]
                 raise ValidationError(
-                    f"Radio '{radio}' not found on device. "
-                    f"Available radios: {available}"
+                    f"Radio '{radio}' not found on device. " f"Available radios: {available}"
                 )
 
             # Capture old values for the response
@@ -610,14 +614,12 @@ async def set_ap_radio_channel(
 
             # PUT the full device back
             resolved_id = device["_id"]
-            endpoint = settings.get_site_api_path(
-                site_id, f"rest/device/{resolved_id}"
-            )
+            endpoint = settings.get_site_api_path(site_id, f"rest/device/{resolved_id}")
             response = await client.put(endpoint, json_data=device)
             if isinstance(response, list):
-                updated_device: dict[str, Any] = response[0] if response else {}
+                response[0] if response else {}
             else:
-                updated_device = response.get("data", [{}])[0]
+                response.get("data", [{}])[0]
 
             logger.info(
                 sanitize_log_message(
@@ -646,9 +648,7 @@ async def set_ap_radio_channel(
 
     except Exception as e:
         logger.error(
-            sanitize_log_message(
-                f"Failed to set radio channel on device '{device_id}': {e}"
-            )
+            sanitize_log_message(f"Failed to set radio channel on device '{device_id}': {e}")
         )
         log_audit(
             operation="set_ap_radio_channel",

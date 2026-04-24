@@ -18,8 +18,8 @@ from .tools import clients as clients_tools
 from .tools import content_filtering as content_filtering_tools
 from .tools import device_control as device_control_tools
 from .tools import devices as devices_tools
-from .tools import diagnostics as diagnostics_tools
 from .tools import dhcp_reservations as dhcp_tools
+from .tools import diagnostics as diagnostics_tools
 from .tools import dns_management as dns_tools
 from .tools import dpi as dpi_tools
 from .tools import dpi_tools as dpi_new_tools
@@ -143,7 +143,9 @@ _LOCAL_TOOL_MODULES = [
 _TOOL_MODULES: list[Any] = []
 if settings.api_type in (APIType.CLOUD_V1, APIType.CLOUD_EA):
     _TOOL_MODULES = list(_CLOUD_TOOL_MODULES)
-    logger.info(f"Cloud API mode ({settings.api_type.value}) - registering {_TOOL_MODULES} tool modules")
+    logger.info(
+        f"Cloud API mode ({settings.api_type.value}) - registering {_TOOL_MODULES} tool modules"
+    )
     # get_site_statistics calls /ea/sites/{id}/devices, /sta, /rest/networkconf
     # which all 404 on the live Cloud API
     for _module in _TOOL_MODULES:

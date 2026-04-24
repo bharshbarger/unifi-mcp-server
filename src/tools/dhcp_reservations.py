@@ -70,9 +70,7 @@ async def list_dhcp_reservations(
     _ensure_local_api(settings)
 
     async with UniFiClient(settings) as client:
-        logger.info(
-            sanitize_log_message(f"Listing DHCP reservations for site {site_id}")
-        )
+        logger.info(sanitize_log_message(f"Listing DHCP reservations for site {site_id}"))
         if not client.is_authenticated:
             await client.authenticate()
 
@@ -80,9 +78,7 @@ async def list_dhcp_reservations(
             response = await client.get(_endpoint(site_id))
         except APIError:
             logger.exception(
-                sanitize_log_message(
-                    f"Failed to list DHCP reservations for site {site_id}"
-                )
+                sanitize_log_message(f"Failed to list DHCP reservations for site {site_id}")
             )
             raise
 
@@ -121,9 +117,7 @@ async def get_dhcp_reservation(
     _ensure_local_api(settings)
 
     async with UniFiClient(settings) as client:
-        logger.info(
-            sanitize_log_message(f"Getting DHCP reservation for {mac}")
-        )
+        logger.info(sanitize_log_message(f"Getting DHCP reservation for {mac}"))
         if not client.is_authenticated:
             await client.authenticate()
 
@@ -206,17 +200,13 @@ async def create_dhcp_reservation(
 
     if dry_run_bool:
         logger.info(
-            sanitize_log_message(
-                f"DRY RUN: Would create DHCP reservation {mac} → {fixed_ip}"
-            )
+            sanitize_log_message(f"DRY RUN: Would create DHCP reservation {mac} → {fixed_ip}")
         )
         return {"status": "dry_run", "payload": payload}
 
     async with UniFiClient(settings) as client:
         logger.info(
-            sanitize_log_message(
-                f"Creating DHCP reservation {mac} → {fixed_ip} on site {site_id}"
-            )
+            sanitize_log_message(f"Creating DHCP reservation {mac} → {fixed_ip} on site {site_id}")
         )
         if not client.is_authenticated:
             await client.authenticate()
@@ -315,26 +305,16 @@ async def update_dhcp_reservation(
             overrides["local_dns_record_enabled"] = local_dns_record_enabled
 
         if dry_run_bool:
-            logger.info(
-                sanitize_log_message(
-                    f"DRY RUN: Would update DHCP reservation for {mac}"
-                )
-            )
+            logger.info(sanitize_log_message(f"DRY RUN: Would update DHCP reservation for {mac}"))
             return {
                 "status": "dry_run",
                 "user_id": user_id,
                 "changes": overrides,
             }
 
-        logger.info(
-            sanitize_log_message(
-                f"Updating DHCP reservation for {mac} (user {user_id})"
-            )
-        )
+        logger.info(sanitize_log_message(f"Updating DHCP reservation for {mac} (user {user_id})"))
 
-        put_response = await client.put(
-            _endpoint(site_id, user_id), json_data=overrides
-        )
+        put_response = await client.put(_endpoint(site_id, user_id), json_data=overrides)
         data = _unwrap(put_response)
         if not data:
             raise APIError(f"DHCP reservation PUT returned no data for {mac}")
@@ -392,11 +372,7 @@ async def remove_dhcp_reservation(
 
     if dry_run_bool:
         action = "forget_client" if forget_client else "clear_fixed_ip"
-        logger.info(
-            sanitize_log_message(
-                f"DRY RUN: Would {action} for {mac}"
-            )
-        )
+        logger.info(sanitize_log_message(f"DRY RUN: Would {action} for {mac}"))
         return {"status": "dry_run", "mac": mac, "action": action}
 
     async with UniFiClient(settings) as client:
@@ -404,9 +380,7 @@ async def remove_dhcp_reservation(
             await client.authenticate()
 
         if forget_client:
-            logger.info(
-                sanitize_log_message(f"Forgetting client {mac} from site {site_id}")
-            )
+            logger.info(sanitize_log_message(f"Forgetting client {mac} from site {site_id}"))
             await client.post(
                 f"/ea/sites/{site_id}/cmd/stamgr",
                 json_data={"cmd": "forget-sta", "macs": [mac.lower()]},
@@ -428,9 +402,7 @@ async def remove_dhcp_reservation(
 
             user_id = user_entry["_id"]
             logger.info(
-                sanitize_log_message(
-                    f"Clearing DHCP reservation for {mac} (user {user_id})"
-                )
+                sanitize_log_message(f"Clearing DHCP reservation for {mac} (user {user_id})")
             )
             await client.put(
                 _endpoint(site_id, user_id),

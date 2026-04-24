@@ -257,7 +257,11 @@ async def get_backup_details(
 
     for backup in backups:
         if backup["filename"] == backup_filename:
-            logger.info(sanitize_log_message(f"Retrieved details for backup '{backup_filename}' in site '{site_id}'"))
+            logger.info(
+                sanitize_log_message(
+                    f"Retrieved details for backup '{backup_filename}' in site '{site_id}'"
+                )
+            )
             return backup
 
     from ..utils import ResourceNotFoundError
@@ -303,7 +307,9 @@ async def download_backup(
     site_id = validate_site_id(site_id)
     logger = get_logger(__name__, settings.log_level)
 
-    logger.info(sanitize_log_message(f"Downloading backup '{backup_filename}' from site '{site_id}'"))
+    logger.info(
+        sanitize_log_message(f"Downloading backup '{backup_filename}' from site '{site_id}'")
+    )
 
     try:
         async with UniFiClient(settings) as client:
@@ -410,7 +416,11 @@ async def delete_backup(
     }
 
     if dry_run:
-        logger.info(sanitize_log_message(f"DRY RUN: Would delete backup '{backup_filename}' from site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"DRY RUN: Would delete backup '{backup_filename}' from site '{site_id}'"
+            )
+        )
         log_audit(
             operation="delete_backup",
             parameters=parameters,
@@ -429,7 +439,11 @@ async def delete_backup(
                 backup_filename=backup_filename,
             )
 
-            logger.info(sanitize_log_message(f"Successfully deleted backup '{backup_filename}' from site '{site_id}'"))
+            logger.info(
+                sanitize_log_message(
+                    f"Successfully deleted backup '{backup_filename}' from site '{site_id}'"
+                )
+            )
             log_audit(
                 operation="delete_backup",
                 parameters=parameters,
@@ -524,7 +538,11 @@ async def restore_backup(
     }
 
     if dry_run:
-        logger.info(sanitize_log_message(f"DRY RUN: Would restore from backup '{backup_filename}' for site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"DRY RUN: Would restore from backup '{backup_filename}' for site '{site_id}'"
+            )
+        )
         log_audit(
             operation="restore_backup",
             parameters=parameters,
@@ -555,7 +573,9 @@ async def restore_backup(
                     settings=settings,
                 )
                 pre_restore_backup_id = pre_restore_result["backup_id"]
-                logger.info(sanitize_log_message(f"Pre-restore backup created: {pre_restore_backup_id}"))
+                logger.info(
+                    sanitize_log_message(f"Pre-restore backup created: {pre_restore_backup_id}")
+                )
 
             # Perform restore
             logger.warning(
@@ -592,7 +612,9 @@ async def restore_backup(
             return result
 
     except Exception as e:
-        logger.error(sanitize_log_message(f"Failed to restore from backup '{backup_filename}': {e}"))
+        logger.error(
+            sanitize_log_message(f"Failed to restore from backup '{backup_filename}': {e}")
+        )
         log_audit(
             operation="restore_backup",
             parameters=parameters,
@@ -872,7 +894,9 @@ async def get_restore_status(
             "warning": "Monitor controller connectivity to determine restore completion.",
         }
     except Exception as e:
-        logger.error(sanitize_log_message(f"Failed to get restore status for '{operation_id}': {e}"))
+        logger.error(
+            sanitize_log_message(f"Failed to get restore status for '{operation_id}': {e}")
+        )
         # During restore, connection errors are expected
         return {
             "operation_id": operation_id,
@@ -1091,7 +1115,9 @@ async def schedule_backups(
             "Consider using external cron jobs to call trigger_backup."
         ) from None
     except Exception as e:
-        logger.error(sanitize_log_message(f"Failed to configure backup schedule for site '{site_id}': {e}"))
+        logger.error(
+            sanitize_log_message(f"Failed to configure backup schedule for site '{site_id}': {e}")
+        )
         log_audit(
             operation="schedule_backups",
             parameters=parameters,
@@ -1144,7 +1170,9 @@ async def get_backup_schedule(
             schedule_data = await client.get_backup_schedule(site_id=site_id)
 
             if not schedule_data:
-                logger.info(sanitize_log_message(f"No backup schedule configured for site '{site_id}'"))
+                logger.info(
+                    sanitize_log_message(f"No backup schedule configured for site '{site_id}'")
+                )
                 return {
                     "configured": False,
                     "message": "No automated backup schedule configured for this site",
@@ -1182,5 +1210,7 @@ async def get_backup_schedule(
             "recommendation": "Use external cron jobs to schedule trigger_backup calls",
         }
     except Exception as e:
-        logger.error(sanitize_log_message(f"Failed to get backup schedule for site '{site_id}': {e}"))
+        logger.error(
+            sanitize_log_message(f"Failed to get backup schedule for site '{site_id}': {e}")
+        )
         raise

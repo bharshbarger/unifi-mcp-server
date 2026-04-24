@@ -38,7 +38,9 @@ class SpeedTestHistory(BaseModel):
     """Historical collection of speed test results."""
 
     count: int = Field(0, description="Total number of results")
-    results: list[SpeedTestResult] = Field(default_factory=list, description="List of speed test results")
+    results: list[SpeedTestResult] = Field(
+        default_factory=list, description="List of speed test results"
+    )
     site_id: str | None = Field(None, description="Site identifier")
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
@@ -66,7 +68,9 @@ class SpectrumInterference(BaseModel):
     channel: int = Field(..., description="WiFi channel number")
     frequency_mhz: float | None = Field(None, description="Center frequency in MHz")
     utilization_percent: float | None = Field(None, description="Channel utilization percentage")
-    interference_level: str | None = Field(None, description="Interference severity (low, medium, high)")
+    interference_level: str | None = Field(
+        None, description="Interference severity (low, medium, high)"
+    )
     interference_type: str | None = Field(None, description="Type of interference detected")
     noise_floor_dbm: float | None = Field(None, description="Noise floor in dBm")
     device_id: str | None = Field(None, description="Device ID that detected the interference")

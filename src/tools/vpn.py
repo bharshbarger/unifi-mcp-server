@@ -33,12 +33,16 @@ async def list_vpn_tunnels(
         await client.authenticate()
 
         response = await client.get(f"/integration/v1/sites/{site_id}/vpn/site-to-site-tunnels")
-        tunnels_data: list[dict[str, Any]] = response if isinstance(response, list) else response.get("data", [])
+        tunnels_data: list[dict[str, Any]] = (
+            response if isinstance(response, list) else response.get("data", [])
+        )
 
         # Apply pagination
         paginated = tunnels_data[offset : offset + limit]
 
-        logger.info(sanitize_log_message(f"Retrieved {len(paginated)} VPN tunnels for site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(f"Retrieved {len(paginated)} VPN tunnels for site '{site_id}'")
+        )
         return [VPNTunnel(**tunnel).model_dump() for tunnel in paginated]
 
 
@@ -67,10 +71,14 @@ async def list_vpn_servers(
         await client.authenticate()
 
         response = await client.get(f"/integration/v1/sites/{site_id}/vpn/servers")
-        servers_data: list[dict[str, Any]] = response if isinstance(response, list) else response.get("data", [])
+        servers_data: list[dict[str, Any]] = (
+            response if isinstance(response, list) else response.get("data", [])
+        )
 
         # Apply pagination
         paginated = servers_data[offset : offset + limit]
 
-        logger.info(sanitize_log_message(f"Retrieved {len(paginated)} VPN servers for site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(f"Retrieved {len(paginated)} VPN servers for site '{site_id}'")
+        )
         return [VPNServer(**server).model_dump() for server in paginated]

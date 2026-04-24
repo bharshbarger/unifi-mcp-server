@@ -45,21 +45,15 @@ async def list_content_filters(
     _ensure_local_api(settings)
 
     async with UniFiClient(settings) as client:
-        logger.info(
-            sanitize_log_message(f"Listing content filters for site {site_id}")
-        )
+        logger.info(sanitize_log_message(f"Listing content filters for site {site_id}"))
         if not client.is_authenticated:
             await client.authenticate()
 
         try:
-            response = await client.get(
-                f"{settings.get_v2_api_path(site_id)}/content-filtering"
-            )
+            response = await client.get(f"{settings.get_v2_api_path(site_id)}/content-filtering")
         except APIError:
             logger.exception(
-                sanitize_log_message(
-                    f"Failed to list content filters for site {site_id}"
-                )
+                sanitize_log_message(f"Failed to list content filters for site {site_id}")
             )
             raise
 
@@ -80,9 +74,7 @@ async def list_content_filter_categories(
     _ensure_local_api(settings)
 
     async with UniFiClient(settings) as client:
-        logger.info(
-            sanitize_log_message(f"Listing content filter categories for site {site_id}")
-        )
+        logger.info(sanitize_log_message(f"Listing content filter categories for site {site_id}"))
         if not client.is_authenticated:
             await client.authenticate()
 
@@ -91,9 +83,7 @@ async def list_content_filter_categories(
                 f"{settings.get_v2_api_path(site_id)}/content-filtering/categories"
             )
         except APIError:
-            logger.exception(
-                sanitize_log_message("Failed to list content filter categories")
-            )
+            logger.exception(sanitize_log_message("Failed to list content filter categories"))
             raise
 
         if isinstance(response, list):
@@ -172,11 +162,7 @@ async def update_content_filter(
         overrides["safe_search"] = list(safe_search)
 
     async with UniFiClient(settings) as client:
-        logger.info(
-            sanitize_log_message(
-                f"Updating content filter {filter_id} for site {site_id}"
-            )
-        )
+        logger.info(sanitize_log_message(f"Updating content filter {filter_id} for site {site_id}"))
         if not client.is_authenticated:
             await client.authenticate()
 
@@ -186,17 +172,11 @@ async def update_content_filter(
             list_response = await client.get(base)
         except APIError:
             logger.exception(
-                sanitize_log_message(
-                    f"Failed to fetch content filters for site {site_id}"
-                )
+                sanitize_log_message(f"Failed to fetch content filters for site {site_id}")
             )
             raise
 
-        items = (
-            list_response
-            if isinstance(list_response, list)
-            else list_response.get("data", [])
-        )
+        items = list_response if isinstance(list_response, list) else list_response.get("data", [])
         current = None
         for item in items:
             if isinstance(item, dict) and item.get("_id") == filter_id:
@@ -211,11 +191,7 @@ async def update_content_filter(
             merged.pop(field, None)
 
         if dry_run_bool:
-            logger.info(
-                sanitize_log_message(
-                    f"DRY RUN: Would update content filter {filter_id}"
-                )
-            )
+            logger.info(sanitize_log_message(f"DRY RUN: Would update content filter {filter_id}"))
             return {
                 "status": "dry_run",
                 "filter_id": filter_id,
@@ -262,23 +238,16 @@ async def delete_content_filter(
     dry_run_bool = coerce_bool(dry_run)
     if not dry_run_bool and not confirm_bool:
         raise ValueError(
-            "This operation deletes a content filter profile. "
-            "Pass confirm=True to proceed."
+            "This operation deletes a content filter profile. " "Pass confirm=True to proceed."
         )
 
     if dry_run_bool:
-        logger.info(
-            sanitize_log_message(
-                f"DRY RUN: Would delete content filter {filter_id}"
-            )
-        )
+        logger.info(sanitize_log_message(f"DRY RUN: Would delete content filter {filter_id}"))
         return {"status": "dry_run", "filter_id": filter_id, "action": "would_delete"}
 
     async with UniFiClient(settings) as client:
         logger.info(
-            sanitize_log_message(
-                f"Deleting content filter {filter_id} from site {site_id}"
-            )
+            sanitize_log_message(f"Deleting content filter {filter_id} from site {site_id}")
         )
         if not client.is_authenticated:
             await client.authenticate()
@@ -288,11 +257,7 @@ async def delete_content_filter(
                 f"{settings.get_v2_api_path(site_id)}/content-filtering/{filter_id}"
             )
         except APIError:
-            logger.exception(
-                sanitize_log_message(
-                    f"Failed to delete content filter {filter_id}"
-                )
-            )
+            logger.exception(sanitize_log_message(f"Failed to delete content filter {filter_id}"))
             raise
 
         log_audit(

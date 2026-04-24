@@ -86,8 +86,7 @@ def _build_match_target(
     # an incomplete payload and reject it, so fail fast here.
     if resolved_mt == "SPECIFIC" and not port:
         raise ValueError(
-            "port_matching_type='SPECIFIC' requires a 'port' value "
-            "(e.g. '53' or '9000-9010')."
+            "port_matching_type='SPECIFIC' requires a 'port' value " "(e.g. '53' or '9000-9010')."
         )
     if resolved_mt == "OBJECT" and not port_group_id:
         raise ValueError(
@@ -192,9 +191,7 @@ def _collect_port_overrides(
     return overrides
 
 
-def _merge_port_overrides(
-    existing: dict[str, Any], overrides: dict[str, Any]
-) -> dict[str, Any]:
+def _merge_port_overrides(existing: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any]:
     """Merge port overrides into an existing source/destination sub-dict.
 
     Clears the now-unused field when switching modes — e.g. switching from
@@ -241,9 +238,7 @@ def _ensure_local_api(settings: Settings) -> None:
         )
 
 
-async def _load_zone_index(
-    client: UniFiClient, settings: Settings, site_id: str
-) -> dict[str, str]:
+async def _load_zone_index(client: UniFiClient, settings: Settings, site_id: str) -> dict[str, str]:
     """Fetch the v2 zone list and build a name/UUID → internal-_id index."""
     endpoint = f"{settings.get_v2_api_path(site_id)}/firewall/zone"
     response = await client.get(endpoint)
@@ -286,7 +281,7 @@ async def _resolve_zone_id(
         return index[identifier]
     if lowered in index:
         return index[lowered]
-    known_internal_ids = sorted({v for v in index.values()})
+    known_internal_ids = sorted(set(index.values()))
     raise ValueError(
         f"Could not resolve firewall zone '{identifier}'. Pass a zone name "
         f"(e.g. 'Internal'), external UUID, or internal _id. "
@@ -319,9 +314,7 @@ async def list_firewall_zones_v2(
     _ensure_local_api(settings)
 
     async with UniFiClient(settings) as client:
-        logger.info(
-            sanitize_log_message(f"Listing v2 firewall zones for site {site_id}")
-        )
+        logger.info(sanitize_log_message(f"Listing v2 firewall zones for site {site_id}"))
 
         if not client.is_authenticated:
             await client.authenticate()
@@ -331,9 +324,7 @@ async def list_firewall_zones_v2(
             response = await client.get(endpoint)
         except APIError:
             logger.exception(
-                sanitize_log_message(
-                    f"Failed to list v2 firewall zones for site {site_id}"
-                )
+                sanitize_log_message(f"Failed to list v2 firewall zones for site {site_id}")
             )
             raise
 
@@ -585,7 +576,9 @@ async def create_firewall_policy(
 
     try:
         async with UniFiClient(settings) as client:
-            logger.info(sanitize_log_message(f"Creating firewall policy '{name}' for site {site_id}"))
+            logger.info(
+                sanitize_log_message(f"Creating firewall policy '{name}' for site {site_id}")
+            )
 
             if not client.is_authenticated:
                 await client.authenticate()
@@ -598,9 +591,7 @@ async def create_firewall_policy(
                 else None
             )
             resolved_destination_zone = (
-                await _resolve_zone_id(
-                    client, settings, site_id, destination_zone_id
-                )
+                await _resolve_zone_id(client, settings, site_id, destination_zone_id)
                 if destination_zone_id
                 else None
             )
@@ -684,7 +675,9 @@ async def create_firewall_policy(
             else:
                 data = response
 
-            logger.info(sanitize_log_message(f"Created firewall policy '{name}' in site '{site_id}'"))
+            logger.info(
+                sanitize_log_message(f"Created firewall policy '{name}' in site '{site_id}'")
+            )
             log_audit(
                 operation="create_firewall_policy",
                 parameters=parameters,
@@ -886,9 +879,7 @@ async def update_firewall_policy(
 
     async with UniFiClient(settings) as client:
         logger.info(
-            sanitize_log_message(
-                f"Updating firewall policy {policy_id} for site {site_id}"
-            )
+            sanitize_log_message(f"Updating firewall policy {policy_id} for site {site_id}")
         )
 
         if not client.is_authenticated:
@@ -946,11 +937,7 @@ async def update_firewall_policy(
             merged.pop(field, None)
 
         if dry_run_bool:
-            logger.info(
-                sanitize_log_message(
-                    f"DRY RUN: Would update firewall policy {policy_id}"
-                )
-            )
+            logger.info(sanitize_log_message(f"DRY RUN: Would update firewall policy {policy_id}"))
             return {
                 "status": "dry_run",
                 "policy_id": policy_id,
@@ -963,9 +950,7 @@ async def update_firewall_policy(
         except ResourceNotFoundError as err:
             raise ResourceNotFoundError("firewall_policy", policy_id) from err
 
-        data = (
-            response.get("data", response) if isinstance(response, dict) else response
-        )
+        data = response.get("data", response) if isinstance(response, dict) else response
 
         logger.info(sanitize_log_message(f"Updated firewall policy {policy_id}"))
         log_audit(
@@ -1010,7 +995,9 @@ async def delete_firewall_policy(
         raise ValueError("This operation deletes a firewall policy. Pass confirm=True to proceed.")
 
     async with UniFiClient(settings) as client:
-        logger.info(sanitize_log_message(f"Deleting firewall policy {policy_id} from site {site_id}"))
+        logger.info(
+            sanitize_log_message(f"Deleting firewall policy {policy_id} from site {site_id}")
+        )
 
         if not client.is_authenticated:
             await client.authenticate()
@@ -1056,7 +1043,9 @@ async def delete_firewall_policy(
             site_id=site_id,
         )
 
-        logger.info(sanitize_log_message(f"Deleted firewall policy {policy_id} from site {site_id}"))
+        logger.info(
+            sanitize_log_message(f"Deleted firewall policy {policy_id} from site {site_id}")
+        )
 
         return {
             "status": "success",

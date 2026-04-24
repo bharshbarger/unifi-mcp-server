@@ -42,6 +42,8 @@ class Lag(BaseModel):
     type: str = Field(..., description="LAG type: LOCAL, SWITCH_STACK, or MULTI_CHASSIS")
     id: str = Field(..., description="LAG ID")
     members: list[LagMember] = Field(default_factory=list, description="LAG members")
-    switch_stack_id: str | None = Field(None, description="Associated switch stack ID", alias="switchStackId")
+    switch_stack_id: str | None = Field(
+        None, description="Associated switch stack ID", alias="switchStackId"
+    )
 
     model_config = ConfigDict(populate_by_name=True)

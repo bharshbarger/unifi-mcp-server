@@ -114,7 +114,9 @@ async def create_network(
     }
 
     if dry_run:
-        logger.info(sanitize_log_message(f"DRY RUN: Would create network '{name}' in site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(f"DRY RUN: Would create network '{name}' in site '{site_id}'")
+        )
         log_audit(
             operation="create_network",
             parameters=parameters,
@@ -226,7 +228,11 @@ async def update_network(
     }
 
     if dry_run:
-        logger.info(sanitize_log_message(f"DRY RUN: Would update network '{network_id}' in site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"DRY RUN: Would update network '{network_id}' in site '{site_id}'"
+            )
+        )
         log_audit(
             operation="update_network",
             parameters=parameters,
@@ -242,7 +248,9 @@ async def update_network(
 
             # Get existing network
             response = await client.get(f"/ea/sites/{site_id}/rest/networkconf")
-            networks_data: list[dict[str, Any]] = response if isinstance(response, list) else response.get("data", [])
+            networks_data: list[dict[str, Any]] = (
+                response if isinstance(response, list) else response.get("data", [])
+            )
 
             existing_network = None
             for network in networks_data:
@@ -340,7 +348,11 @@ async def delete_network(
     parameters = {"site_id": site_id, "network_id": network_id}
 
     if dry_run:
-        logger.info(sanitize_log_message(f"DRY RUN: Would delete network '{network_id}' from site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"DRY RUN: Would delete network '{network_id}' from site '{site_id}'"
+            )
+        )
         log_audit(
             operation="delete_network",
             parameters=parameters,
@@ -356,7 +368,9 @@ async def delete_network(
 
             # Verify network exists before deleting
             response = await client.get(f"/ea/sites/{site_id}/rest/networkconf")
-            networks_data: list[dict[str, Any]] = response if isinstance(response, list) else response.get("data", [])
+            networks_data: list[dict[str, Any]] = (
+                response if isinstance(response, list) else response.get("data", [])
+            )
 
             network_exists = any(net.get("_id") == network_id for net in networks_data)
             if not network_exists:
@@ -364,7 +378,9 @@ async def delete_network(
 
             response = await client.delete(f"/ea/sites/{site_id}/rest/networkconf/{network_id}")
 
-            logger.info(sanitize_log_message(f"Deleted network '{network_id}' from site '{site_id}'"))
+            logger.info(
+                sanitize_log_message(f"Deleted network '{network_id}' from site '{site_id}'")
+            )
             log_audit(
                 operation="delete_network",
                 parameters=parameters,

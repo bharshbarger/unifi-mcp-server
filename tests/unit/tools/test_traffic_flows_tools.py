@@ -213,23 +213,17 @@ class TestLocalApiGate:
             await tf.get_traffic_flows("default", cloud_settings)
 
     @pytest.mark.asyncio
-    async def test_get_flow_trends_always_raises(
-        self, mock_settings: MagicMock
-    ) -> None:
+    async def test_get_flow_trends_always_raises(self, mock_settings: MagicMock) -> None:
         with pytest.raises(NotImplementedError, match="historical time-series"):
             await tf.get_flow_trends("default", mock_settings)
 
     @pytest.mark.asyncio
-    async def test_stream_traffic_flows_raises(
-        self, mock_settings: MagicMock
-    ) -> None:
+    async def test_stream_traffic_flows_raises(self, mock_settings: MagicMock) -> None:
         with pytest.raises(NotImplementedError, match="50 flows with no pagination"):
             await tf.stream_traffic_flows("default", mock_settings)
 
     @pytest.mark.asyncio
-    async def test_get_connection_states_raises(
-        self, mock_settings: MagicMock
-    ) -> None:
+    async def test_get_connection_states_raises(self, mock_settings: MagicMock) -> None:
         with pytest.raises(NotImplementedError, match="completed flows"):
             await tf.get_connection_states("default", mock_settings)
 
@@ -331,8 +325,12 @@ class TestGetTrafficFlows:
                 "domains": [],
             },
             "traffic_data": {
-                "bytes_tx": 4096, "bytes_rx": 8192, "bytes_total": 12288,
-                "packets_tx": 12, "packets_rx": 18, "packets_total": 30,
+                "bytes_tx": 4096,
+                "bytes_rx": 8192,
+                "bytes_total": 12288,
+                "packets_tx": 12,
+                "packets_rx": 18,
+                "packets_total": 30,
             },
             "policies": [],
             "duration_milliseconds": 1500,
@@ -384,9 +382,7 @@ class TestGetTrafficFlows:
     ) -> None:
         with patch("src.tools.traffic_flows.UniFiClient") as MockClient:
             MockClient.return_value = _mock_client(sample_raw_flows)
-            result = await tf.get_traffic_flows(
-                "default", mock_settings, min_bytes=1000
-            )
+            result = await tf.get_traffic_flows("default", mock_settings, min_bytes=1000)
         assert len(result) == 1
         assert result[0]["id"] == "flow-2"
 
@@ -428,9 +424,7 @@ class TestGetTrafficFlows:
         assert len(result) == 3
 
     @pytest.mark.asyncio
-    async def test_handles_empty_response(
-        self, mock_settings: MagicMock
-    ) -> None:
+    async def test_handles_empty_response(self, mock_settings: MagicMock) -> None:
         with patch("src.tools.traffic_flows.UniFiClient") as MockClient:
             MockClient.return_value = _mock_client([])
             result = await tf.get_traffic_flows("default", mock_settings)
@@ -467,9 +461,7 @@ class TestGetFlowStatistics:
     ) -> None:
         with patch("src.tools.traffic_flows.UniFiClient") as MockClient:
             MockClient.return_value = _mock_client(sample_raw_flows)
-            stats = await tf.get_flow_statistics(
-                "default", mock_settings, action="blocked"
-            )
+            stats = await tf.get_flow_statistics("default", mock_settings, action="blocked")
         assert stats["sample_size"] == 1
         assert stats["total_bytes"] == 100
 
@@ -498,9 +490,7 @@ class TestGetTrafficFlowDetails:
     ) -> None:
         with patch("src.tools.traffic_flows.UniFiClient") as MockClient:
             MockClient.return_value = _mock_client(sample_raw_flows)
-            result = await tf.get_traffic_flow_details(
-                "default", "flow-2", mock_settings
-            )
+            result = await tf.get_traffic_flow_details("default", "flow-2", mock_settings)
         assert result["id"] == "flow-2"
         assert result["source"]["client_name"] == "Rob's Laptop"
 
@@ -511,9 +501,7 @@ class TestGetTrafficFlowDetails:
         with patch("src.tools.traffic_flows.UniFiClient") as MockClient:
             MockClient.return_value = _mock_client(sample_raw_flows)
             with pytest.raises(ResourceNotFoundError):
-                await tf.get_traffic_flow_details(
-                    "default", "missing-id", mock_settings
-                )
+                await tf.get_traffic_flow_details("default", "missing-id", mock_settings)
 
 
 # --------------------------------------------------------------------------- #
@@ -537,9 +525,7 @@ class TestGetTopFlows:
     ) -> None:
         with patch("src.tools.traffic_flows.UniFiClient") as MockClient:
             MockClient.return_value = _mock_client(sample_raw_flows)
-            result = await tf.get_top_flows(
-                "default", mock_settings, limit=1, sort_by="packets"
-            )
+            result = await tf.get_top_flows("default", mock_settings, limit=1, sort_by="packets")
         assert result[0]["id"] == "flow-2"  # 72 packets
 
     @pytest.mark.asyncio
@@ -548,9 +534,7 @@ class TestGetTopFlows:
     ) -> None:
         with patch("src.tools.traffic_flows.UniFiClient") as MockClient:
             MockClient.return_value = _mock_client(sample_raw_flows)
-            result = await tf.get_top_flows(
-                "default", mock_settings, limit=1, sort_by="duration"
-            )
+            result = await tf.get_top_flows("default", mock_settings, limit=1, sort_by="duration")
         assert result[0]["id"] == "flow-1"  # 221461 ms
 
 
@@ -561,9 +545,7 @@ class TestGetFlowRisks:
     ) -> None:
         with patch("src.tools.traffic_flows.UniFiClient") as MockClient:
             MockClient.return_value = _mock_client(sample_raw_flows)
-            result = await tf.get_flow_risks(
-                "default", mock_settings, min_risk_level="medium"
-            )
+            result = await tf.get_flow_risks("default", mock_settings, min_risk_level="medium")
         assert [r["id"] for r in result] == ["flow-2", "flow-3"]
 
     @pytest.mark.asyncio
@@ -572,9 +554,7 @@ class TestGetFlowRisks:
     ) -> None:
         with patch("src.tools.traffic_flows.UniFiClient") as MockClient:
             MockClient.return_value = _mock_client(sample_raw_flows)
-            result = await tf.get_flow_risks(
-                "default", mock_settings, min_risk_level="high"
-            )
+            result = await tf.get_flow_risks("default", mock_settings, min_risk_level="high")
         assert len(result) == 1
         assert result[0]["id"] == "flow-3"
 
@@ -713,9 +693,7 @@ class TestExportTrafficFlows:
 
         with patch("src.tools.traffic_flows.UniFiClient") as MockClient:
             MockClient.return_value = _mock_client(sample_raw_flows)
-            result = await tf.export_traffic_flows(
-                "default", mock_settings, export_format="json"
-            )
+            result = await tf.export_traffic_flows("default", mock_settings, export_format="json")
         parsed = json.loads(result)
         assert len(parsed) == 3
         assert parsed[0]["id"] == "flow-1"
@@ -726,21 +704,15 @@ class TestExportTrafficFlows:
     ) -> None:
         with patch("src.tools.traffic_flows.UniFiClient") as MockClient:
             MockClient.return_value = _mock_client(sample_raw_flows)
-            result = await tf.export_traffic_flows(
-                "default", mock_settings, export_format="csv"
-            )
+            result = await tf.export_traffic_flows("default", mock_settings, export_format="csv")
         lines = result.strip().split("\n")
         assert lines[0].startswith("flow_id,action,protocol")
         assert len(lines) == 4  # header + 3 rows
 
     @pytest.mark.asyncio
-    async def test_export_invalid_format_raises(
-        self, mock_settings: MagicMock
-    ) -> None:
+    async def test_export_invalid_format_raises(self, mock_settings: MagicMock) -> None:
         with pytest.raises(ValueError, match="export_format"):
-            await tf.export_traffic_flows(
-                "default", mock_settings, export_format="xml"
-            )
+            await tf.export_traffic_flows("default", mock_settings, export_format="xml")
 
     @pytest.mark.asyncio
     async def test_export_respects_max_records(
@@ -814,13 +786,9 @@ class TestBlockFlowActions:
         assert result["blocked_target"] == "198.51.100.5"
 
     @pytest.mark.asyncio
-    async def test_block_without_confirm_raises(
-        self, mock_settings: MagicMock
-    ) -> None:
+    async def test_block_without_confirm_raises(self, mock_settings: MagicMock) -> None:
         with pytest.raises(ValidationError):
-            await tf.block_flow_source_ip(
-                "default", "flow-1", mock_settings, confirm=False
-            )
+            await tf.block_flow_source_ip("default", "flow-1", mock_settings, confirm=False)
 
     @pytest.mark.asyncio
     async def test_block_temporary_sets_expiry(

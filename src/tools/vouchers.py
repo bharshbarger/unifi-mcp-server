@@ -133,7 +133,9 @@ async def create_vouchers(
             payload["note"] = note
 
         if dry_run:
-            logger.info(sanitize_log_message(f"[DRY RUN] Would create {count} vouchers for site {site_id}"))
+            logger.info(
+                sanitize_log_message(f"[DRY RUN] Would create {count} vouchers for site {site_id}")
+            )
             return {"dry_run": True, "payload": payload}
 
         response = await client.post(f"/integration/v1/sites/{site_id}/vouchers", json_data=payload)
@@ -230,7 +232,9 @@ async def bulk_delete_vouchers(
             await client.authenticate()
 
         if dry_run:
-            logger.info(sanitize_log_message(f"[DRY RUN] Would bulk delete vouchers for site {site_id}"))
+            logger.info(
+                sanitize_log_message(f"[DRY RUN] Would bulk delete vouchers for site {site_id}")
+            )
             return {"dry_run": True, "filter": filter_expr}
 
         params = {"filter": filter_expr}
@@ -249,5 +253,7 @@ async def bulk_delete_vouchers(
         return {
             "success": True,
             "message": "Vouchers deleted successfully",
-            "deleted_count": (response.get("data", {}).get("count", 0) if isinstance(response, dict) else 0),
+            "deleted_count": (
+                response.get("data", {}).get("count", 0) if isinstance(response, dict) else 0
+            ),
         }

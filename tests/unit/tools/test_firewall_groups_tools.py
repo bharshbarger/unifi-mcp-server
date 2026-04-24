@@ -145,13 +145,9 @@ class TestListFirewallGroups:
         assert all(g["group_type"] == "port-group" for g in result)
 
     @pytest.mark.asyncio
-    async def test_invalid_group_type_raises(
-        self, local_settings: MagicMock
-    ) -> None:
+    async def test_invalid_group_type_raises(self, local_settings: MagicMock) -> None:
         with pytest.raises(ValueError, match="Invalid group_type"):
-            await fg.list_firewall_groups(
-                "default", local_settings, group_type="bogus-group"
-            )
+            await fg.list_firewall_groups("default", local_settings, group_type="bogus-group")
 
     @pytest.mark.asyncio
     async def test_handles_raw_list_response(
@@ -172,9 +168,7 @@ class TestGetFirewallGroup:
         client = _mock_client(get_response={"data": [sample_groups[0]]})
         with patch("src.tools.firewall_groups.UniFiClient") as MockClient:
             MockClient.return_value = client
-            result = await fg.get_firewall_group(
-                "group-port-1", "default", local_settings
-            )
+            result = await fg.get_firewall_group("group-port-1", "default", local_settings)
         assert result["id"] == "group-port-1"
         assert result["name"] == "HomeKit-HAP"
 
@@ -239,9 +233,7 @@ class TestCreateFirewallGroup:
         assert post_body["group_members"] == ["10.0.0.0/8", "192.168.50.0/24"]
 
     @pytest.mark.asyncio
-    async def test_create_dry_run_does_not_post(
-        self, local_settings: MagicMock
-    ) -> None:
+    async def test_create_dry_run_does_not_post(self, local_settings: MagicMock) -> None:
         client = _mock_client()
         with patch("src.tools.firewall_groups.UniFiClient") as MockClient:
             MockClient.return_value = client
@@ -257,9 +249,7 @@ class TestCreateFirewallGroup:
         client.post.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_create_without_confirm_raises(
-        self, local_settings: MagicMock
-    ) -> None:
+    async def test_create_without_confirm_raises(self, local_settings: MagicMock) -> None:
         with pytest.raises(ValueError, match="confirm=True"):
             await fg.create_port_group(
                 name="x",
@@ -284,9 +274,7 @@ class TestCreateFirewallGroup:
             )
 
     @pytest.mark.asyncio
-    async def test_invalid_group_type_raises(
-        self, local_settings: MagicMock
-    ) -> None:
+    async def test_invalid_group_type_raises(self, local_settings: MagicMock) -> None:
         with pytest.raises(ValueError, match="Invalid group_type"):
             await fg.create_firewall_group(
                 name="x",
@@ -298,9 +286,7 @@ class TestCreateFirewallGroup:
             )
 
     @pytest.mark.asyncio
-    async def test_non_list_members_raises(
-        self, local_settings: MagicMock
-    ) -> None:
+    async def test_non_list_members_raises(self, local_settings: MagicMock) -> None:
         with pytest.raises(ValueError, match="must be a list"):
             await fg.create_firewall_group(
                 name="x",
@@ -407,9 +393,7 @@ class TestDeleteFirewallGroup:
         client.delete.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_delete_without_confirm_raises(
-        self, local_settings: MagicMock
-    ) -> None:
+    async def test_delete_without_confirm_raises(self, local_settings: MagicMock) -> None:
         with pytest.raises(ValueError, match="confirm=True"):
             await fg.delete_firewall_group(
                 group_id="group-port-1",

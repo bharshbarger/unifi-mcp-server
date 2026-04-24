@@ -120,9 +120,7 @@ class TestGetDhcpReservation:
         client = _mock_client({"data": sample_users})
         with patch("src.tools.dhcp_reservations.UniFiClient") as MockClient:
             MockClient.return_value = client
-            result = await dhcp.get_dhcp_reservation(
-                "aa:bb:cc:dd:ee:01", "default", local_settings
-            )
+            result = await dhcp.get_dhcp_reservation("aa:bb:cc:dd:ee:01", "default", local_settings)
 
         assert result["fixed_ip"] == "192.168.30.10"
         assert result["name"] == "Camera 1"
@@ -135,9 +133,7 @@ class TestGetDhcpReservation:
         with patch("src.tools.dhcp_reservations.UniFiClient") as MockClient:
             MockClient.return_value = client
             with pytest.raises(ResourceNotFoundError):
-                await dhcp.get_dhcp_reservation(
-                    "ff:ff:ff:ff:ff:ff", "default", local_settings
-                )
+                await dhcp.get_dhcp_reservation("ff:ff:ff:ff:ff:ff", "default", local_settings)
 
     @pytest.mark.asyncio
     async def test_non_fixed_ip_user_not_found(
@@ -148,9 +144,7 @@ class TestGetDhcpReservation:
         with patch("src.tools.dhcp_reservations.UniFiClient") as MockClient:
             MockClient.return_value = client
             with pytest.raises(ResourceNotFoundError):
-                await dhcp.get_dhcp_reservation(
-                    "aa:bb:cc:dd:ee:02", "default", local_settings
-                )
+                await dhcp.get_dhcp_reservation("aa:bb:cc:dd:ee:02", "default", local_settings)
 
 
 class TestCreateDhcpReservation:
@@ -204,9 +198,7 @@ class TestCreateDhcpReservation:
         assert result["payload"]["fixed_ip"] == "192.168.10.200"
 
     @pytest.mark.asyncio
-    async def test_create_without_confirm_raises(
-        self, local_settings: MagicMock
-    ) -> None:
+    async def test_create_without_confirm_raises(self, local_settings: MagicMock) -> None:
         with pytest.raises(ValueError, match="confirm=True"):
             await dhcp.create_dhcp_reservation(
                 mac="11:22:33:44:55:66",
@@ -280,9 +272,7 @@ class TestRemoveDhcpReservation:
         assert put_body == {"use_fixedip": False}
 
     @pytest.mark.asyncio
-    async def test_forget_client_entirely(
-        self, local_settings: MagicMock
-    ) -> None:
+    async def test_forget_client_entirely(self, local_settings: MagicMock) -> None:
         client = _mock_client()
         client.post.return_value = {"data": []}
 

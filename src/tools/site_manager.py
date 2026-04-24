@@ -9,7 +9,6 @@ from ..models.site_manager import (
     CrossSitePerformanceComparison,
     CrossSiteSearchResult,
     CrossSiteStatistics,
-    Host,
     InternetHealthMetrics,
     ISPMetrics,
     SDWANConfig,
@@ -63,7 +62,11 @@ async def list_all_sites_aggregated(settings: Settings) -> list[dict[str, Any]]:
         logger.info("Retrieving aggregated site list from Site Manager API")
 
         response = await client.list_sites()
-        sites_data = response if isinstance(response, list) else response.get("data", response.get("sites", []))
+        sites_data = (
+            response
+            if isinstance(response, list)
+            else response.get("data", response.get("sites", []))
+        )
 
         # Enhance with aggregated stats if available
         sites: list[dict[str, Any]] = []
@@ -162,11 +165,19 @@ async def get_cross_site_statistics(settings: Settings) -> dict[str, Any]:
 
         # Get all sites with health
         sites_response = await client.list_sites()
-        sites_data = sites_response if isinstance(sites_response, list) else sites_response.get("data", sites_response.get("sites", []))
+        sites_data = (
+            sites_response
+            if isinstance(sites_response, list)
+            else sites_response.get("data", sites_response.get("sites", []))
+        )
 
         try:
             health_response = await client.get_site_health()
-            health_data = health_response if isinstance(health_response, list) else health_response.get("data", health_response)
+            health_data = (
+                health_response
+                if isinstance(health_response, list)
+                else health_response.get("data", health_response)
+            )
         except ResourceNotFoundError:
             logger.warning("sites/health endpoint not available; returning partial statistics")
             health_data = []
@@ -268,7 +279,11 @@ async def get_site_inventory(
             if isinstance(site_response, list):
                 site_data = site_response[0] if site_response else {}
             else:
-                _raw = site_response.get("data", site_response) if isinstance(site_response, dict) else site_response
+                _raw = (
+                    site_response.get("data", site_response)
+                    if isinstance(site_response, dict)
+                    else site_response
+                )
                 site_data = _raw[0] if isinstance(_raw, list) else _raw
 
             # Fetch detailed counts (these would come from various endpoints)
@@ -290,7 +305,11 @@ async def get_site_inventory(
         else:
             # Get inventory for all sites
             sites_response = await client.list_sites()
-            sites_data = sites_response if isinstance(sites_response, list) else sites_response.get("data", sites_response.get("sites", []))
+            sites_data = (
+                sites_response
+                if isinstance(sites_response, list)
+                else sites_response.get("data", sites_response.get("sites", []))
+            )
 
             inventories = []
             for site in sites_data:
@@ -332,7 +351,11 @@ async def compare_site_performance(settings: Settings) -> dict[str, Any]:
         # Get site health data
         try:
             health_response = await client.get_site_health()
-            health_data = health_response if isinstance(health_response, list) else health_response.get("data", health_response)
+            health_data = (
+                health_response
+                if isinstance(health_response, list)
+                else health_response.get("data", health_response)
+            )
         except ResourceNotFoundError:
             logger.warning("sites/health endpoint not available")
             health_data = []
@@ -340,7 +363,11 @@ async def compare_site_performance(settings: Settings) -> dict[str, Any]:
         # Get internet health data for bandwidth/latency
         try:
             internet_response = await client.get_internet_health()
-            internet_data = internet_response if isinstance(internet_response, list) else internet_response.get("data", internet_response)
+            internet_data = (
+                internet_response
+                if isinstance(internet_response, list)
+                else internet_response.get("data", internet_response)
+            )
         except ResourceNotFoundError:
             logger.warning("internet/health endpoint not available")
             internet_data = []
@@ -448,11 +475,17 @@ async def search_across_sites(
         raise ValueError(f"search_type must be one of {valid_types}, got '{search_type}'")
 
     async with SiteManagerClient(settings) as client:
-        logger.info(sanitize_log_message(f"Searching across sites: query='{query}', type={search_type}"))
+        logger.info(
+            sanitize_log_message(f"Searching across sites: query='{query}', type={search_type}")
+        )
 
         # Get all sites first
         sites_response = await client.list_sites()
-        sites_data = sites_response if isinstance(sites_response, list) else sites_response.get("data", sites_response.get("sites", []))
+        sites_data = (
+            sites_response
+            if isinstance(sites_response, list)
+            else sites_response.get("data", sites_response.get("sites", []))
+        )
 
         results: list[dict[str, Any]] = []
         query_lower = query.lower()
@@ -481,7 +514,9 @@ async def search_across_sites(
                                 }
                             )
                 except Exception as e:
-                    logger.debug(sanitize_log_message(f"Error searching devices in site {site_id}: {e}"))
+                    logger.debug(
+                        sanitize_log_message(f"Error searching devices in site {site_id}: {e}")
+                    )
 
             # Search clients
             if search_type in ["client", "all"]:
@@ -505,7 +540,9 @@ async def search_across_sites(
                                 }
                             )
                 except Exception as e:
-                    logger.debug(sanitize_log_message(f"Error searching clients in site {site_id}: {e}"))
+                    logger.debug(
+                        sanitize_log_message(f"Error searching clients in site {site_id}: {e}")
+                    )
 
             # Search networks
             if search_type in ["network", "all"]:
@@ -523,7 +560,9 @@ async def search_across_sites(
                                 }
                             )
                 except Exception as e:
-                    logger.debug(sanitize_log_message(f"Error searching networks in site {site_id}: {e}"))
+                    logger.debug(
+                        sanitize_log_message(f"Error searching networks in site {site_id}: {e}")
+                    )
 
         search_result = CrossSiteSearchResult(
             total_results=len(results),
@@ -584,7 +623,11 @@ async def query_isp_metrics(
     """
 
     async with SiteManagerClient(settings) as client:
-        logger.info(sanitize_log_message(f"Querying ISP metrics (site_id={site_id}, start={start_time}, end={end_time})"))
+        logger.info(
+            sanitize_log_message(
+                f"Querying ISP metrics (site_id={site_id}, start={start_time}, end={end_time})"
+            )
+        )
 
         response = await client.query_isp_metrics(site_id, start_time, end_time)
         data = response if isinstance(response, list) else response.get("data", response)
@@ -614,7 +657,11 @@ async def list_sdwan_configs(settings: Settings) -> list[dict[str, Any]]:
 
         try:
             response = await client.list_sdwan_configs()
-            data = response if isinstance(response, list) else response.get("data", response.get("configs", []))
+            data = (
+                response
+                if isinstance(response, list)
+                else response.get("data", response.get("configs", []))
+            )
 
             if isinstance(data, list):
                 return [SDWANConfig(**config).model_dump() for config in data]
@@ -695,7 +742,11 @@ async def list_hosts(
         logger.info(sanitize_log_message(f"Retrieving hosts list (limit={limit}, offset={offset})"))
 
         response = await client.list_hosts(limit, offset)
-        data = response if isinstance(response, list) else response.get("data", response.get("hosts", []))
+        data = (
+            response
+            if isinstance(response, list)
+            else response.get("data", response.get("hosts", []))
+        )
 
         if isinstance(data, list):
             return data  # type: ignore[no-any-return]

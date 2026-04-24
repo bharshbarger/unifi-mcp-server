@@ -1251,9 +1251,7 @@ class TestCreateFirewallPolicy:
 
             request_body = mock_client.post.call_args[1]["json_data"]
             assert request_body["source"]["zone_id"] == "690d6e64e9671173fd71c586"
-            assert (
-                request_body["destination"]["zone_id"] == "690d6e64e9671173fd71c586"
-            )
+            assert request_body["destination"]["zone_id"] == "690d6e64e9671173fd71c586"
 
     @pytest.mark.asyncio
     async def test_create_firewall_policy_unknown_zone_raises(
@@ -1426,9 +1424,7 @@ class TestListFirewallZonesV2:
             assert called_endpoint.endswith("/firewall/zone")
 
     @pytest.mark.asyncio
-    async def test_list_firewall_zones_v2_handles_none_data(
-        self, local_settings: Settings
-    ) -> None:
+    async def test_list_firewall_zones_v2_handles_none_data(self, local_settings: Settings) -> None:
         """UniFiClient can return ``{"data": None}`` for empty responses;
         the tool must not raise ``TypeError: 'NoneType' is not iterable``."""
         from src.tools.firewall_policies import list_firewall_zones_v2
@@ -1454,9 +1450,7 @@ class TestCreateFirewallPolicyConfirmCoercion:
         return Settings()
 
     @pytest.mark.asyncio
-    async def test_string_false_confirm_does_not_bypass(
-        self, local_settings: Settings
-    ) -> None:
+    async def test_string_false_confirm_does_not_bypass(self, local_settings: Settings) -> None:
         """confirm='False' (a truthy string) must not bypass the gate."""
         from src.tools.firewall_policies import create_firewall_policy
 
@@ -1470,9 +1464,7 @@ class TestCreateFirewallPolicyConfirmCoercion:
             )
 
     @pytest.mark.asyncio
-    async def test_string_true_confirm_is_accepted(
-        self, local_settings: Settings
-    ) -> None:
+    async def test_string_true_confirm_is_accepted(self, local_settings: Settings) -> None:
         """confirm='true' (JSON-RPC stringified bool) must be coerced."""
         from src.tools.firewall_policies import _zone_cache, create_firewall_policy
 
@@ -1507,9 +1499,7 @@ class TestCreateFirewallPolicyConfirmCoercion:
             mock_client.post.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_invalid_ip_version_raises(
-        self, local_settings: Settings
-    ) -> None:
+    async def test_invalid_ip_version_raises(self, local_settings: Settings) -> None:
         from src.tools.firewall_policies import create_firewall_policy
 
         with pytest.raises(ValueError, match="Invalid ip_version"):
@@ -1711,9 +1701,7 @@ class TestCreateFirewallPolicyPortMatching:
             assert body["destination"]["match_opposite_ports"] is True
 
     @pytest.mark.asyncio
-    async def test_specific_without_port_raises(
-        self, local_settings: Settings
-    ) -> None:
+    async def test_specific_without_port_raises(self, local_settings: Settings) -> None:
         """port_matching_type='SPECIFIC' without a port value must error."""
         from src.tools.firewall_policies import _zone_cache, create_firewall_policy
 
@@ -1740,9 +1728,7 @@ class TestCreateFirewallPolicyPortMatching:
                 _zone_cache.pop("default", None)
 
     @pytest.mark.asyncio
-    async def test_object_without_port_group_id_raises(
-        self, local_settings: Settings
-    ) -> None:
+    async def test_object_without_port_group_id_raises(self, local_settings: Settings) -> None:
         """port_matching_type='OBJECT' without a port_group_id must error."""
         from src.tools.firewall_policies import _zone_cache, create_firewall_policy
 

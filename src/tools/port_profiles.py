@@ -54,7 +54,9 @@ async def list_port_profiles(
             for p in paginated
         ]
 
-        logger.info(sanitize_log_message(f"Retrieved {len(profiles)} port profiles for site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(f"Retrieved {len(profiles)} port profiles for site '{site_id}'")
+        )
         return profiles
 
 
@@ -94,7 +96,9 @@ async def get_port_profile(
             raise ResourceNotFoundError("port_profile", profile_id)
 
         profile = PortProfile.model_validate(raw_profiles[0])
-        logger.info(sanitize_log_message(f"Retrieved port profile '{profile_id}' for site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(f"Retrieved port profile '{profile_id}' for site '{site_id}'")
+        )
         return profile.model_dump(by_alias=True, exclude_none=True)
 
 
@@ -200,7 +204,11 @@ async def create_port_profile(
                     )
 
             if dry_run:
-                logger.info(sanitize_log_message(f"DRY RUN: Would create port profile '{name}' in site '{site_id}'"))
+                logger.info(
+                    sanitize_log_message(
+                        f"DRY RUN: Would create port profile '{name}' in site '{site_id}'"
+                    )
+                )
                 log_audit(
                     operation="create_port_profile",
                     parameters=parameters,
@@ -309,7 +317,11 @@ async def update_port_profile(
     }
 
     if dry_run:
-        logger.info(sanitize_log_message(f"DRY RUN: Would update port profile '{profile_id}' in site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"DRY RUN: Would update port profile '{profile_id}' in site '{site_id}'"
+            )
+        )
         log_audit(
             operation="update_port_profile",
             parameters=parameters,
@@ -367,7 +379,9 @@ async def update_port_profile(
             else:
                 updated = response.get("data", [{}])[0]
 
-            logger.info(sanitize_log_message(f"Updated port profile '{profile_id}' in site '{site_id}'"))
+            logger.info(
+                sanitize_log_message(f"Updated port profile '{profile_id}' in site '{site_id}'")
+            )
             log_audit(
                 operation="update_port_profile",
                 parameters=parameters,
@@ -422,7 +436,11 @@ async def delete_port_profile(
     parameters = {"site_id": site_id, "profile_id": profile_id}
 
     if dry_run:
-        logger.info(sanitize_log_message(f"DRY RUN: Would delete port profile '{profile_id}' from site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"DRY RUN: Would delete port profile '{profile_id}' from site '{site_id}'"
+            )
+        )
         log_audit(
             operation="delete_port_profile",
             parameters=parameters,
@@ -447,7 +465,9 @@ async def delete_port_profile(
 
             await client.delete(f"/ea/sites/{site_id}/rest/portconf/{profile_id}")
 
-            logger.info(sanitize_log_message(f"Deleted port profile '{profile_id}' from site '{site_id}'"))
+            logger.info(
+                sanitize_log_message(f"Deleted port profile '{profile_id}' from site '{site_id}'")
+            )
             log_audit(
                 operation="delete_port_profile",
                 parameters=parameters,
@@ -512,7 +532,11 @@ async def get_device_port_overrides(
         if not device:
             raise ResourceNotFoundError("device", device_id)
 
-        logger.info(sanitize_log_message(f"Retrieved port overrides for device '{device_id}' in site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"Retrieved port overrides for device '{device_id}' in site '{site_id}'"
+            )
+        )
 
         overrides = [
             PortOverride.model_validate(o).model_dump(exclude_none=True)
@@ -665,7 +689,9 @@ async def set_device_port_overrides(
     except (ResourceNotFoundError, ValidationError):
         raise
     except Exception as e:
-        logger.error(sanitize_log_message(f"Failed to set port overrides on device '{device_id}': {e}"))
+        logger.error(
+            sanitize_log_message(f"Failed to set port overrides on device '{device_id}': {e}")
+        )
         log_audit(
             operation="set_device_port_overrides",
             parameters=parameters,

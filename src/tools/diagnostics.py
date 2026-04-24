@@ -13,7 +13,9 @@ from ..models.diagnostics import (
 from ..utils import get_logger, sanitize_log_message, validate_site_id
 
 
-async def get_network_references(site_id: str, network_id: str, settings: Settings) -> dict[str, Any]:
+async def get_network_references(
+    site_id: str, network_id: str, settings: Settings
+) -> dict[str, Any]:
     """Get references to a network from other resources.
 
     Args:
@@ -38,7 +40,9 @@ async def get_network_references(site_id: str, network_id: str, settings: Settin
         references_data = data.get("referenceResources", []) if isinstance(data, dict) else []
         references = [NetworkReference(**ref).model_dump() for ref in references_data]
 
-        logger.info(sanitize_log_message(f"Retrieved {len(references)} references for network {network_id}"))
+        logger.info(
+            sanitize_log_message(f"Retrieved {len(references)} references for network {network_id}")
+        )
         return {
             "network_id": network_id,
             "site_id": site_id,
@@ -126,7 +130,11 @@ async def get_speed_test_history(site_id: str, settings: Settings) -> list[dict[
             data = []
 
         results = [SpeedTestResult(**item).model_dump() for item in data]
-        logger.info(sanitize_log_message(f"Retrieved {len(results)} speed test results for site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"Retrieved {len(results)} speed test results for site '{site_id}'"
+            )
+        )
         return results
 
 
@@ -194,5 +202,9 @@ async def list_spectrum_interference(site_id: str, settings: Settings) -> list[d
                 )
                 interference_list.append(interference.model_dump())
 
-        logger.info(sanitize_log_message(f"Retrieved {len(interference_list)} interference entries for site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"Retrieved {len(interference_list)} interference entries for site '{site_id}'"
+            )
+        )
         return interference_list

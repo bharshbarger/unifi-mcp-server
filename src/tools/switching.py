@@ -46,12 +46,11 @@ async def list_switch_stacks(
         )
 
         paginated = raw_stacks[offset : offset + limit]
-        stacks = [
-            SwitchStack.model_validate(s).model_dump(exclude_none=True)
-            for s in paginated
-        ]
+        stacks = [SwitchStack.model_validate(s).model_dump(exclude_none=True) for s in paginated]
 
-        logger.info(sanitize_log_message(f"Retrieved {len(stacks)} switch stacks for site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(f"Retrieved {len(stacks)} switch stacks for site '{site_id}'")
+        )
         return stacks
 
 
@@ -82,7 +81,9 @@ async def get_switch_stack(
     async with UniFiClient(settings) as client:
         await client.authenticate()
 
-        endpoint = settings.get_integration_path(f"sites/{site_id}/switching/switch-stacks/{switch_stack_id}")
+        endpoint = settings.get_integration_path(
+            f"sites/{site_id}/switching/switch-stacks/{switch_stack_id}"
+        )
         response = await client.get(endpoint)
         raw_stacks: list[dict[str, Any]] = (
             response if isinstance(response, list) else response.get("data", [])
@@ -92,7 +93,9 @@ async def get_switch_stack(
             raise ResourceNotFoundError("switch_stack", switch_stack_id)
 
         stack = SwitchStack.model_validate(raw_stacks[0])
-        logger.info(sanitize_log_message(f"Retrieved switch stack '{switch_stack_id}' for site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(f"Retrieved switch stack '{switch_stack_id}' for site '{site_id}'")
+        )
         return stack.model_dump(exclude_none=True)
 
 
@@ -127,12 +130,11 @@ async def list_mclag_domains(
         )
 
         paginated = raw_domains[offset : offset + limit]
-        domains = [
-            MclagDomain.model_validate(d).model_dump(exclude_none=True)
-            for d in paginated
-        ]
+        domains = [MclagDomain.model_validate(d).model_dump(exclude_none=True) for d in paginated]
 
-        logger.info(sanitize_log_message(f"Retrieved {len(domains)} MC-LAG domains for site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(f"Retrieved {len(domains)} MC-LAG domains for site '{site_id}'")
+        )
         return domains
 
 
@@ -163,7 +165,9 @@ async def get_mclag_domain(
     async with UniFiClient(settings) as client:
         await client.authenticate()
 
-        endpoint = settings.get_integration_path(f"sites/{site_id}/switching/mc-lag-domains/{mclag_domain_id}")
+        endpoint = settings.get_integration_path(
+            f"sites/{site_id}/switching/mc-lag-domains/{mclag_domain_id}"
+        )
         response = await client.get(endpoint)
         raw_domains: list[dict[str, Any]] = (
             response if isinstance(response, list) else response.get("data", [])
@@ -173,7 +177,11 @@ async def get_mclag_domain(
             raise ResourceNotFoundError("mclag_domain", mclag_domain_id)
 
         domain = MclagDomain.model_validate(raw_domains[0])
-        logger.info(sanitize_log_message(f"Retrieved MC-LAG domain '{mclag_domain_id}' for site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"Retrieved MC-LAG domain '{mclag_domain_id}' for site '{site_id}'"
+            )
+        )
         return domain.model_dump(exclude_none=True)
 
 
@@ -209,8 +217,7 @@ async def list_lags(
 
         paginated = raw_lags[offset : offset + limit]
         lags = [
-            Lag.model_validate(lag_item).model_dump(exclude_none=True)
-            for lag_item in paginated
+            Lag.model_validate(lag_item).model_dump(exclude_none=True) for lag_item in paginated
         ]
 
         logger.info(sanitize_log_message(f"Retrieved {len(lags)} LAGs for site '{site_id}'"))

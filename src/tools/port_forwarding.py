@@ -51,7 +51,11 @@ async def list_port_forwards(
         # Apply pagination
         paginated = rules_data[offset : offset + limit]
 
-        logger.info(sanitize_log_message(f"Retrieved {len(paginated)} port forwarding rules for site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"Retrieved {len(paginated)} port forwarding rules for site '{site_id}'"
+            )
+        )
         return paginated
 
 
@@ -258,7 +262,11 @@ async def update_port_forward(
     }
 
     if dry_run:
-        logger.info(sanitize_log_message(f"DRY RUN: Would update port forwarding rule '{rule_id}' in site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"DRY RUN: Would update port forwarding rule '{rule_id}' in site '{site_id}'"
+            )
+        )
         log_audit(
             operation="update_port_forward",
             parameters=parameters,
@@ -310,7 +318,11 @@ async def update_port_forward(
                 data_list = response.get("data", [{}])
                 updated_rule = data_list[0] if isinstance(data_list, list) else data_list
 
-            logger.info(sanitize_log_message(f"Updated port forwarding rule '{rule_id}' in site '{site_id}'"))
+            logger.info(
+                sanitize_log_message(
+                    f"Updated port forwarding rule '{rule_id}' in site '{site_id}'"
+                )
+            )
             log_audit(
                 operation="update_port_forward",
                 parameters=parameters,
@@ -321,7 +333,9 @@ async def update_port_forward(
             return updated_rule
 
     except Exception as e:
-        logger.error(sanitize_log_message(f"Failed to update port forwarding rule '{rule_id}': {e}"))
+        logger.error(
+            sanitize_log_message(f"Failed to update port forwarding rule '{rule_id}': {e}")
+        )
         log_audit(
             operation="update_port_forward",
             parameters=parameters,
@@ -390,7 +404,11 @@ async def delete_port_forward(
 
             response = await client.delete(f"/ea/sites/{site_id}/rest/portforward/{rule_id}")
 
-            logger.info(sanitize_log_message(f"Deleted port forwarding rule '{rule_id}' from site '{site_id}'"))
+            logger.info(
+                sanitize_log_message(
+                    f"Deleted port forwarding rule '{rule_id}' from site '{site_id}'"
+                )
+            )
             log_audit(
                 operation="delete_port_forward",
                 parameters=parameters,
@@ -401,7 +419,9 @@ async def delete_port_forward(
             return {"success": True, "deleted_rule_id": rule_id}
 
     except Exception as e:
-        logger.error(sanitize_log_message(f"Failed to delete port forwarding rule '{rule_id}': {e}"))
+        logger.error(
+            sanitize_log_message(f"Failed to delete port forwarding rule '{rule_id}': {e}")
+        )
         log_audit(
             operation="delete_port_forward",
             parameters=parameters,

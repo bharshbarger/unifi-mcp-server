@@ -80,7 +80,7 @@ def pytest_collection_modifyitems(config, items):
     import asyncio
 
     for item in items:
-        func = getattr(item, 'obj', None)
+        func = getattr(item, "obj", None)
         if asyncio.iscoroutinefunction(func):
             item.add_marker(pytest.mark.asyncio)
 

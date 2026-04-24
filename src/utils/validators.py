@@ -99,9 +99,7 @@ def validate_site_id(site_id: str) -> str:
 
 
 _OBJECT_ID_RE = re.compile(r"^[a-f0-9]{24}$")
-_UUID_RE = re.compile(
-    r"^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
-)
+_UUID_RE = re.compile(r"^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$")
 
 
 def validate_device_id(device_id: str) -> str:

@@ -46,11 +46,14 @@ def _make_tool_wrapper(fn: Any, settings: Settings) -> Any:
     public_sig = sig.replace(parameters=public_params)
 
     if inspect.iscoroutinefunction(fn):
+
         @functools.wraps(fn)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             kwargs["settings"] = settings
             return await fn(*args, **kwargs)
+
     else:
+
         @functools.wraps(fn)
         def wrapper(*args: Any, **kwargs: Any) -> Any:  # type: ignore[misc]
             kwargs["settings"] = settings

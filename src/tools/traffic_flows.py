@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Traffic flow monitoring tools (local v2 API).
 
 The UniFi Integration API (``/proxy/network/integration/v1/...``) does **not**
@@ -26,6 +24,8 @@ Because this endpoint is only reachable via the local gateway proxy, every
 function in this module calls :func:`_ensure_local_api` and raises
 ``NotImplementedError`` when the MCP is configured for cloud-only API access.
 """
+
+from __future__ import annotations
 
 import csv
 import json
@@ -134,9 +134,7 @@ def _flow_matches(
             return False
     if source_ip is not None and src.ip != source_ip:
         return False
-    if source_zone_name is not None and (
-        (src.zone_name or "").lower() != source_zone_name.lower()
-    ):
+    if source_zone_name is not None and ((src.zone_name or "").lower() != source_zone_name.lower()):
         return False
     if source_network_name is not None and (
         (src.network_name or "").lower() != source_network_name.lower()
@@ -187,9 +185,7 @@ async def _get_filtered_flows(
             raw_flows = await _fetch_raw_flows(client, settings, site_id)
         except APIError:
             logger.exception(
-                sanitize_log_message(
-                    f"Failed to fetch traffic flows for site {site_id}"
-                )
+                sanitize_log_message(f"Failed to fetch traffic flows for site {site_id}")
             )
             raise
 
@@ -198,11 +194,7 @@ async def _get_filtered_flows(
             try:
                 flow = _parse_flow(raw)
             except Exception as exc:
-                logger.debug(
-                    sanitize_log_message(
-                        f"Skipping unparseable flow record: {exc}"
-                    )
-                )
+                logger.debug(sanitize_log_message(f"Skipping unparseable flow record: {exc}"))
                 continue
             if _flow_matches(flow, **filters):
                 flows.append(flow)
@@ -287,11 +279,7 @@ async def get_traffic_flows(
         client_name_contains=client_name_contains,
     )
 
-    logger.info(
-        sanitize_log_message(
-            f"Retrieved {len(flows)} traffic flows for site {site_id}"
-        )
-    )
+    logger.info(sanitize_log_message(f"Retrieved {len(flows)} traffic flows for site {site_id}"))
 
     results = [flow.model_dump(by_alias=True) for flow in flows]
     if limit is not None:
@@ -422,11 +410,7 @@ async def get_flow_risks(
     threshold = order.get((min_risk_level or "").lower(), 0)
 
     flows = await _get_filtered_flows(site_id, settings)
-    matching = [
-        flow
-        for flow in flows
-        if order.get((flow.risk or "").lower(), 0) >= threshold
-    ]
+    matching = [flow for flow in flows if order.get((flow.risk or "").lower(), 0) >= threshold]
     return [flow.model_dump(by_alias=True) for flow in matching]
 
 
@@ -466,9 +450,7 @@ async def get_client_flow_aggregation(
     settings: Settings,
 ) -> dict[str, Any]:
     """Aggregate the current flow sample for a specific client MAC."""
-    flows = await _get_filtered_flows(
-        site_id, settings, source_mac=client_mac
-    )
+    flows = await _get_filtered_flows(site_id, settings, source_mac=client_mac)
 
     if not flows:
         return ClientFlowAggregation(
@@ -654,12 +636,14 @@ async def find_flows_for_rule_reference(
 
 
 def _has_any_identifier(endpoint: Any) -> bool:
-    return bool(getattr(endpoint, "id", None) or getattr(endpoint, "mac", None) or getattr(endpoint, "ip", None))
+    return bool(
+        getattr(endpoint, "id", None)
+        or getattr(endpoint, "mac", None)
+        or getattr(endpoint, "ip", None)
+    )
 
 
-def _rank_destinations(
-    flows: Iterable[TrafficFlow], *, limit: int
-) -> list[dict[str, Any]]:
+def _rank_destinations(flows: Iterable[TrafficFlow], *, limit: int) -> list[dict[str, Any]]:
     """Return the top destinations by total bytes in a flow sample."""
     tally: dict[str, dict[str, Any]] = {}
     for flow in flows:
@@ -685,11 +669,7 @@ def _rank_destinations(
 
 def _flow_to_reference_match(flow: TrafficFlow) -> FlowRuleReferenceMatch:
     src_label = (
-        flow.source.client_name
-        or flow.source.mac
-        or flow.source.ip
-        or flow.source.id
-        or "unknown"
+        flow.source.client_name or flow.source.mac or flow.source.ip or flow.source.id or "unknown"
     )
     dst_label_parts = [
         flow.destination.ip or flow.destination.id or "?",
@@ -895,16 +875,10 @@ async def _create_block_action(
     created_at = datetime.now(timezone.utc).isoformat()
     expires_at = None
     if duration == "temporary" and expires_in_hours:
-        expires_at = (
-            datetime.now(timezone.utc) + timedelta(hours=expires_in_hours)
-        ).isoformat()
+        expires_at = (datetime.now(timezone.utc) + timedelta(hours=expires_in_hours)).isoformat()
 
     if dry_run:
-        logger.info(
-            sanitize_log_message(
-                f"[DRY RUN] Would block {block_type}={blocked_target}"
-            )
-        )
+        logger.info(sanitize_log_message(f"[DRY RUN] Would block {block_type}={blocked_target}"))
         return BlockFlowAction(
             action_id=action_id,
             block_type=block_type,  # type: ignore[arg-type]

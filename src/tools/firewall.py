@@ -3,7 +3,7 @@
 from typing import Any
 
 from ..api import UniFiClient
-from ..config import Settings
+from ..config import APIType, Settings
 from ..utils import (
     ResourceNotFoundError,
     get_logger,
@@ -45,10 +45,31 @@ async def list_firewall_rules(
             response if isinstance(response, list) else response.get("data", [])
         )
 
+        # In local mode, legacy rest/firewallrule may be empty while custom
+        # policies live on the v2 endpoint. Fall back to v2 when empty.
+        if not rules_data and settings.api_type == APIType.LOCAL:
+            try:
+                v2_endpoint = f"{settings.get_v2_api_path(site_id)}/firewall-policies"
+                v2_response = await client.get(v2_endpoint)
+                v2_data = v2_response if isinstance(v2_response, list) else v2_response.get("data", [])
+                if v2_data:
+                    rules_data = v2_data
+                    logger.info(
+                        sanitize_log_message(
+                            f"Retrieved {len(rules_data)} firewall policies from v2 API for site '{site_id}'"
+                        )
+                    )
+            except Exception as e:
+                logger.debug(
+                    sanitize_log_message(f"v2 firewall-policies fallback failed for site '{site_id}': {e}")
+                )
+
         # Apply pagination
         paginated = rules_data[offset : offset + limit]
 
-        logger.info(sanitize_log_message(f"Retrieved {len(paginated)} firewall rules for site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(f"Retrieved {len(paginated)} firewall rules for site '{site_id}'")
+        )
         return paginated
 
 
@@ -173,7 +194,11 @@ async def create_firewall_rule(
     }
 
     if dry_run:
-        logger.info(sanitize_log_message(f"DRY RUN: Would create firewall rule '{name}' in site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"DRY RUN: Would create firewall rule '{name}' in site '{site_id}'"
+            )
+        )
         log_audit(
             operation="create_firewall_rule",
             parameters=parameters,
@@ -284,7 +309,11 @@ async def update_firewall_rule(
     }
 
     if dry_run:
-        logger.info(sanitize_log_message(f"DRY RUN: Would update firewall rule '{rule_id}' in site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"DRY RUN: Would update firewall rule '{rule_id}' in site '{site_id}'"
+            )
+        )
         log_audit(
             operation="update_firewall_rule",
             parameters=parameters,
@@ -342,7 +371,9 @@ async def update_firewall_rule(
                 _raw = response.get("data", response)
                 updated_rule: dict[str, Any] = _raw[0] if isinstance(_raw, list) else _raw
 
-            logger.info(sanitize_log_message(f"Updated firewall rule '{rule_id}' in site '{site_id}'"))
+            logger.info(
+                sanitize_log_message(f"Updated firewall rule '{rule_id}' in site '{site_id}'")
+            )
             log_audit(
                 operation="update_firewall_rule",
                 parameters=parameters,
@@ -393,7 +424,11 @@ async def delete_firewall_rule(
     parameters = {"site_id": site_id, "rule_id": rule_id}
 
     if dry_run:
-        logger.info(sanitize_log_message(f"DRY RUN: Would delete firewall rule '{rule_id}' from site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"DRY RUN: Would delete firewall rule '{rule_id}' from site '{site_id}'"
+            )
+        )
         log_audit(
             operation="delete_firewall_rule",
             parameters=parameters,
@@ -420,7 +455,9 @@ async def delete_firewall_rule(
 
             response = await client.delete(f"/ea/sites/{site_id}/rest/firewallrule/{rule_id}")
 
-            logger.info(sanitize_log_message(f"Deleted firewall rule '{rule_id}' from site '{site_id}'"))
+            logger.info(
+                sanitize_log_message(f"Deleted firewall rule '{rule_id}' from site '{site_id}'")
+            )
             log_audit(
                 operation="delete_firewall_rule",
                 parameters=parameters,

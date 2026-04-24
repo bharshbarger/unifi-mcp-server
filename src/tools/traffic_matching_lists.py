@@ -3,7 +3,7 @@
 from typing import Any
 
 from ..api import UniFiClient
-from ..config import Settings
+from ..config import APIType, Settings
 from ..models.traffic_matching_list import TrafficMatchingList, TrafficMatchingListCreate
 from ..utils import (
     ResourceNotFoundError,
@@ -15,6 +15,15 @@ from ..utils import (
     validate_limit_offset,
     validate_site_id,
 )
+
+
+def _ensure_cloud_api(settings: Settings) -> None:
+    """Raise if the current API type is local — traffic matching lists are integration-only."""
+    if settings.api_type == APIType.LOCAL:
+        raise NotImplementedError(
+            "Traffic matching lists are only available via the UniFi integration API (cloud). "
+            "Use list_firewall_groups for local gateway access."
+        )
 
 
 async def list_traffic_matching_lists(
@@ -37,6 +46,7 @@ async def list_traffic_matching_lists(
     site_id = validate_site_id(site_id)
     limit, offset = validate_limit_offset(limit, offset)
     logger = get_logger(__name__, settings.log_level)
+    _ensure_cloud_api(settings)
 
     async with UniFiClient(settings) as client:
         await client.authenticate()
@@ -51,7 +61,11 @@ async def list_traffic_matching_lists(
         # Apply pagination
         paginated = lists_data[offset : offset + limit]
 
-        logger.info(sanitize_log_message(f"Retrieved {len(paginated)} traffic matching lists for site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"Retrieved {len(paginated)} traffic matching lists for site '{site_id}'"
+            )
+        )
         return [TrafficMatchingList(**lst).model_dump() for lst in paginated]
 
 
@@ -75,6 +89,7 @@ async def get_traffic_matching_list(
     """
     site_id = validate_site_id(site_id)
     logger = get_logger(__name__, settings.log_level)
+    _ensure_cloud_api(settings)
 
     async with UniFiClient(settings) as client:
         await client.authenticate()
@@ -127,6 +142,7 @@ async def create_traffic_matching_list(
     site_id = validate_site_id(site_id)
     validate_confirmation(confirm, "traffic matching list operation", dry_run)
     logger = get_logger(__name__, settings.log_level)
+    _ensure_cloud_api(settings)
 
     # Validate list type
     valid_types = ["PORTS", "IPV4_ADDRESSES", "IPV6_ADDRESSES"]
@@ -148,7 +164,11 @@ async def create_traffic_matching_list(
     }
 
     if dry_run:
-        logger.info(sanitize_log_message(f"DRY RUN: Would create traffic matching list '{name}' in site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"DRY RUN: Would create traffic matching list '{name}' in site '{site_id}'"
+            )
+        )
         log_audit(
             operation="create_traffic_matching_list",
             parameters=parameters,
@@ -174,7 +194,9 @@ async def create_traffic_matching_list(
                 response if isinstance(response, list) else response.get("data", response)
             )
 
-            logger.info(sanitize_log_message(f"Created traffic matching list '{name}' in site '{site_id}'"))
+            logger.info(
+                sanitize_log_message(f"Created traffic matching list '{name}' in site '{site_id}'")
+            )
             log_audit(
                 operation="create_traffic_matching_list",
                 parameters=parameters,
@@ -227,6 +249,7 @@ async def update_traffic_matching_list(
     site_id = validate_site_id(site_id)
     validate_confirmation(confirm, "traffic matching list operation", dry_run)
     logger = get_logger(__name__, settings.log_level)
+    _ensure_cloud_api(settings)
 
     # Validate list type if provided
     if list_type is not None:
@@ -247,7 +270,11 @@ async def update_traffic_matching_list(
     }
 
     if dry_run:
-        logger.info(sanitize_log_message(f"DRY RUN: Would update traffic matching list '{list_id}' in site '{site_id}'"))
+        logger.info(
+            sanitize_log_message(
+                f"DRY RUN: Would update traffic matching list '{list_id}' in site '{site_id}'"
+            )
+        )
         log_audit(
             operation="update_traffic_matching_list",
             parameters=parameters,
@@ -296,7 +323,11 @@ async def update_traffic_matching_list(
                 response if isinstance(response, list) else response.get("data", response)
             )
 
-            logger.info(sanitize_log_message(f"Updated traffic matching list '{list_id}' in site '{site_id}'"))
+            logger.info(
+                sanitize_log_message(
+                    f"Updated traffic matching list '{list_id}' in site '{site_id}'"
+                )
+            )
             log_audit(
                 operation="update_traffic_matching_list",
                 parameters=parameters,
@@ -307,7 +338,9 @@ async def update_traffic_matching_list(
             return updated_list
 
     except Exception as e:
-        logger.error(sanitize_log_message(f"Failed to update traffic matching list '{list_id}': {e}"))
+        logger.error(
+            sanitize_log_message(f"Failed to update traffic matching list '{list_id}': {e}")
+        )
         log_audit(
             operation="update_traffic_matching_list",
             parameters=parameters,
@@ -343,6 +376,7 @@ async def delete_traffic_matching_list(
     site_id = validate_site_id(site_id)
     validate_confirmation(confirm, "traffic matching list operation", dry_run)
     logger = get_logger(__name__, settings.log_level)
+    _ensure_cloud_api(settings)
 
     parameters = {"site_id": site_id, "list_id": list_id}
 
@@ -376,7 +410,11 @@ async def delete_traffic_matching_list(
 
             await client.delete(endpoint)
 
-            logger.info(sanitize_log_message(f"Deleted traffic matching list '{list_id}' from site '{site_id}'"))
+            logger.info(
+                sanitize_log_message(
+                    f"Deleted traffic matching list '{list_id}' from site '{site_id}'"
+                )
+            )
             log_audit(
                 operation="delete_traffic_matching_list",
                 parameters=parameters,
@@ -387,7 +425,9 @@ async def delete_traffic_matching_list(
             return {"success": True, "deleted_list_id": list_id}
 
     except Exception as e:
-        logger.error(sanitize_log_message(f"Failed to delete traffic matching list '{list_id}': {e}"))
+        logger.error(
+            sanitize_log_message(f"Failed to delete traffic matching list '{list_id}': {e}")
+        )
         log_audit(
             operation="delete_traffic_matching_list",
             parameters=parameters,

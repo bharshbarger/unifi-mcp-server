@@ -245,6 +245,9 @@ class UniFiClient:
         """
         self._site_uuid_to_name.clear()
         for site in sites:
+            if not isinstance(site, dict):
+                self.logger.warning(f"Skipping non-dict site entry: {type(site).__name__}")
+                continue
             site_id = site.get("id")
             internal_ref = site.get("internalReference")
             if site_id and internal_ref:
@@ -523,6 +526,9 @@ class UniFiClient:
             sites = response.get("data", response.get("sites", []))
 
         for site in sites:
+            if not isinstance(site, dict):
+                self.logger.warning(f"Skipping non-dict site entry in resolve: {type(site).__name__}")
+                continue
             site_id = site.get("id") or site.get("_id")
             if not site_id:
                 continue

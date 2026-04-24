@@ -20,7 +20,7 @@ def mock_settings():
     settings = MagicMock()
     settings.log_level = "INFO"
     settings.api_type = MagicMock()
-    settings.api_type.value = "local"
+    settings.api_type.value = "cloud-ea"
     settings.base_url = "https://192.168.2.1"
     settings.api_key = "test-key"
     settings.local_host = "192.168.2.1"

@@ -3,7 +3,7 @@
 from typing import Any
 
 from ..api.client import UniFiClient
-from ..config import Settings
+from ..config import APIType, Settings
 from ..models import ACLRule
 from ..utils import audit_action, get_logger, sanitize_log_message, validate_confirmation
 
@@ -14,12 +14,20 @@ _VALID_ACTIONS = ("ALLOW", "BLOCK")
 _VALID_TYPES = ("IPV4", "MAC")
 
 
+def _ensure_cloud_api(settings: Settings) -> None:
+    """Raise if the current API type is local — ACL rules are integration-only."""
+    if settings.api_type == APIType.LOCAL:
+        raise NotImplementedError(
+            "ACL rules are only available via the UniFi integration API (cloud). "
+            "Use list_firewall_rules or list_firewall_policies for local gateway access."
+        )
+
+
 def _normalise_action(action: str) -> str:
     upper = action.upper()
     if upper not in _VALID_ACTIONS:
         raise ValueError(
-            f"Invalid action '{action}'. UniFi integration API accepts only "
-            f"{_VALID_ACTIONS}."
+            f"Invalid action '{action}'. UniFi integration API accepts only " f"{_VALID_ACTIONS}."
         )
     return upper
 
@@ -28,8 +36,7 @@ def _normalise_type(type_value: str) -> str:
     upper = type_value.upper()
     if upper not in _VALID_TYPES:
         raise ValueError(
-            f"Invalid type '{type_value}'. UniFi integration API accepts only "
-            f"{_VALID_TYPES}."
+            f"Invalid type '{type_value}'. UniFi integration API accepts only " f"{_VALID_TYPES}."
         )
     return upper
 
@@ -66,6 +73,7 @@ async def list_acl_rules(
     Returns:
         List of ACL rules
     """
+    _ensure_cloud_api(settings)
     async with UniFiClient(settings) as client:
         logger.info(sanitize_log_message(f"Listing ACL rules for site {site_id}"))
 
@@ -101,6 +109,7 @@ async def get_acl_rule(site_id: str, acl_rule_id: str, settings: Settings) -> di
     Returns:
         ACL rule details
     """
+    _ensure_cloud_api(settings)
     async with UniFiClient(settings) as client:
         logger.info(sanitize_log_message(f"Getting ACL rule {acl_rule_id} for site {site_id}"))
 
@@ -109,9 +118,7 @@ async def get_acl_rule(site_id: str, acl_rule_id: str, settings: Settings) -> di
 
         resolved_site_id = await client.resolve_site_id(site_id)
         response = await client.get(
-            settings.get_integration_path(
-                f"sites/{resolved_site_id}/acl-rules/{acl_rule_id}"
-            )
+            settings.get_integration_path(f"sites/{resolved_site_id}/acl-rules/{acl_rule_id}")
         )
         data = response.get("data", response)
 
@@ -175,6 +182,7 @@ async def create_acl_rule(
     """
     validate_confirmation(confirm, "create ACL rule", dry_run)
 
+    _ensure_cloud_api(settings)
     normalised_action = _normalise_action(action)
     normalised_type = _normalise_type(type)
 
@@ -210,9 +218,7 @@ async def create_acl_rule(
 
         if dry_run:
             logger.info(
-                sanitize_log_message(
-                    f"[DRY RUN] Would create ACL rule '{name}' for site {site_id}"
-                )
+                sanitize_log_message(f"[DRY RUN] Would create ACL rule '{name}' for site {site_id}")
             )
             return {"dry_run": True, "payload": payload}
 
@@ -291,6 +297,7 @@ async def update_acl_rule(
     """
     validate_confirmation(confirm, "update ACL rule", dry_run)
 
+    _ensure_cloud_api(settings)
     normalised_action = _normalise_action(action) if action is not None else None
     normalised_type = _normalise_type(type) if type is not None else None
 
@@ -337,9 +344,7 @@ async def update_acl_rule(
 
         resolved_site_id = await client.resolve_site_id(site_id)
         response = await client.put(
-            settings.get_integration_path(
-                f"sites/{resolved_site_id}/acl-rules/{acl_rule_id}"
-            ),
+            settings.get_integration_path(f"sites/{resolved_site_id}/acl-rules/{acl_rule_id}"),
             json_data=payload,
         )
         if isinstance(response, list):
@@ -382,6 +387,7 @@ async def delete_acl_rule(
     """
     validate_confirmation(confirm, "delete ACL rule", dry_run)
 
+    _ensure_cloud_api(settings)
     async with UniFiClient(settings) as client:
         logger.info(sanitize_log_message(f"Deleting ACL rule {acl_rule_id} for site {site_id}"))
 
@@ -394,9 +400,7 @@ async def delete_acl_rule(
 
         resolved_site_id = await client.resolve_site_id(site_id)
         await client.delete(
-            settings.get_integration_path(
-                f"sites/{resolved_site_id}/acl-rules/{acl_rule_id}"
-            )
+            settings.get_integration_path(f"sites/{resolved_site_id}/acl-rules/{acl_rule_id}")
         )
 
         # Audit the action

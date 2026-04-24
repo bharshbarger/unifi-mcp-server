@@ -43,7 +43,8 @@ async def get_site_details(site_id: str, settings: Settings) -> dict[str, Any]:
 
         for site_data in sites_data:
             if (
-                site_data.get("_id") == site_id
+                site_data.get("id") == site_id
+                or site_data.get("_id") == site_id
                 or site_data.get("siteId") == site_id
                 or site_data.get("name") == site_id
                 or site_data.get("meta", {}).get("name") == site_id
@@ -84,7 +85,11 @@ async def list_sites(
 
             logger.debug(sanitize_log_message(f"Fetching sites from endpoint: {endpoint}"))
             response = await client.get(endpoint)
-            logger.debug(sanitize_log_message(f"Raw response received ({len(response) if isinstance(response, list) else len(response.get('data', []))} items)"))
+            logger.debug(
+                sanitize_log_message(
+                    f"Raw response received ({len(response) if isinstance(response, list) else len(response.get('data', []))} items)"
+                )
+            )
 
             # Handle both local and cloud API response formats
             if isinstance(response, list):
@@ -106,10 +111,16 @@ async def list_sites(
                     site_obj = Site(**s)
                     sites.append(site_obj.model_dump())
                 except Exception as e:
-                    logger.error(sanitize_log_message(f"Failed to parse site {idx}: {e}"), exc_info=True)
+                    logger.error(
+                        sanitize_log_message(f"Failed to parse site {idx}: {e}"), exc_info=True
+                    )
                     raise
 
-            logger.info(sanitize_log_message(f"Retrieved {len(sites)} sites (offset={offset}, limit={limit})"))
+            logger.info(
+                sanitize_log_message(
+                    f"Retrieved {len(sites)} sites (offset={offset}, limit={limit})"
+                )
+            )
             return sites
     except Exception as e:
         logger.error(sanitize_log_message(f"Error listing sites: {e}"), exc_info=True)
@@ -137,9 +148,21 @@ async def get_site_statistics(site_id: str, settings: Settings) -> dict[str, Any
         clients_response = await client.get(f"/ea/sites/{site_id}/sta")
         networks_response = await client.get(f"/ea/sites/{site_id}/rest/networkconf")
 
-        devices_data = devices_response if isinstance(devices_response, list) else devices_response.get("data", [])
-        clients_data = clients_response if isinstance(clients_response, list) else clients_response.get("data", [])
-        networks_data = networks_response if isinstance(networks_response, list) else networks_response.get("data", [])
+        devices_data = (
+            devices_response
+            if isinstance(devices_response, list)
+            else devices_response.get("data", [])
+        )
+        clients_data = (
+            clients_response
+            if isinstance(clients_response, list)
+            else clients_response.get("data", [])
+        )
+        networks_data = (
+            networks_response
+            if isinstance(networks_response, list)
+            else networks_response.get("data", [])
+        )
 
         # Count device types
         ap_count = sum(1 for d in devices_data if d.get("type") == "uap")

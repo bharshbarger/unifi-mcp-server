@@ -6,6 +6,12 @@ from typing import Literal
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from . import keychain
+
+# Keychain account names. Both live under the ``unifi-mcp-server`` service.
+KEYCHAIN_ACCOUNT_API_KEY = "api_key"
+KEYCHAIN_ACCOUNT_SITE_MANAGER_API_KEY = "site_manager_api_key"
+
 
 class APIType(str, Enum):
     """API connection type enumeration."""
@@ -29,10 +35,24 @@ class Settings(BaseSettings):
     )
 
     # API Configuration
+    #
+    # Keys default to empty so that the post-init validator can fall back to
+    # macOS Keychain (service ``unifi-mcp-server``, accounts ``api_key`` and
+    # ``site_manager_api_key``). The env var route is still supported for CI
+    # and non-macOS hosts.
     api_key: str = Field(
-        ...,
-        description="UniFi API key (X-API-Key header)",
+        default="",
+        description="UniFi API key (X-API-Key header). Loaded from env or macOS Keychain.",
         validation_alias="UNIFI_API_KEY",
+    )
+
+    site_manager_api_key: str = Field(
+        default="",
+        description=(
+            "Optional dedicated API key for the cloud Site Manager API. "
+            "Falls back to api_key when blank."
+        ),
+        validation_alias="UNIFI_SITE_MANAGER_API_KEY",
     )
 
     api_type: APIType = Field(
@@ -194,6 +214,65 @@ class Settings(BaseSettings):
             raise ValueError("local_host is required when api_type is 'local'")
         return self
 
+    @model_validator(mode="after")
+    def resolve_secrets_from_keychain(self) -> "Settings":
+        """Fill missing API keys from the macOS Keychain.
+
+        Resolution order per key:
+            1. Environment variable (already loaded by pydantic-settings).
+            2. macOS Keychain (service ``unifi-mcp-server``).
+            3. Empty string — required only for ``api_key`` (raises below).
+
+        Tracks the source of each resolved key on ``__pydantic_private__`` so
+        startup logging can report whether keys came from env or Keychain.
+        ``site_manager_api_key`` is allowed to remain empty; callers fall back
+        to ``api_key`` via :meth:`resolved_site_manager_api_key`.
+        """
+        sources: dict[str, str] = {}
+
+        sources["api_key"] = "env" if self.api_key else "missing"
+        if not self.api_key:
+            secret = keychain.get_secret(KEYCHAIN_ACCOUNT_API_KEY)
+            if secret:
+                self.api_key = secret
+                sources["api_key"] = "keychain"
+
+        sources["site_manager_api_key"] = "env" if self.site_manager_api_key else "missing"
+        if not self.site_manager_api_key:
+            secret = keychain.get_secret(KEYCHAIN_ACCOUNT_SITE_MANAGER_API_KEY)
+            if secret:
+                self.site_manager_api_key = secret
+                sources["site_manager_api_key"] = "keychain"
+
+        if not self.api_key:
+            raise ValueError(
+                "UniFi API key not configured. Set UNIFI_API_KEY in the "
+                "environment, or seed it in macOS Keychain with:\n  "
+                + keychain.add_command(KEYCHAIN_ACCOUNT_API_KEY)
+            )
+
+        # Stash sources on the instance dict so it bypasses pydantic's
+        # field machinery but stays accessible via describe_secret_sources().
+        object.__setattr__(self, "_secret_sources", sources)
+        return self
+
+    def describe_secret_sources(self) -> dict[str, str]:
+        """Return where each API key was loaded from: ``env``, ``keychain``, or ``missing``."""
+        sources: dict[str, str] = getattr(self, "_secret_sources", {})
+        # When site_manager_api_key wasn't set anywhere but api_key was,
+        # the SM client transparently falls back; surface that as "fallback".
+        if sources.get("site_manager_api_key") == "missing" and self.api_key:
+            return {**sources, "site_manager_api_key": "fallback:api_key"}
+        return dict(sources)
+
+    def resolved_site_manager_api_key(self) -> str:
+        """Return the API key the Site Manager client should use.
+
+        Falls back to the primary :attr:`api_key` when no dedicated Site
+        Manager key has been provided.
+        """
+        return self.site_manager_api_key or self.api_key
+
     @property
     def base_url(self) -> str:
         """Get the appropriate base URL based on API type.
@@ -309,13 +388,21 @@ class Settings(BaseSettings):
         return f"/proxy/network/v2/api/site/{site_id}"
 
     def get_headers(self) -> dict[str, str]:
-        """Get HTTP headers for API requests.
-
-        Returns:
-            Dictionary of HTTP headers
-        """
+        """Get HTTP headers for UniFi local/cloud API requests."""
         return {
             "X-API-KEY": self.api_key,  # UniFi API expects all caps
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+
+    def get_site_manager_headers(self) -> dict[str, str]:
+        """Get HTTP headers for cloud Site Manager API requests.
+
+        Uses the dedicated :attr:`site_manager_api_key` when set, otherwise
+        falls back to the primary :attr:`api_key`.
+        """
+        return {
+            "X-API-KEY": self.resolved_site_manager_api_key(),
             "Content-Type": "application/json",
             "Accept": "application/json",
         }

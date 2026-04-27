@@ -514,15 +514,49 @@ See [docs/RELEASE_PROCESS.md](docs/RELEASE_PROCESS.md) for the complete release 
 2. Navigate to **Settings → Control Plane → Integrations**
 3. Click **Create API Key**
 4. **Save the key immediately** - it's only shown once!
-5. Store it securely in your `.env` file
+5. Store it (see options below).
+
+#### API Key Storage
+
+**Recommended (macOS): use the login Keychain.** Secrets never touch disk in
+plaintext, never end up in shell history, and never get committed to git by
+accident.
+
+```bash
+# Primary key (used for local controller and cloud APIs)
+security add-generic-password -U -s unifi-mcp-server -a api_key \
+  -w 'YOUR_API_KEY'
+
+# Optional: separate key for the cloud Site Manager API
+security add-generic-password -U -s unifi-mcp-server -a site_manager_api_key \
+  -w 'YOUR_SITE_MANAGER_KEY'
+```
+
+The server resolves keys at startup in this order: env var → Keychain →
+`ConfigurationError`. On startup it logs the source for each key, e.g.:
+
+```
+API key sources: api_key=keychain, site_manager_api_key=fallback:api_key
+```
+
+To remove a stored key:
+
+```bash
+security delete-generic-password -s unifi-mcp-server -a api_key
+```
+
+**Fallback (non-macOS / CI):** set `UNIFI_API_KEY` (and optionally
+`UNIFI_SITE_MANAGER_API_KEY`) in the environment.
 
 #### Configuration File
 
-Create a `.env` file in the project root:
+For non-secret settings, create a `.env` file in the project root:
 
 ```env
-# Required: Your UniFi API Key
-UNIFI_API_KEY=your-api-key-here
+# UniFi API Key — leave commented out on macOS; the server reads it from Keychain.
+# Only set this on non-macOS hosts or in CI.
+# UNIFI_API_KEY=your-api-key-here
+# UNIFI_SITE_MANAGER_API_KEY=your-site-manager-key-here
 
 # API Mode Selection (choose one):
 # - 'local': Full access via local gateway (RECOMMENDED)

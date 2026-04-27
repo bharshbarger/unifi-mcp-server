@@ -54,6 +54,13 @@ from .utils import get_logger
 settings = Settings()
 logger = get_logger(__name__, settings.log_level)
 
+_secret_sources = settings.describe_secret_sources()
+logger.info(
+    "API key sources: api_key=%s, site_manager_api_key=%s",
+    _secret_sources.get("api_key", "unknown"),
+    _secret_sources.get("site_manager_api_key", "unknown"),
+)
+
 mcp = FastMCP("UniFi MCP Server")
 
 # ---------------------------------------------------------------------------

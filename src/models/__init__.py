@@ -33,10 +33,11 @@ from .radius import RADIUSProfile
 from .reference_data import DeviceTag
 from .site import Site
 from .site_manager import (
-    CrossSiteStatistics,
-    InternetHealthMetrics,
-    SiteHealthSummary,
-    VantagePoint,
+    CrossSiteSearchResult,
+    Host,
+    SDWANConfig,
+    SDWANConfigStatus,
+    SiteInventory,
 )
 from .traffic_flow import FlowRisk, FlowStatistics, FlowView, TrafficFlow
 from .traffic_matching_list import (
@@ -87,10 +88,11 @@ __all__ = [
     "VPNServer",
     "RADIUSProfile",
     "DeviceTag",
-    "SiteHealthSummary",
-    "InternetHealthMetrics",
-    "CrossSiteStatistics",
-    "VantagePoint",
+    "SiteInventory",
+    "CrossSiteSearchResult",
+    "SDWANConfig",
+    "SDWANConfigStatus",
+    "Host",
     "BackupMetadata",
     "BackupOperation",
     "BackupSchedule",

@@ -121,17 +121,21 @@ async def test_list_all_sites_aggregated(settings, env: TestEnvironment) -> dict
 
         result = await list_all_sites_aggregated(settings)
 
-        assert isinstance(result, list), "Should return a list of sites"
-        assert len(result) > 0, "Should have at least one site"
+        assert isinstance(result, dict), "Should return paginated envelope"
+        assert "sites" in result, "Should include sites list"
+        sites = result["sites"]
+        assert isinstance(sites, list), "sites should be a list"
 
         return {
             "status": "PASS",
-            "message": f"Retrieved {len(result)} aggregated sites",
-            "details": {"site_count": len(result)},
+            "message": f"Retrieved {len(sites)} aggregated sites",
+            "details": {
+                "site_count": len(sites),
+                "has_next_token": result.get("next_token") is not None,
+            },
         }
 
     except ValueError as e:
-        # Site Manager not enabled
         if "not enabled" in str(e).lower():
             return {
                 "status": "SKIP",
@@ -145,28 +149,25 @@ async def test_list_all_sites_aggregated(settings, env: TestEnvironment) -> dict
 
 
 @pytest.mark.integration
-async def test_get_internet_health(settings, env: TestEnvironment) -> dict[str, Any]:
-    """Test get_internet_health (Site Manager API)."""
+async def test_list_hosts(settings, env: TestEnvironment) -> dict[str, Any]:
+    """Test list_hosts (Site Manager API)."""
     try:
-        from src.tools.site_manager import get_internet_health
+        from src.tools.site_manager import list_hosts
 
-        # Test aggregate metrics (no site_id)
-        result = await get_internet_health(settings)
-
-        assert isinstance(result, dict), "Should return health metrics dictionary"
+        result = await list_hosts(settings, page_size=10)
+        assert isinstance(result, dict), "Should return paginated envelope"
+        hosts = result["hosts"]
+        assert isinstance(hosts, list), "hosts should be a list"
 
         return {
             "status": "PASS",
-            "message": "Retrieved internet health metrics",
-            "details": {"has_metrics": len(result) > 0},
+            "message": f"Retrieved {len(hosts)} host(s)",
+            "details": {"host_count": len(hosts)},
         }
 
     except ValueError as e:
         if "not enabled" in str(e).lower():
-            return {
-                "status": "SKIP",
-                "message": "Site Manager API not enabled",
-            }
+            return {"status": "SKIP", "message": "Site Manager API not enabled"}
         return {"status": "ERROR", "message": f"ValueError: {str(e)}"}
     except AssertionError as e:
         return {"status": "FAIL", "message": str(e)}
@@ -175,33 +176,25 @@ async def test_get_internet_health(settings, env: TestEnvironment) -> dict[str, 
 
 
 @pytest.mark.integration
-async def test_get_site_health_summary(settings, env: TestEnvironment) -> dict[str, Any]:
-    """Test get_site_health_summary for all sites."""
+async def test_list_devices(settings, env: TestEnvironment) -> dict[str, Any]:
+    """Test list_devices (Site Manager API)."""
     try:
-        from src.tools.site_manager import get_site_health_summary
+        from src.tools.site_manager import list_devices
 
-        # Test all sites (no site_id)
-        result = await get_site_health_summary(settings)
-
-        assert isinstance(result, list | dict), "Should return health summary"
-
-        if isinstance(result, list):
-            count = len(result)
-        else:
-            count = 1
+        result = await list_devices(settings, page_size=10)
+        assert isinstance(result, dict), "Should return paginated envelope"
+        devices = result["devices"]
+        assert isinstance(devices, list), "devices should be a list"
 
         return {
             "status": "PASS",
-            "message": f"Retrieved health summary for {count} site(s)",
-            "details": {"site_count": count},
+            "message": f"Retrieved {len(devices)} device(s)",
+            "details": {"device_count": len(devices)},
         }
 
     except ValueError as e:
         if "not enabled" in str(e).lower():
-            return {
-                "status": "SKIP",
-                "message": "Site Manager API not enabled",
-            }
+            return {"status": "SKIP", "message": "Site Manager API not enabled"}
         return {"status": "ERROR", "message": f"ValueError: {str(e)}"}
     except AssertionError as e:
         return {"status": "FAIL", "message": str(e)}
@@ -210,33 +203,23 @@ async def test_get_site_health_summary(settings, env: TestEnvironment) -> dict[s
 
 
 @pytest.mark.integration
-async def test_get_site_health_summary_specific(settings, env: TestEnvironment) -> dict[str, Any]:
-    """Test get_site_health_summary for specific site."""
+async def test_list_sdwan_configs(settings, env: TestEnvironment) -> dict[str, Any]:
+    """Test list_sdwan_configs (Site Manager API)."""
     try:
-        from src.tools.site_manager import get_site_health_summary
-        from src.tools.sites import list_sites
+        from src.tools.site_manager import list_sdwan_configs
 
-        # Get first site
-        sites = await list_sites(settings)
-        assert len(sites) > 0, "Need at least one site for testing"
-
-        site_id = sites[0].get("id") or sites[0].get("_id")
-        result = await get_site_health_summary(settings, site_id)
-
-        assert isinstance(result, dict), "Should return health summary dictionary"
+        result = await list_sdwan_configs(settings)
+        assert isinstance(result, list), "Should return a list of SD-WAN configs"
 
         return {
             "status": "PASS",
-            "message": f"Retrieved health summary for site {site_id[:8]}...",
-            "details": {"site_id": site_id[:8] + "..."},
+            "message": f"Retrieved {len(result)} SD-WAN config(s)",
+            "details": {"config_count": len(result)},
         }
 
     except ValueError as e:
         if "not enabled" in str(e).lower():
-            return {
-                "status": "SKIP",
-                "message": "Site Manager API not enabled",
-            }
+            return {"status": "SKIP", "message": "Site Manager API not enabled"}
         return {"status": "ERROR", "message": f"ValueError: {str(e)}"}
     except AssertionError as e:
         return {"status": "FAIL", "message": str(e)}
@@ -245,31 +228,24 @@ async def test_get_site_health_summary_specific(settings, env: TestEnvironment) 
 
 
 @pytest.mark.integration
-async def test_get_cross_site_statistics(settings, env: TestEnvironment) -> dict[str, Any]:
-    """Test get_cross_site_statistics (Site Manager API)."""
+async def test_get_isp_metrics(settings, env: TestEnvironment) -> dict[str, Any]:
+    """Test get_isp_metrics (Site Manager API)."""
     try:
-        from src.tools.site_manager import get_cross_site_statistics
+        from src.tools.site_manager import get_isp_metrics
 
-        result = await get_cross_site_statistics(settings)
-
-        assert isinstance(result, dict), "Should return statistics dictionary"
-        assert "total_sites" in result, "Should have total_sites field"
+        result = await get_isp_metrics(settings, metric_type="5m", duration="1h")
+        assert isinstance(result, dict), "Should return ISP metrics envelope"
+        assert "metrics" in result, "Should include metrics payload"
 
         return {
             "status": "PASS",
-            "message": f"Retrieved cross-site stats for {result.get('total_sites', 0)} sites",
-            "details": {
-                "total_sites": result.get("total_sites", 0),
-                "sites_healthy": result.get("sites_healthy", 0),
-            },
+            "message": "Retrieved 5m ISP metrics for last 1h",
+            "details": {"has_metrics": result["metrics"] is not None},
         }
 
     except ValueError as e:
         if "not enabled" in str(e).lower():
-            return {
-                "status": "SKIP",
-                "message": "Site Manager API not enabled",
-            }
+            return {"status": "SKIP", "message": "Site Manager API not enabled"}
         return {"status": "ERROR", "message": f"ValueError: {str(e)}"}
     except AssertionError as e:
         return {"status": "FAIL", "message": str(e)}
@@ -352,10 +328,10 @@ def create_cloud_suite() -> TestSuite:
             test_get_site_details_cloud,
             test_get_site_statistics,
             test_list_all_sites_aggregated,
-            test_get_internet_health,
-            test_get_site_health_summary,
-            test_get_site_health_summary_specific,
-            test_get_cross_site_statistics,
+            test_list_hosts,
+            test_list_devices,
+            test_list_sdwan_configs,
+            test_get_isp_metrics,
             test_list_sites_with_limit,
             test_list_sites_with_search,
         ],

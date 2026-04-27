@@ -306,26 +306,6 @@ async def get_site_manager_sites_resource() -> str:
     return await site_manager_res.get_all_sites()
 
 
-@mcp.resource("site-manager://health")
-async def get_site_manager_health_resource() -> str:
-    """Get cross-site health metrics.
-
-    Returns:
-        JSON string of health metrics
-    """
-    return await site_manager_res.get_health_metrics()
-
-
-@mcp.resource("site-manager://internet-health")
-async def get_site_manager_internet_health_resource() -> str:
-    """Get internet connectivity status.
-
-    Returns:
-        JSON string of internet health
-    """
-    return await site_manager_res.get_internet_health_status()
-
-
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------

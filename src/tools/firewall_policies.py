@@ -1025,7 +1025,7 @@ async def delete_firewall_policy(
                 "Predefined rules are managed by the UniFi system."
             )
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(sanitize_log_message(f"DRY RUN: Would delete firewall policy {policy_id}"))
             return {
                 "status": "dry_run",

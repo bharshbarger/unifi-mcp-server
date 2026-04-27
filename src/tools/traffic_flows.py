@@ -48,6 +48,7 @@ from ..utils import (
     APIError,
     ResourceNotFoundError,
     audit_action,
+    coerce_bool,
     get_logger,
     sanitize_log_message,
     validate_confirmation,
@@ -877,7 +878,7 @@ async def _create_block_action(
     if duration == "temporary" and expires_in_hours:
         expires_at = (datetime.now(timezone.utc) + timedelta(hours=expires_in_hours)).isoformat()
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(sanitize_log_message(f"[DRY RUN] Would block {block_type}={blocked_target}"))
         return BlockFlowAction(
             action_id=action_id,

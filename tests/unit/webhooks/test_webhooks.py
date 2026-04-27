@@ -3,7 +3,7 @@
 import hashlib
 import hmac
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -191,7 +191,7 @@ class TestWebhookReceiverDuplicateDetection:
             event_id="expiring-event",
         )
 
-        receiver._event_cache[event.event_id] = datetime.now() - timedelta(minutes=6)
+        receiver._event_cache[event.event_id] = datetime.now(timezone.utc) - timedelta(minutes=6)
 
         result = receiver._is_duplicate(event)
 
@@ -222,7 +222,7 @@ class TestWebhookReceiverRateLimit:
 
     def test_rate_limit_resets_after_window(self, receiver):
         receiver._rate_limit_cache["site-3"] = [
-            datetime.now() - timedelta(seconds=120) for _ in range(100)
+            datetime.now(timezone.utc) - timedelta(seconds=120) for _ in range(100)
         ]
 
         result = receiver._check_rate_limit("site-3", max_requests=100, window_seconds=60)

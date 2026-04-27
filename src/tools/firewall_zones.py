@@ -9,6 +9,7 @@ from ..models.zbf_matrix import ZoneNetworkAssignment
 from ..utils import (
     ValidationError,
     audit_action,
+    coerce_bool,
     get_logger,
     sanitize_log_message,
     validate_confirmation,
@@ -149,7 +150,7 @@ async def create_firewall_zone(
             "networkIds": network_ids if network_ids else [],
         }
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(
                 sanitize_log_message(
                     f"[DRY RUN] Would create firewall zone '{name}' for site {site_id}"
@@ -254,7 +255,7 @@ async def update_firewall_zone(
         if name is not None:
             payload["name"] = name
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(
                 sanitize_log_message(
                     f"[DRY RUN] Would update firewall zone {firewall_zone_id} for site {site_id}"
@@ -381,7 +382,7 @@ async def assign_network_to_zone(
         if zone_name is not None:
             payload["name"] = zone_name
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(
                 sanitize_log_message(
                     f"[DRY RUN] Would assign network {network_id} to zone {zone_id}"
@@ -505,7 +506,7 @@ async def delete_firewall_zone(
         if not client.is_authenticated:
             await client.authenticate()
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(sanitize_log_message(f"[DRY RUN] Would delete firewall zone {zone_id}"))
             return {"dry_run": True, "zone_id": zone_id, "action": "would_delete"}
 
@@ -589,7 +590,7 @@ async def unassign_network_from_zone(
         if zone_name is not None:
             payload["name"] = zone_name
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(
                 sanitize_log_message(
                     f"[DRY RUN] Would remove network {network_id} from zone {zone_id}"

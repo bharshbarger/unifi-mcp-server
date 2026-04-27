@@ -9,11 +9,11 @@ import hashlib
 import hmac
 import json
 from collections.abc import Callable
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException, Request, status
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from ..config import Settings
 from ..utils import get_logger
@@ -28,7 +28,8 @@ class WebhookEvent(BaseModel):
     data: dict[str, Any] = Field(..., description="Event data")
     event_id: str | None = Field(None, description="Unique event identifier")
 
-    @validator("event_type")
+    @field_validator("event_type")
+    @classmethod
     def validate_event_type(cls, v: str) -> str:
         """Validate event type format."""
         if not v or "." not in v:
@@ -242,7 +243,7 @@ class WebhookReceiver:
             return False
 
         # Clean old cache entries (older than 5 minutes)
-        cutoff = datetime.now() - timedelta(minutes=5)
+        cutoff = datetime.now(timezone.utc) - timedelta(minutes=5)
         self._event_cache = {eid: ts for eid, ts in self._event_cache.items() if ts > cutoff}
 
         # Check if event ID exists
@@ -250,7 +251,7 @@ class WebhookReceiver:
             return True
 
         # Add to cache
-        self._event_cache[event.event_id] = datetime.now()
+        self._event_cache[event.event_id] = datetime.now(timezone.utc)
         return False
 
     def _check_rate_limit(
@@ -269,7 +270,7 @@ class WebhookReceiver:
         Returns:
             True if within rate limit, False otherwise
         """
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         cutoff = now - timedelta(seconds=window_seconds)
 
         # Initialize or clean rate limit cache for this site

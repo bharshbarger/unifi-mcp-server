@@ -5,7 +5,13 @@ from typing import Any
 from ..api.client import UniFiClient
 from ..config import Settings
 from ..models import Voucher
-from ..utils import audit_action, get_logger, sanitize_log_message, validate_confirmation
+from ..utils import (
+    audit_action,
+    coerce_bool,
+    get_logger,
+    sanitize_log_message,
+    validate_confirmation,
+)
 
 logger = get_logger(__name__)
 
@@ -132,7 +138,7 @@ async def create_vouchers(
         if note:
             payload["note"] = note
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(
                 sanitize_log_message(f"[DRY RUN] Would create {count} vouchers for site {site_id}")
             )
@@ -185,7 +191,7 @@ async def delete_voucher(
         if not client.is_authenticated:
             await client.authenticate()
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(sanitize_log_message(f"[DRY RUN] Would delete voucher {voucher_id}"))
             return {"dry_run": True, "voucher_id": voucher_id}
 
@@ -231,7 +237,7 @@ async def bulk_delete_vouchers(
         if not client.is_authenticated:
             await client.authenticate()
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(
                 sanitize_log_message(f"[DRY RUN] Would bulk delete vouchers for site {site_id}")
             )

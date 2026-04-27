@@ -6,6 +6,7 @@ from ..api import UniFiClient
 from ..config import APIType, Settings
 from ..utils import (
     ResourceNotFoundError,
+    coerce_bool,
     get_logger,
     log_audit,
     sanitize_log_message,
@@ -51,7 +52,9 @@ async def list_firewall_rules(
             try:
                 v2_endpoint = f"{settings.get_v2_api_path(site_id)}/firewall-policies"
                 v2_response = await client.get(v2_endpoint)
-                v2_data = v2_response if isinstance(v2_response, list) else v2_response.get("data", [])
+                v2_data = (
+                    v2_response if isinstance(v2_response, list) else v2_response.get("data", [])
+                )
                 if v2_data:
                     rules_data = v2_data
                     logger.info(
@@ -61,7 +64,9 @@ async def list_firewall_rules(
                     )
             except Exception as e:
                 logger.debug(
-                    sanitize_log_message(f"v2 firewall-policies fallback failed for site '{site_id}': {e}")
+                    sanitize_log_message(
+                        f"v2 firewall-policies fallback failed for site '{site_id}': {e}"
+                    )
                 )
 
         # Apply pagination
@@ -193,7 +198,7 @@ async def create_firewall_rule(
         "enabled": enabled,
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would create firewall rule '{name}' in site '{site_id}'"
@@ -308,7 +313,7 @@ async def update_firewall_rule(
         "enabled": enabled,
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would update firewall rule '{rule_id}' in site '{site_id}'"
@@ -423,7 +428,7 @@ async def delete_firewall_rule(
 
     parameters = {"site_id": site_id, "rule_id": rule_id}
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would delete firewall rule '{rule_id}' from site '{site_id}'"

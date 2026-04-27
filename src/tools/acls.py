@@ -5,7 +5,13 @@ from typing import Any
 from ..api.client import UniFiClient
 from ..config import APIType, Settings
 from ..models import ACLRule
-from ..utils import audit_action, get_logger, sanitize_log_message, validate_confirmation
+from ..utils import (
+    audit_action,
+    coerce_bool,
+    get_logger,
+    sanitize_log_message,
+    validate_confirmation,
+)
 
 logger = get_logger(__name__)
 
@@ -216,7 +222,7 @@ async def create_acl_rule(
             "type": normalised_type,
         }
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(
                 sanitize_log_message(f"[DRY RUN] Would create ACL rule '{name}' for site {site_id}")
             )
@@ -334,7 +340,7 @@ async def update_acl_rule(
         if enabled is not None:
             payload["enabled"] = enabled
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(
                 sanitize_log_message(
                     f"[DRY RUN] Would update ACL rule {acl_rule_id} for site {site_id}"
@@ -394,7 +400,7 @@ async def delete_acl_rule(
         if not client.is_authenticated:
             await client.authenticate()
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(sanitize_log_message(f"[DRY RUN] Would delete ACL rule {acl_rule_id}"))
             return {"dry_run": True, "acl_rule_id": acl_rule_id}
 

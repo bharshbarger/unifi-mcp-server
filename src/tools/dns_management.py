@@ -127,10 +127,6 @@ async def update_wan_dns(
     if (dns1 is not None or dns2 is not None) and dns_preference is None:
         overrides["wan_dns_preference"] = "manual"
 
-    if dry_run_bool:
-        logger.info(sanitize_log_message(f"DRY RUN: Would update WAN DNS on {wan_network_id}"))
-        return {"status": "dry_run", "wan_network_id": wan_network_id, "changes": overrides}
-
     async with UniFiClient(settings) as client:
         logger.info(
             sanitize_log_message(f"Updating WAN DNS on {wan_network_id} for site {site_id}")
@@ -140,8 +136,36 @@ async def update_wan_dns(
 
         endpoint = f"/ea/sites/{site_id}/rest/networkconf/{wan_network_id}"
 
+        # GET-merge-PUT: the legacy V1 networkconf endpoint expects the full
+        # network object on PUT — sending only the override keys clobbers the
+        # rest of the network config.
         try:
-            response = await client.put(endpoint, json_data=overrides)
+            current_response = await client.get(endpoint)
+        except APIError:
+            logger.exception(
+                sanitize_log_message(f"Failed to fetch WAN config for {wan_network_id}")
+            )
+            raise
+
+        items = _unwrap(current_response)
+        if not items:
+            from ..utils import ResourceNotFoundError
+
+            raise ResourceNotFoundError("wan_network", wan_network_id)
+        current = items[0]
+        merged = {**current, **overrides}
+
+        if dry_run_bool:
+            logger.info(sanitize_log_message(f"DRY RUN: Would update WAN DNS on {wan_network_id}"))
+            return {
+                "status": "dry_run",
+                "wan_network_id": wan_network_id,
+                "changes": overrides,
+                "merged_payload": merged,
+            }
+
+        try:
+            response = await client.put(endpoint, json_data=merged)
         except APIError:
             logger.exception(sanitize_log_message(f"Failed to update WAN DNS on {wan_network_id}"))
             raise

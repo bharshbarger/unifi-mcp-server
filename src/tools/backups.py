@@ -1,7 +1,7 @@
 """Backup and restore operations MCP tools."""
 
 import hashlib
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -9,6 +9,7 @@ from ..api import UniFiClient
 from ..config import Settings
 from ..utils import (
     ValidationError,
+    coerce_bool,
     get_logger,
     log_audit,
     sanitize_log_message,
@@ -84,7 +85,7 @@ async def trigger_backup(
         "retention_days": retention_days,
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             f"DRY RUN: Would create {backup_type} backup for site '{site_id}' "
             f"with {retention_days} days retention"
@@ -129,7 +130,7 @@ async def trigger_backup(
             filename = (
                 download_url.split("/")[-1]
                 if download_url
-                else f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.unf"
+                else f"backup_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.unf"
             )
 
             result = {
@@ -137,7 +138,7 @@ async def trigger_backup(
                 "filename": filename,
                 "download_url": download_url,
                 "backup_type": backup_type,
-                "created_at": datetime.now().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
                 "retention_days": retention_days,
                 "status": "completed",
             }
@@ -338,7 +339,7 @@ async def download_backup(
                 "local_path": str(output_file.absolute()),
                 "size_bytes": len(backup_content),
                 "checksum": checksum if verify_checksum else None,
-                "download_time": datetime.now().isoformat(),
+                "download_time": datetime.now(timezone.utc).isoformat(),
             }
 
             logger.info(
@@ -415,7 +416,7 @@ async def delete_backup(
         "backup_filename": backup_filename,
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would delete backup '{backup_filename}' from site '{site_id}'"
@@ -454,7 +455,7 @@ async def delete_backup(
             return {
                 "backup_filename": backup_filename,
                 "status": "deleted",
-                "deleted_at": datetime.now().isoformat(),
+                "deleted_at": datetime.now(timezone.utc).isoformat(),
             }
 
     except Exception as e:
@@ -537,7 +538,7 @@ async def restore_backup(
         "create_pre_restore_backup": create_pre_restore_backup,
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would restore from backup '{backup_filename}' for site '{site_id}'"
@@ -593,7 +594,7 @@ async def restore_backup(
                 "status": "restore_initiated",
                 "pre_restore_backup_id": pre_restore_backup_id,
                 "can_rollback": pre_restore_backup_id is not None,
-                "restore_time": datetime.now().isoformat(),
+                "restore_time": datetime.now(timezone.utc).isoformat(),
                 "warning": "Controller may restart. Devices may temporarily disconnect.",
                 "restore_response": restore_response,
             }
@@ -701,7 +702,7 @@ async def validate_backup(
             "warnings": warnings,
             "errors": errors,
             "size_bytes": size_bytes,
-            "validated_at": datetime.now().isoformat(),
+            "validated_at": datetime.now(timezone.utc).isoformat(),
         }
 
         logger.info(
@@ -718,7 +719,7 @@ async def validate_backup(
             "backup_filename": backup_filename,
             "is_valid": False,
             "errors": [str(e)],
-            "validated_at": datetime.now().isoformat(),
+            "validated_at": datetime.now(timezone.utc).isoformat(),
         }
 
 
@@ -1039,7 +1040,7 @@ async def schedule_backups(
         "cloud_backup_enabled": cloud_backup_enabled,
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             f"DRY RUN: Would configure {frequency} {backup_type} backups at {time_of_day} for site '{site_id}'"
         )
@@ -1091,7 +1092,7 @@ async def schedule_backups(
                 "retention_days": retention_days,
                 "max_backups": max_backups,
                 "cloud_backup_enabled": cloud_backup_enabled,
-                "configured_at": datetime.now().isoformat(),
+                "configured_at": datetime.now(timezone.utc).isoformat(),
                 "next_run": schedule_response.get("next_run", None),
             }
 

@@ -305,6 +305,24 @@ class CacheClient:
         return ":".join(parts)
 
 
+# Module-level CacheClient cache, keyed by Settings instance id, so the
+# decorator reuses one Redis connection across calls instead of reconnecting
+# every invocation.
+_shared_cache_clients: dict[int, "CacheClient"] = {}
+
+
+async def _get_shared_cache(settings: Settings) -> "CacheClient":
+    """Return a connected, process-shared CacheClient for *settings*."""
+    key = id(settings)
+    cache = _shared_cache_clients.get(key)
+    if cache is None:
+        cache = CacheClient(settings)
+        _shared_cache_clients[key] = cache
+    if not cache._connected:
+        await cache.connect()
+    return cache
+
+
 def cached(
     resource_type: str,
     ttl: int | None = None,
@@ -315,7 +333,10 @@ def cached(
     Args:
         resource_type: Type of resource being cached
         ttl: Time to live in seconds (uses CacheConfig if not specified)
-        key_builder: Optional custom key builder function
+        key_builder: Optional custom key builder function. If not provided,
+            the default builder includes the function name plus *all* keyword
+            arguments (excluding ``settings``) so that calls with different
+            parameter values get distinct cache keys.
 
     Example:
         @cached(resource_type="sites", ttl=300)
@@ -340,34 +361,31 @@ def cached(
                 # No settings, can't use cache - call function directly
                 return await func(*args, **kwargs)
 
-            # Initialize cache client
-            cache = CacheClient(settings)
-            await cache.connect()
+            cache = await _get_shared_cache(settings)
 
             # Build cache key
             if key_builder:
                 cache_key = key_builder(*args, **kwargs)
             else:
-                # Default key builder using function name and args
+                # Include every keyword argument (other than settings) so
+                # different parameter values map to different cache keys.
                 key_parts = [resource_type, func.__name__]
-                # Add site_id if present in kwargs
-                if "site_id" in kwargs:
-                    key_parts.append(kwargs["site_id"])
+                for k in sorted(kwargs):
+                    if k == "settings":
+                        continue
+                    v = kwargs[k]
+                    if v is not None:
+                        key_parts.append(f"{k}={v}")
                 cache_key = ":".join(str(p) for p in key_parts if p)
 
-            # Try to get from cache
             cached_value = await cache.get(cache_key)
             if cached_value is not None:
-                await cache.disconnect()
                 return cached_value
 
-            # Call function
             result = await func(*args, **kwargs)
 
-            # Cache result
             cache_ttl = ttl if ttl is not None else CacheConfig.get_ttl(resource_type)
             await cache.set(cache_key, result, ttl=cache_ttl)
-            await cache.disconnect()
 
             return result
 
@@ -403,7 +421,9 @@ async def warm_cache(settings: Settings) -> dict[str, int]:
             # Warm sites cache
             try:
                 response = await client.get("/ea/sites")
-                sites = response.get("data", [])
+                # _request unwraps {"data": [...]} to a bare list, but in
+                # legacy/dict shapes we still need to dig into "data".
+                sites = response if isinstance(response, list) else response.get("data", [])
                 for site in sites:
                     site_id = site.get("id")
                     if site_id:
@@ -422,7 +442,7 @@ async def warm_cache(settings: Settings) -> dict[str, int]:
 
                 try:
                     response = await client.get(f"/ea/sites/{site_id}/devices")
-                    devices = response.get("data", [])
+                    devices = response if isinstance(response, list) else response.get("data", [])
                     key = cache.build_key("devices", site_id=site_id)
                     await cache.set(key, devices, ttl=CacheConfig.DEVICES)
                     warmed["devices"] += len(devices)

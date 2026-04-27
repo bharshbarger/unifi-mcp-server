@@ -24,6 +24,14 @@ class AuditLogger:
         # Ensure log directory exists
         self.log_file.parent.mkdir(parents=True, exist_ok=True)
 
+    def _append_line(self, line: str) -> None:
+        """Append one JSON record to the audit log (sync helper)."""
+        try:
+            with open(self.log_file, "a", encoding="utf-8") as f:
+                f.write(line)
+        except Exception as e:
+            self.logger.error(f"Failed to write audit log: {e}")
+
     def log_operation(
         self,
         operation: str,
@@ -65,12 +73,13 @@ class AuditLogger:
         if error:
             audit_record["error"] = error
 
-        # Log to file
-        try:
-            with open(self.log_file, "a", encoding="utf-8") as f:
-                f.write(json.dumps(audit_record) + "\n")
-        except Exception as e:
-            self.logger.error(f"Failed to write audit log: {e}")
+        # Append the record. POSIX guarantees atomicity for writes < PIPE_BUF
+        # (typically 4 KB) under O_APPEND, so concurrent writes from multiple
+        # coroutines won't interleave a single record. The write is sync —
+        # if you need fully non-blocking audit, replace `_append_line` with
+        # an `aiofile` implementation.
+        line = json.dumps(audit_record) + "\n"
+        self._append_line(line)
 
         # Log to application logger
         log_message = f"AUDIT: {operation} - {result}"

@@ -7,6 +7,7 @@ from ..config import Settings
 from ..utils import (
     ResourceNotFoundError,
     ValidationError,
+    coerce_bool,
     get_logger,
     log_audit,
     sanitize_log_message,
@@ -140,7 +141,7 @@ async def create_port_forward(
         "enabled": enabled,
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             f"DRY RUN: Would create port forward '{name}' "
             f"({dst_port} -> {fwd_ip}:{fwd_port}) in site '{site_id}'"
@@ -261,7 +262,7 @@ async def update_port_forward(
         "log": log,
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would update port forwarding rule '{rule_id}' in site '{site_id}'"
@@ -374,7 +375,7 @@ async def delete_port_forward(
 
     parameters = {"site_id": site_id, "rule_id": rule_id}
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             f"DRY RUN: Would delete port forwarding rule '{rule_id}' " f"from site '{site_id}'"
         )

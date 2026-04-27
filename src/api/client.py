@@ -2,8 +2,10 @@
 
 import asyncio
 import json
+import re
 import time
 from typing import Any
+from urllib.parse import quote
 from uuid import UUID
 
 import httpx
@@ -37,7 +39,12 @@ class RateLimiter:
         self._lock = asyncio.Lock()
 
     async def acquire(self) -> None:
-        """Acquire a token, waiting if necessary."""
+        """Acquire a token, waiting if necessary.
+
+        The token-bucket math runs under the lock; the sleep itself releases
+        the lock so other waiters can compute their own deadlines concurrently.
+        """
+        sleep_time = 0.0
         async with self._lock:
             now = time.time()
             time_passed = now - self.last_update
@@ -49,10 +56,14 @@ class RateLimiter:
 
             if self.tokens < 1:
                 sleep_time = (1 - self.tokens) * self.period_seconds / self.requests_per_period
-                await asyncio.sleep(sleep_time)
-                self.tokens = 0
+                # Reserve the token now so the next caller's bucket math is
+                # consistent with our impending consumption.
+                self.tokens -= 1
             else:
                 self.tokens -= 1
+
+        if sleep_time > 0:
+            await asyncio.sleep(sleep_time)
 
 
 class UniFiClient:
@@ -134,8 +145,6 @@ class UniFiClient:
             return endpoint
 
         # Local API - translate cloud format to local format
-        import re
-
         # Special case: /ea/sites (without site_id) -> Integration API
         if endpoint == "/ea/sites":
             return "/proxy/network/integration/v1/sites"
@@ -195,9 +204,15 @@ class UniFiClient:
     async def authenticate(self) -> None:
         """Authenticate with the UniFi API.
 
+        Idempotent: if the client has already authenticated successfully,
+        this returns immediately without an extra HTTP roundtrip.
+
         Raises:
             AuthenticationError: If authentication fails
         """
+        if self._authenticated:
+            return
+
         try:
             # Test authentication with a simple API call
             # Use appropriate endpoint based on API type
@@ -208,22 +223,15 @@ class UniFiClient:
 
             response = await self._request("GET", test_endpoint)
 
-            # Handle both dict and list responses
-            # Local API (after normalization) returns list directly
-            # Cloud API returns dict with "meta", "data", etc.
+            # The request would have raised on 401/403/etc., so reaching here
+            # means the controller accepted our credentials. Treat any
+            # well-formed response as authenticated.
             if isinstance(response, list):
-                # List response means we got data successfully (local API)
-                self._authenticated = True
-                # Build site UUID -> name mapping for local API
                 if self.settings.api_type == APIType.LOCAL:
                     self._build_site_uuid_map(response)
+                self._authenticated = True
             elif isinstance(response, dict):
-                # Dict response - check for success indicators
-                self._authenticated = (
-                    response.get("meta", {}).get("rc") == "ok"
-                    or response.get("data") is not None
-                    or response.get("count") is not None
-                )
+                self._authenticated = True
             else:
                 self._authenticated = False
 
@@ -262,7 +270,7 @@ class UniFiClient:
         params: dict[str, Any] | None = None,
         json_data: dict[str, Any] | None = None,
         retry_count: int = 0,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | list[dict[str, Any]]:
         """Make an HTTP request with retries and error handling.
 
         Args:
@@ -273,7 +281,10 @@ class UniFiClient:
             retry_count: Current retry attempt number
 
         Returns:
-            Response data as dictionary
+            Response data. May be a dict (object responses) or a list
+            (when the API wraps a collection in ``{"data": [...]}`` — the
+            wrapper is unwrapped here for caller convenience). Callers
+            should ``isinstance``-check before calling ``.get()``.
 
         Raises:
             APIError: If API returns an error
@@ -423,16 +434,10 @@ class UniFiClient:
             self.logger.error(f"Unexpected error during API request: {e}")
             raise APIError(f"Unexpected error: {e}") from e
 
-    async def get(self, endpoint: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
-        """Make a GET request.
-
-        Args:
-            endpoint: API endpoint path
-            params: Query parameters
-
-        Returns:
-            Response data
-        """
+    async def get(
+        self, endpoint: str, params: dict[str, Any] | None = None
+    ) -> dict[str, Any] | list[dict[str, Any]]:
+        """Make a GET request."""
         return await self._request("GET", endpoint, params=params)
 
     async def post(
@@ -440,17 +445,8 @@ class UniFiClient:
         endpoint: str,
         json_data: dict[str, Any],
         params: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        """Make a POST request.
-
-        Args:
-            endpoint: API endpoint path
-            json_data: JSON request body
-            params: Query parameters
-
-        Returns:
-            Response data
-        """
+    ) -> dict[str, Any] | list[dict[str, Any]]:
+        """Make a POST request."""
         return await self._request("POST", endpoint, params=params, json_data=json_data)
 
     async def put(
@@ -458,29 +454,14 @@ class UniFiClient:
         endpoint: str,
         json_data: dict[str, Any],
         params: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        """Make a PUT request.
-
-        Args:
-            endpoint: API endpoint path
-            json_data: JSON request body
-            params: Query parameters
-
-        Returns:
-            Response data
-        """
+    ) -> dict[str, Any] | list[dict[str, Any]]:
+        """Make a PUT request."""
         return await self._request("PUT", endpoint, params=params, json_data=json_data)
 
-    async def delete(self, endpoint: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
-        """Make a DELETE request.
-
-        Args:
-            endpoint: API endpoint path
-            params: Query parameters
-
-        Returns:
-            Response data
-        """
+    async def delete(
+        self, endpoint: str, params: dict[str, Any] | None = None
+    ) -> dict[str, Any] | list[dict[str, Any]]:
+        """Make a DELETE request."""
         return await self._request("DELETE", endpoint, params=params)
 
     @staticmethod
@@ -527,7 +508,9 @@ class UniFiClient:
 
         for site in sites:
             if not isinstance(site, dict):
-                self.logger.warning(f"Skipping non-dict site entry in resolve: {type(site).__name__}")
+                self.logger.warning(
+                    f"Skipping non-dict site entry in resolve: {type(site).__name__}"
+                )
                 continue
             site_id = site.get("id") or site.get("_id")
             if not site_id:
@@ -636,20 +619,33 @@ class UniFiClient:
         """
         site_id = await self.resolve_site_id(site_id)
 
+        safe_name = quote(backup_filename, safe="")
+
         # For local API
         if self.settings.api_type == APIType.LOCAL:
-            endpoint = f"/proxy/network/data/backup/{backup_filename}"
+            endpoint = f"/proxy/network/data/backup/{safe_name}"
         else:
             # Cloud API
-            endpoint = f"/ea/sites/{site_id}/backups/{backup_filename}/download"
+            endpoint = f"/ea/sites/{site_id}/backups/{safe_name}/download"
 
-        # Use direct HTTP client for binary download
+        # Apply the same rate limiting and retry policy as JSON requests.
+        await self.rate_limiter.acquire()
+
         full_url = f"{self.settings.base_url}{endpoint}"
 
-        response = await self.client.get(full_url)
-        response.raise_for_status()
-
-        return response.content
+        retries = 0
+        while True:
+            try:
+                response = await self.client.get(full_url)
+                response.raise_for_status()
+                return response.content
+            except (httpx.TimeoutException, httpx.NetworkError) as e:
+                if retries >= self.settings.max_retries:
+                    raise NetworkError(f"Backup download failed: {e}") from e
+                backoff = self.settings.retry_backoff_factor**retries
+                self.logger.warning(f"Backup download retry {retries + 1} in {backoff}s")
+                await asyncio.sleep(backoff)
+                retries += 1
 
     async def delete_backup(
         self,
@@ -670,12 +666,14 @@ class UniFiClient:
         """
         site_id = await self.resolve_site_id(site_id)
 
+        safe_name = quote(backup_filename, safe="")
+
         # For local API
         if self.settings.api_type == APIType.LOCAL:
-            endpoint = f"/proxy/network/api/backup/delete-backup/{backup_filename}"
+            endpoint = f"/proxy/network/api/backup/delete-backup/{safe_name}"
         else:
             # Cloud API
-            endpoint = f"/ea/sites/{site_id}/backups/{backup_filename}"
+            endpoint = f"/ea/sites/{site_id}/backups/{safe_name}"
 
         return await self.delete(endpoint)
 
@@ -709,7 +707,8 @@ class UniFiClient:
             payload = {"filename": backup_filename}
         else:
             # Cloud API
-            endpoint = f"/ea/sites/{site_id}/backups/{backup_filename}/restore"
+            safe_name = quote(backup_filename, safe="")
+            endpoint = f"/ea/sites/{site_id}/backups/{safe_name}/restore"
             payload = {"backup_id": backup_filename}
 
         return await self.post(endpoint, json_data=payload)

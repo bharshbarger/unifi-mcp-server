@@ -7,6 +7,7 @@ from ..config import Settings
 from ..utils import (
     ResourceNotFoundError,
     ValidationError,
+    coerce_bool,
     get_logger,
     log_audit,
     sanitize_log_message,
@@ -92,7 +93,7 @@ async def restart_device(
 
     parameters = {"site_id": site_id, "device_mac": device_mac}
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would restart device '{device_mac}' in site '{site_id}'"
@@ -191,7 +192,7 @@ async def locate_device(
 
     action = "enable" if enabled else "disable"
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would {action} locate mode for device '{device_mac}' "
@@ -298,7 +299,7 @@ async def upgrade_device(
         "firmware_url": firmware_url,
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would initiate firmware upgrade for device '{device_mac}' "
@@ -540,7 +541,7 @@ async def set_ap_radio_channel(
         "tx_power": tx_power,
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would set {radio} channel to "

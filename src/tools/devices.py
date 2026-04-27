@@ -9,6 +9,7 @@ from ..utils import (
     APIError,
     ResourceNotFoundError,
     audit_action,
+    coerce_bool,
     get_logger,
     sanitize_log_message,
     validate_confirmation,
@@ -114,7 +115,10 @@ async def get_device_statistics(site_id: str, device_id: str, settings: Settings
         devices_data = response.get("data", []) if isinstance(response, dict) else response
 
         for device_data in devices_data:
-            if device_data.get("_id") == device_id:
+            # Match either the modern integration UUID (``id``) or the legacy
+            # internal-stats ObjectId (``_id``); ``validate_device_id`` accepts
+            # both formats.
+            if device_data.get("id") == device_id or device_data.get("_id") == device_id:
                 # Extract statistics
                 stats = {
                     "device_id": device_id,
@@ -315,7 +319,7 @@ async def adopt_device(
         if name:
             payload["name"] = name
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(sanitize_log_message(f"[DRY RUN] Would adopt device {device_id}"))
             return {"dry_run": True, "device_id": device_id, "payload": payload}
 
@@ -377,7 +381,7 @@ async def execute_port_action(
 
         payload = {"action": action, "params": params or {}}
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(
                 sanitize_log_message(
                     f"[DRY RUN] Would execute port action '{action}' on device {device_id} port {port_idx}"

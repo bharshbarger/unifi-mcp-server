@@ -9,6 +9,7 @@ from ..utils import (
     DuplicateResourceError,
     ResourceNotFoundError,
     ValidationError,
+    coerce_bool,
     get_logger,
     log_audit,
     sanitize_log_message,
@@ -203,7 +204,7 @@ async def create_port_profile(
                         "port_profile", name, profile.get("_id", "unknown")
                     )
 
-            if dry_run:
+            if coerce_bool(dry_run):
                 logger.info(
                     sanitize_log_message(
                         f"DRY RUN: Would create port profile '{name}' in site '{site_id}'"
@@ -316,7 +317,7 @@ async def update_port_profile(
         "forward": forward,
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would update port profile '{profile_id}' in site '{site_id}'"
@@ -435,7 +436,7 @@ async def delete_port_profile(
 
     parameters = {"site_id": site_id, "profile_id": profile_id}
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would delete port profile '{profile_id}' from site '{site_id}'"
@@ -638,7 +639,7 @@ async def set_device_port_overrides(
             else:
                 final_overrides = port_overrides
 
-            if dry_run:
+            if coerce_bool(dry_run):
                 logger.info(
                     f"DRY RUN: Would set {len(final_overrides)} port overrides "
                     f"on device '{device_id}' in site '{site_id}'"

@@ -7,6 +7,7 @@ from ..config import Settings
 from ..utils import (
     ResourceNotFoundError,
     ValidationError,
+    coerce_bool,
     get_logger,
     log_audit,
     sanitize_log_message,
@@ -196,7 +197,7 @@ async def create_wlan(
         "password": "***MASKED***" if password else None,
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(f"DRY RUN: Would create WLAN '{name}' in site '{site_id}'")
         )
@@ -359,7 +360,7 @@ async def update_wlan(
         "password": "***MASKED***" if password else None,
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(f"DRY RUN: Would update WLAN '{wlan_id}' in site '{site_id}'")
         )
@@ -492,7 +493,7 @@ async def delete_wlan(
 
     parameters = {"site_id": site_id, "wlan_id": wlan_id}
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(f"DRY RUN: Would delete WLAN '{wlan_id}' from site '{site_id}'")
         )

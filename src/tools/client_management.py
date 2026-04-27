@@ -6,6 +6,7 @@ from ..api import UniFiClient
 from ..config import Settings
 from ..utils import (
     ResourceNotFoundError,
+    coerce_bool,
     get_logger,
     log_audit,
     sanitize_log_message,
@@ -45,7 +46,7 @@ async def block_client(
 
     parameters = {"site_id": site_id, "client_mac": client_mac}
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(f"DRY RUN: Would block client '{client_mac}' in site '{site_id}'")
         )
@@ -133,7 +134,7 @@ async def unblock_client(
 
     parameters = {"site_id": site_id, "client_mac": client_mac}
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would unblock client '{client_mac}' in site '{site_id}'"
@@ -213,7 +214,7 @@ async def reconnect_client(
 
     parameters = {"site_id": site_id, "client_mac": client_mac}
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would force reconnect for client '{client_mac}' in site '{site_id}'"
@@ -319,7 +320,7 @@ async def authorize_guest(
         "duration": duration,
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would authorize guest client '{client_mac}' for {duration}s in site '{site_id}'"
@@ -431,7 +432,7 @@ async def limit_bandwidth(
         "download_limit_kbps": download_limit_kbps,
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would apply bandwidth limits to client '{client_mac}' in site '{site_id}'"

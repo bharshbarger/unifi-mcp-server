@@ -19,6 +19,7 @@ from ..models.qos_profile import TrafficRoute
 from ..utils import (
     ValidationError,
     audit_action,
+    coerce_bool,
     get_logger,
     sanitize_log_message,
     validate_confirmation,
@@ -157,7 +158,7 @@ async def create_traffic_route(
     if bandwidth_limit_kbps is not None:
         route_data["bandwidth_limit_kbps"] = bandwidth_limit_kbps
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"[DRY RUN] Would create traffic route '{name}' for site {site_id}"
@@ -240,7 +241,7 @@ async def update_traffic_route(
     if not update_data:
         raise ValidationError("No update fields provided")
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"[DRY RUN] Would update traffic route {route_id} for site {site_id}"

@@ -8,6 +8,7 @@ from ..models.traffic_matching_list import TrafficMatchingList, TrafficMatchingL
 from ..utils import (
     ResourceNotFoundError,
     ValidationError,
+    coerce_bool,
     get_logger,
     log_audit,
     sanitize_log_message,
@@ -163,7 +164,7 @@ async def create_traffic_matching_list(
         "items_count": len(items),
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would create traffic matching list '{name}' in site '{site_id}'"
@@ -269,7 +270,7 @@ async def update_traffic_matching_list(
         "items_count": len(items) if items else None,
     }
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             sanitize_log_message(
                 f"DRY RUN: Would update traffic matching list '{list_id}' in site '{site_id}'"
@@ -380,7 +381,7 @@ async def delete_traffic_matching_list(
 
     parameters = {"site_id": site_id, "list_id": list_id}
 
-    if dry_run:
+    if coerce_bool(dry_run):
         logger.info(
             f"DRY RUN: Would delete traffic matching list '{list_id}' from site '{site_id}'"
         )

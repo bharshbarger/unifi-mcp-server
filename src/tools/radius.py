@@ -5,7 +5,13 @@ from typing import Any
 from ..api.client import UniFiClient
 from ..config import Settings
 from ..models.radius import GuestPortalConfig, HotspotPackage, RADIUSAccount, RADIUSProfile
-from ..utils import audit_action, get_logger, sanitize_log_message, validate_confirmation
+from ..utils import (
+    audit_action,
+    coerce_bool,
+    get_logger,
+    sanitize_log_message,
+    validate_confirmation,
+)
 
 logger = get_logger(__name__)
 
@@ -129,7 +135,7 @@ async def create_radius_profile(
         if acct_secret:
             payload["acct_secret"] = acct_secret
 
-        if dry_run:
+        if coerce_bool(dry_run):
             # Build safe payload without secrets for logging
             payload_safe = {
                 "name": name,
@@ -239,7 +245,7 @@ async def update_radius_profile(
         if enabled is not None:
             payload["enabled"] = enabled
 
-        if dry_run:
+        if coerce_bool(dry_run):
             # Build safe payload without secrets for logging
             payload_safe = {}
             if name is not None:
@@ -316,7 +322,7 @@ async def delete_radius_profile(
         if not client.is_authenticated:
             await client.authenticate()
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(sanitize_log_message(f"[DRY RUN] Would delete RADIUS profile {profile_id}"))
             return {"dry_run": True, "profile_id": profile_id}
 
@@ -433,7 +439,7 @@ async def create_radius_account(
         if note:
             payload["note"] = note
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(
                 sanitize_log_message(f"[DRY RUN] Would create RADIUS account for site {site_id}")
             )
@@ -563,7 +569,7 @@ async def update_radius_account(
         if not client.is_authenticated:
             await client.authenticate()
 
-        if dry_run:
+        if coerce_bool(dry_run):
             payload_safe = payload.copy()
             if "x_password" in payload_safe:
                 payload_safe["x_password"] = "***REDACTED***"
@@ -625,7 +631,7 @@ async def delete_radius_account(
         if not client.is_authenticated:
             await client.authenticate()
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(sanitize_log_message(f"[DRY RUN] Would delete RADIUS account {account_id}"))
             return {"dry_run": True, "account_id": account_id}
 
@@ -737,7 +743,7 @@ async def configure_guest_portal(
         if terms_of_service_text is not None:
             payload["terms_of_service_text"] = terms_of_service_text
 
-        if dry_run:
+        if coerce_bool(dry_run):
             # Build safe payload without secrets for logging
             payload_safe = {}
             if portal_title is not None:
@@ -871,7 +877,7 @@ async def create_hotspot_package(
         if price is not None:
             payload["price"] = price
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(
                 sanitize_log_message(
                     f"[DRY RUN] Would create hotspot package '{name}' for site {site_id}"
@@ -1006,7 +1012,7 @@ async def update_hotspot_package(
         if not client.is_authenticated:
             await client.authenticate()
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(
                 sanitize_log_message(
                     f"[DRY RUN] Would update hotspot package {package_id} for site {site_id}"
@@ -1062,7 +1068,7 @@ async def delete_hotspot_package(
         if not client.is_authenticated:
             await client.authenticate()
 
-        if dry_run:
+        if coerce_bool(dry_run):
             logger.info(
                 sanitize_log_message(f"[DRY RUN] Would delete hotspot package {package_id}")
             )

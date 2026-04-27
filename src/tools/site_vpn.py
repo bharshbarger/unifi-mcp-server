@@ -5,7 +5,13 @@ from typing import Any
 from ..api import UniFiClient
 from ..config import Settings
 from ..models.vpn import SiteToSiteVPN
-from ..utils import ResourceNotFoundError, get_logger, sanitize_log_message, validate_site_id
+from ..utils import (
+    ResourceNotFoundError,
+    coerce_bool,
+    get_logger,
+    sanitize_log_message,
+    validate_site_id,
+)
 
 
 async def list_site_to_site_vpns(site_id: str, settings: Settings) -> list[dict[str, Any]]:
@@ -82,10 +88,10 @@ async def update_site_to_site_vpn(
         if x_ipsec_pre_shared_key is not None:
             updates["x_ipsec_pre_shared_key"] = x_ipsec_pre_shared_key
 
-        if dry_run:
+        if coerce_bool(dry_run):
             return {"dry_run": True, "vpn_id": vpn_id, "updates": updates}
 
-        if not confirm:
+        if not coerce_bool(confirm):
             return {"error": "confirm=True required", "vpn_id": vpn_id, "updates": updates}
 
         # Merge and update

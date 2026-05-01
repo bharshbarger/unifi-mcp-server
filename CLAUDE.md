@@ -17,8 +17,8 @@ The UniFi MCP Server is a Model Context Protocol (MCP) server that exposes the U
 1. **Read Key Documentation**:
    - `README.md` - Project overview and features
    - `AGENTS.md` - Universal AI agent guidelines
-   - `DEVELOPMENT_PLAN.md` - Roadmap and priorities
-   - `TODO.md` - Current tasks and phase breakdown
+   - `DEVELOPMENT_PLAN.md` - Roadmap and priorities (authoritative)
+   - `TODO.md` - Small open follow-ups (the historical phase-by-phase roadmap was archived to `docs/archive/TODO-2025-11-archive.md`; use `DEVELOPMENT_PLAN.md` for that)
    - `API.md` - Complete MCP tool documentation
 
 2. **Understand the Architecture**:

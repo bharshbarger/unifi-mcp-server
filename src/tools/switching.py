@@ -38,6 +38,7 @@ async def list_switch_stacks(
 
     async with UniFiClient(settings) as client:
         await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         endpoint = settings.get_integration_path(f"sites/{site_id}/switching/switch-stacks")
         response = await client.get(endpoint)
@@ -80,6 +81,7 @@ async def get_switch_stack(
 
     async with UniFiClient(settings) as client:
         await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         endpoint = settings.get_integration_path(
             f"sites/{site_id}/switching/switch-stacks/{switch_stack_id}"
@@ -122,6 +124,7 @@ async def list_mclag_domains(
 
     async with UniFiClient(settings) as client:
         await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         endpoint = settings.get_integration_path(f"sites/{site_id}/switching/mc-lag-domains")
         response = await client.get(endpoint)
@@ -164,6 +167,7 @@ async def get_mclag_domain(
 
     async with UniFiClient(settings) as client:
         await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         endpoint = settings.get_integration_path(
             f"sites/{site_id}/switching/mc-lag-domains/{mclag_domain_id}"
@@ -208,6 +212,7 @@ async def list_lags(
 
     async with UniFiClient(settings) as client:
         await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         endpoint = settings.get_integration_path(f"sites/{site_id}/switching/lags")
         response = await client.get(endpoint)
@@ -250,6 +255,7 @@ async def get_lag_details(
 
     async with UniFiClient(settings) as client:
         await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         endpoint = settings.get_integration_path(f"sites/{site_id}/switching/lags/{lag_id}")
         response = await client.get(endpoint)

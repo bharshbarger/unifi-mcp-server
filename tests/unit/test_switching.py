@@ -296,3 +296,84 @@ class TestGetLagDetails:
 
         with pytest.raises(ValidationError):
             await get_lag_details("site-1", "", mock_settings)
+
+
+class TestSwitchingSiteUuidResolution:
+    """Regression: each Switching tool must resolve a friendly site identifier
+    (e.g. "default") to the controller's site UUID before building the
+    /integration/v1/sites/{id}/switching/... URL. The integration API rejects
+    "default" with 400 api.request.argument-type-mismatch."""
+
+    @staticmethod
+    def _build_resolving_client(get_response):
+        client = AsyncMock()
+        client.authenticate = AsyncMock()
+        client.resolve_site_id = AsyncMock(return_value="resolved-uuid-abc")
+        client.get = AsyncMock(return_value=get_response)
+        return client
+
+    def _assert_resolved(self, client):
+        client.resolve_site_id.assert_awaited_once_with("default")
+        called_url = client.get.call_args.args[0]
+        assert "resolved-uuid-abc" in called_url
+        assert "/sites/default/" not in called_url
+
+    @pytest.mark.asyncio
+    async def test_list_switch_stacks_resolves_default_to_uuid(self, mock_settings):
+        from src.tools.switching import list_switch_stacks
+
+        with patch("src.tools.switching.UniFiClient") as mock_client_class:
+            client = self._build_resolving_client({"data": []})
+            mock_client_class.return_value.__aenter__.return_value = client
+            await list_switch_stacks("default", mock_settings)
+            self._assert_resolved(client)
+
+    @pytest.mark.asyncio
+    async def test_get_switch_stack_resolves_default_to_uuid(self, mock_settings):
+        from src.tools.switching import get_switch_stack
+
+        with patch("src.tools.switching.UniFiClient") as mock_client_class:
+            client = self._build_resolving_client({"data": [make_switch_stack("ss-1")]})
+            mock_client_class.return_value.__aenter__.return_value = client
+            await get_switch_stack("default", "ss-1", mock_settings)
+            self._assert_resolved(client)
+
+    @pytest.mark.asyncio
+    async def test_list_mclag_domains_resolves_default_to_uuid(self, mock_settings):
+        from src.tools.switching import list_mclag_domains
+
+        with patch("src.tools.switching.UniFiClient") as mock_client_class:
+            client = self._build_resolving_client({"data": []})
+            mock_client_class.return_value.__aenter__.return_value = client
+            await list_mclag_domains("default", mock_settings)
+            self._assert_resolved(client)
+
+    @pytest.mark.asyncio
+    async def test_get_mclag_domain_resolves_default_to_uuid(self, mock_settings):
+        from src.tools.switching import get_mclag_domain
+
+        with patch("src.tools.switching.UniFiClient") as mock_client_class:
+            client = self._build_resolving_client({"data": [make_mclag_domain("mc-1")]})
+            mock_client_class.return_value.__aenter__.return_value = client
+            await get_mclag_domain("default", "mc-1", mock_settings)
+            self._assert_resolved(client)
+
+    @pytest.mark.asyncio
+    async def test_list_lags_resolves_default_to_uuid(self, mock_settings):
+        from src.tools.switching import list_lags
+
+        with patch("src.tools.switching.UniFiClient") as mock_client_class:
+            client = self._build_resolving_client({"data": []})
+            mock_client_class.return_value.__aenter__.return_value = client
+            await list_lags("default", mock_settings)
+            self._assert_resolved(client)
+
+    @pytest.mark.asyncio
+    async def test_get_lag_details_resolves_default_to_uuid(self, mock_settings):
+        from src.tools.switching import get_lag_details
+
+        with patch("src.tools.switching.UniFiClient") as mock_client_class:
+            client = self._build_resolving_client({"data": [make_lag("lag-1")]})
+            mock_client_class.return_value.__aenter__.return_value = client
+            await get_lag_details("default", "lag-1", mock_settings)
+            self._assert_resolved(client)

@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-05-01
+
+This release covers 36 commits since `0.2.4` across firewall, traffic, switching, diagnostics, secrets handling, and Site Manager surface area. The major-bump is driven by the Site Manager tool/model trim — calls to the removed names will fail and require update.
+
+### Breaking
+
+- **Site Manager API trim** (`9bca756`). Removed 6 tools: `get_internet_health`, `get_site_health_summary`, `get_cross_site_statistics`, `list_vantage_points`, `compare_site_performance`, `get_version_control`. Removed 8 unused models (SiteHealthSummary, InternetHealthMetrics, CrossSiteStatistics, VantagePoint, SitePerformanceMetrics, CrossSitePerformanceComparison, ISPMetrics, VersionControl). Removed MCP resources `site-manager://health` and `site-manager://internet-health`. Survivors: `list_all_sites_aggregated`, `list_hosts`, `get_host`, `get_isp_metrics`, `query_isp_metrics`, plus a new `list_devices`. Net −1,306 lines; the SM client now centralizes HTTP through `_request`.
+
+### Added
+
+- **Switching API** (`c48384b`, `6003c60`). New tools for switch stacks, MC-LAG domains, and LAGs: `list_switch_stacks`, `get_switch_stack`, `list_mclag_domains`, `get_mclag_domain`, `list_lags`, `get_lag_details`. Models in `src/models/switching.py`. Fully TDD-built.
+- **Diagnostics module** (`74531de`). Network References (`get_network_references`), Speed Test (`run_speed_test`, `get_speed_test_status`, `get_speed_test_history`), and Spectrum Scan (`get_spectrum_scan`, `list_spectrum_interference`).
+- **Firewall groups CRUD** (`016c573`, `1c91509`). Address/port group create/read/update/delete with port matching on policies.
+- **Zone-based firewall policies** (`af1cd56`, `a2d5139`). Policy CRUD against the v2 endpoint with a zone-name resolver.
+- **Traffic Flows v2** (`44a6cda`, `73c3b0f`). Rewritten against the local v2 endpoint; new `find_flows_for_rule_reference` tool.
+- **macOS Keychain secrets** (`3b2a977`). `Settings.resolve_secrets_from_keychain()` resolves `api_key` and `site_manager_api_key` in order: env var → Keychain (`security` CLI) → `ConfigurationError`. `Settings.describe_secret_sources()` exposes per-key provenance, logged at startup. `Settings.resolved_site_manager_api_key()` and `get_site_manager_headers()` let the SM client use a dedicated key when provided. `scripts/seed-keychain.sh` interactive seeder. README and `.env.example` updated; env vars are now a fallback for non-macOS / CI hosts.
+- **Claude Code stdio launcher** (`4d2e16b`). `scripts/launch-mcp.sh` wraps the venv entry point so Claude Code can spawn the server over stdio with no secrets in harness config — secrets stay in Keychain.
+- **WLAN updates** (`a8e0ea8`, `d92cc90`). `update_wlan` parameter parity, AP radio channel config, `wlan_bands` parameter.
+- **`update_port_forward`** tool (`e6a943d`).
+
+### Changed
+
+- **Cross-cutting cleanup** (`449ea57`). `coerce_bool` adopted across 19 tool modules for uniform `dry_run` / `confirm` parsing. `datetime.now()` → `datetime.now(timezone.utc)` in audit and backup paths. Pydantic v1 → v2 validator migration in `src/webhooks/receiver.py`. Process-shared `CacheClient` pool keyed by `Settings` id. `_append_line` audit helper extracted. `uv.lock` pinned to `exclude-newer = 2026-04-19T17:52:51Z`.
+- **API client** (`449ea57`). `authenticate()` is now idempotent. Rate-limiter token wait runs *outside* the bucket lock so concurrent waiters compute deadlines independently.
+- **Documentation** (`647b6ba`, `bc80620`). `UNIFI_API.md` bumped to v10.3.55. `DEVELOPMENT_PLAN.md` rewritten for full-API-coverage roadmap (v10.3.55 + Site Manager v1.0 + Protect v6.2.83).
+- **Security hardening + main.py refactor** (`2359fe1`).
+
+### Fixed
+
+- **`Network.vlan_id` blank-coercion** (`d82bf77`). The local controller returns `vlan: ""` for VLAN-disabled networks (the default LAN); the model declared `vlan_id: int | None` with no coercion hook so `list_vlans` crashed with a Pydantic `ValidationError` before returning data. A `mode='before'` field validator now maps blank/whitespace strings to `None` while letting numeric strings still parse. 6 model-layer tests + 1 tool-layer regression test.
+- **`update_wan_dns`** (`449ea57`). Switched from partial PUT to GET-merge-PUT — the legacy V1 `networkconf` endpoint expects the full network object on PUT, so the previous partial PUT was clobbering unrelated fields on every call.
+- **Local API mode response normalization** (`a003b68`, `b645533`, `a13032d`). Single-object response unwrap and parsing fixes across all tool modules.
+- **Cloud-EA + Site Manager hardening** (`d021b7f`). API compatibility fixes.
+- **Integration API compatibility** (`c0b61cc`). ACLs, zones, devices, traffic flows.
+- **Firewall zones** (`5c98370`, #54). Zone PUT payload now uses `networkIds` (the API contract), not `networks`.
+- **Network model** (`229e07e`). VLAN model alias + API field name; removed immutable `purpose` parameter.
+- **WLAN** (`a0a9da4`). `update_wlan` syncs the legacy `wlan_band` field when `wlan_bands` is updated.
+- **Local API bug pile** (`5c18c9e`, `79277ae`, #57). Cumulative bug fixes in local-mode tools and removal of endpoints that don't exist in the local API.
+- **Dependabot vulnerabilities** (`e0d3b88`).
+
+### Tests
+
+- 1,230 unit tests passing (up from 1,159 at 0.2.4).
+- New: `tests/unit/models/test_network.py`, `tests/unit/tools/test_networks_tools.py::TestListVlans::test_list_vlans_handles_blank_vlan_field`, `tests/unit/api/test_site_manager_client.py`, `tests/unit/config/test_keychain.py` (12 tests), full TDD suites for Switching and Diagnostics.
+
+### Known issues / open follow-ups
+
+- `list_firewall_policies` returns a controller 500 (HTML body) when Zone-Based Firewall is not configured; should be mapped to a typed `NotConfiguredError` like `list_firewall_zones` does.
+- `list_wlans` returns `x_passphrase` in plaintext; redact-by-default with an opt-in flag is open for design.
+- Startup log warns `Component already exists: tool:list_radius_profiles@`; pre-existing duplicate registration in `src/tools/radius.py`.
+
 ## [0.2.4] - 2026-02-19
 
 ### Fixed

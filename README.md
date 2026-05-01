@@ -12,7 +12,7 @@ A Model Context Protocol (MCP) server that exposes the UniFi Network Controller 
 
 ## 📋 Version Notice
 
-**Current Stable Release**: 0.2.4 (2026-02-19) 🎉
+**Current Release**: 0.3.0 (2026-05-01)
 
 **Installation:**
 
@@ -20,11 +20,22 @@ A Model Context Protocol (MCP) server that exposes the UniFi Network Controller 
 pip install unifi-mcp-server
 ```
 
-**What's New in v0.2.4 (Hotfix):**
+**What's New in v0.3.0:**
 
-- 🚨 **Critical Startup Fix (issue #42)** - `ImportError: cannot import 'config' from 'agnost'` prevented the server from starting for all users, even when `AGNOST_ENABLED=false`. The fix moves agnost imports inside the conditional block with graceful error handling.
-- 📌 **Dependency Pin** - Excluded broken `agnost==0.1.13` from the version range (`>=0.1.12,!=0.1.13`)
-- 🧪 **1,325 Tests Passing** - 1219 unit + 106 integration tests, cloud-ea API compatibility fixes, Site Manager endpoint hardening
+- **Breaking — Site Manager trim** — 6 cloud-only Site Manager tools removed (see `CHANGELOG.md`).
+- **Switching API** — switch stacks, MC-LAG domains, LAGs (6 new tools).
+- **Diagnostics** — Network References, Speed Test, Spectrum Scan (6 new tools).
+- **Firewall** — address/port group CRUD, zone-based policy CRUD with zone-name resolver.
+- **Traffic Flows v2** — rewritten against the local v2 endpoint; rule-reference lookup.
+- **macOS Keychain secrets** — API keys load from Keychain via the `security` CLI; env vars become a fallback for non-macOS/CI hosts. New `scripts/seed-keychain.sh` interactive seeder.
+- **Claude Code launcher** — `scripts/launch-mcp.sh` for stdio registration with no secrets in harness config.
+- **`list_vlans` Pydantic crash fix** — `vlan=""` on VLAN-disabled networks now coerces to `None`.
+- **1,230 unit tests passing** (up from 1,159 at 0.2.4).
+
+**Previous Release - v0.2.4 (2026-02-19):**
+
+- 🚨 **Critical Startup Fix (issue #42)** - `ImportError: cannot import 'config' from 'agnost'` prevented the server from starting for all users, even when `AGNOST_ENABLED=false`.
+- 📌 **Dependency Pin** - Excluded broken `agnost==0.1.13` from the version range.
 
 **Previous Release - v0.2.3 (2026-02-18):**
 

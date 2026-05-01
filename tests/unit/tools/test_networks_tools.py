@@ -179,6 +179,41 @@ class TestListVlans:
         with pytest.raises(ValidationError):
             await list_vlans("", mock_settings)
 
+    @pytest.mark.asyncio
+    async def test_list_vlans_handles_blank_vlan_field(self, mock_settings):
+        # Regression: local controller returns vlan="" for VLAN-disabled
+        # networks (the default LAN). Pin at the tool layer so the model's
+        # blank-string coercion isn't accidentally undone.
+        response = {
+            "data": [
+                {
+                    "_id": "net-default",
+                    "name": "Default",
+                    "purpose": "corporate",
+                    "vlan": "",
+                    "vlan_enabled": False,
+                    "ip_subnet": "192.168.1.1/24",
+                },
+                {
+                    "_id": "net-work",
+                    "name": "work",
+                    "purpose": "corporate",
+                    "vlan": 2,
+                    "vlan_enabled": True,
+                    "ip_subnet": "192.168.2.1/24",
+                },
+            ]
+        }
+
+        with patch("src.tools.networks.UniFiClient") as mock_client_class:
+            mock_client_class.return_value = create_mock_client([response])
+
+            result = await list_vlans("site-1", mock_settings)
+
+            assert len(result) == 2
+            assert result[0]["vlan_id"] is None
+            assert result[1]["vlan_id"] == 2
+
 
 class TestGetSubnetInfo:
     @pytest.mark.asyncio

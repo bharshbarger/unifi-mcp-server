@@ -338,6 +338,7 @@ async def authorize_guest(
     try:
         async with UniFiClient(settings) as client:
             await client.authenticate()
+            site_id = await client.resolve_site_id(site_id)
 
             # Build authorization payload
             auth_data = {
@@ -455,6 +456,7 @@ async def limit_bandwidth(
     try:
         async with UniFiClient(settings) as client:
             await client.authenticate()
+            site_id = await client.resolve_site_id(site_id)
 
             # Build bandwidth limit payload
             limit_data = {

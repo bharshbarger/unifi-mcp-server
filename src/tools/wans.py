@@ -24,6 +24,8 @@ async def list_wan_connections(site_id: str, settings: Settings) -> list[dict]:
         if not client.is_authenticated:
             await client.authenticate()
 
+        site_id = await client.resolve_site_id(site_id)
+
         response = await client.get(f"/integration/v1/sites/{site_id}/wans")
         data = response if isinstance(response, list) else response.get("data", [])
 

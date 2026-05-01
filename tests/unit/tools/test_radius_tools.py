@@ -84,6 +84,7 @@ async def test_list_radius_profiles_success(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -118,6 +119,7 @@ async def test_get_radius_profile_success(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -148,6 +150,7 @@ async def test_create_radius_profile_success(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.post = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -174,6 +177,7 @@ async def test_create_radius_profile_dry_run(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
         mock_client_class.return_value = mock_client
@@ -227,6 +231,7 @@ async def test_update_radius_profile_success(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.put = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -253,6 +258,7 @@ async def test_delete_radius_profile_success(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.delete = AsyncMock()
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -298,6 +304,7 @@ async def test_list_radius_accounts_success(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -331,6 +338,7 @@ async def test_create_radius_account_success(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.post = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -370,6 +378,7 @@ async def test_delete_radius_account_success(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.delete = AsyncMock()
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -406,6 +415,7 @@ async def test_get_guest_portal_config_success(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -437,6 +447,7 @@ async def test_configure_guest_portal_success(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.put = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -466,6 +477,7 @@ async def test_configure_guest_portal_dry_run(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
         mock_client_class.return_value = mock_client
@@ -521,6 +533,7 @@ async def test_list_hotspot_packages_success(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -554,6 +567,7 @@ async def test_create_hotspot_package_success(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.post = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -595,6 +609,7 @@ async def test_create_hotspot_package_with_quotas(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.post = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -621,6 +636,7 @@ async def test_delete_hotspot_package_success(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.delete = AsyncMock()
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -657,6 +673,7 @@ async def test_list_radius_profiles_list_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -685,6 +702,7 @@ async def test_get_radius_profile_list_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -702,6 +720,7 @@ async def test_get_radius_profile_empty_list_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=[])
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -731,6 +750,7 @@ async def test_create_radius_profile_list_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.post = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -767,6 +787,7 @@ async def test_create_radius_profile_with_acct_server(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.post = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -797,6 +818,7 @@ async def test_create_radius_profile_dry_run_with_acct(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
         mock_client_class.return_value = mock_client
@@ -835,6 +857,7 @@ async def test_update_radius_profile_list_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.put = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -858,6 +881,7 @@ async def test_update_radius_profile_dry_run(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
         mock_client_class.return_value = mock_client
@@ -910,6 +934,7 @@ async def test_update_radius_profile_with_all_fields(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.put = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -964,6 +989,7 @@ async def test_delete_radius_profile_dry_run(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
         mock_client_class.return_value = mock_client
@@ -997,6 +1023,7 @@ async def test_list_radius_accounts_list_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1015,6 +1042,7 @@ async def test_create_radius_account_dry_run(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
         mock_client_class.return_value = mock_client
@@ -1050,6 +1078,7 @@ async def test_create_radius_account_list_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.post = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1083,6 +1112,7 @@ async def test_create_radius_account_without_vlan(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.post = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1122,6 +1152,7 @@ async def test_create_radius_account_with_note(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.post = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1148,6 +1179,7 @@ async def test_delete_radius_account_dry_run(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
         mock_client_class.return_value = mock_client
@@ -1181,6 +1213,7 @@ async def test_get_guest_portal_config_list_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1207,6 +1240,7 @@ async def test_configure_guest_portal_list_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.put = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1229,6 +1263,7 @@ async def test_configure_guest_portal_dry_run_all_fields(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
         mock_client_class.return_value = mock_client
@@ -1289,6 +1324,7 @@ async def test_list_hotspot_packages_list_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1307,6 +1343,7 @@ async def test_create_hotspot_package_dry_run(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
         mock_client_class.return_value = mock_client
@@ -1351,6 +1388,7 @@ async def test_create_hotspot_package_list_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.post = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1387,6 +1425,7 @@ async def test_delete_hotspot_package_dry_run(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
         mock_client_class.return_value = mock_client
@@ -1440,6 +1479,7 @@ async def test_get_radius_account_success(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1473,6 +1513,7 @@ async def test_get_radius_account_list_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1497,6 +1538,7 @@ async def test_get_radius_account_empty_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1530,6 +1572,7 @@ async def test_update_radius_account_username_only(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.put = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1568,6 +1611,7 @@ async def test_update_radius_account_vlan(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.put = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1606,6 +1650,7 @@ async def test_update_radius_account_dry_run(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
         mock_client_class.return_value = mock_client
@@ -1650,6 +1695,7 @@ async def test_update_radius_account_all_fields(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.put = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1714,6 +1760,7 @@ async def test_get_hotspot_package_success(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1749,6 +1796,7 @@ async def test_get_hotspot_package_list_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1783,6 +1831,7 @@ async def test_update_hotspot_package_name_only(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.put = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1822,6 +1871,7 @@ async def test_update_hotspot_package_bandwidth_limits(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.put = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1861,6 +1911,7 @@ async def test_update_hotspot_package_dry_run(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
         mock_client_class.return_value = mock_client
@@ -1919,6 +1970,7 @@ async def test_update_hotspot_package_all_fields(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.put = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1960,6 +2012,7 @@ async def test_get_hotspot_package_empty_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -1994,6 +2047,7 @@ async def test_get_radius_account_already_authenticated(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = True
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -2014,6 +2068,7 @@ async def test_update_radius_account_dry_run_no_password(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = False
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
         mock_client_class.return_value = mock_client
@@ -2046,6 +2101,7 @@ async def test_update_radius_account_already_auth_dict_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = True
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.put = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -2079,6 +2135,7 @@ async def test_get_hotspot_package_already_authenticated(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = True
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()
@@ -2108,6 +2165,7 @@ async def test_update_hotspot_package_already_auth_dict_response(mock_settings):
         mock_client = AsyncMock()
         mock_client.is_authenticated = True
         mock_client.authenticate = AsyncMock()
+        mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
         mock_client.put = AsyncMock(return_value=mock_response)
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock()

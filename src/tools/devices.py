@@ -265,6 +265,7 @@ async def list_pending_devices(
 
     async with UniFiClient(settings) as client:
         await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         params = {}
         if limit is not None:
@@ -314,6 +315,7 @@ async def adopt_device(
 
     async with UniFiClient(settings) as client:
         await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         payload = {}
         if name:
@@ -378,6 +380,7 @@ async def execute_port_action(
 
     async with UniFiClient(settings) as client:
         await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         payload = {"action": action, "params": params or {}}
 

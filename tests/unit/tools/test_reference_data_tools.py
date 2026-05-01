@@ -41,6 +41,7 @@ async def test_list_countries_success(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -71,6 +72,7 @@ async def test_list_countries_pagination(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -90,6 +92,7 @@ async def test_list_countries_empty(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -113,6 +116,7 @@ async def test_list_countries_default_pagination(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -143,6 +147,7 @@ async def test_list_device_tags_success(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -164,6 +169,7 @@ async def test_list_device_tags_empty(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -189,6 +195,7 @@ async def test_list_device_tags_pagination(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -228,6 +235,7 @@ async def test_list_radius_profiles_success(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -248,6 +256,7 @@ async def test_list_radius_profiles_empty(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -272,6 +281,7 @@ async def test_list_radius_profiles_pagination(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -306,6 +316,7 @@ async def test_list_radius_profiles_with_full_config(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)

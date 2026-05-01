@@ -40,6 +40,7 @@ async def list_vouchers(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         params: dict[str, Any] = {}
         if limit is not None:
@@ -71,6 +72,7 @@ async def get_voucher(site_id: str, voucher_id: str, settings: Settings) -> dict
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         response = await client.get(f"/integration/v1/sites/{site_id}/vouchers/{voucher_id}")
         if isinstance(response, list):
@@ -120,6 +122,7 @@ async def create_vouchers(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         # Build request payload
         payload: dict[str, Any] = {
@@ -190,6 +193,7 @@ async def delete_voucher(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         if coerce_bool(dry_run):
             logger.info(sanitize_log_message(f"[DRY RUN] Would delete voucher {voucher_id}"))
@@ -236,6 +240,7 @@ async def bulk_delete_vouchers(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         if coerce_bool(dry_run):
             logger.info(

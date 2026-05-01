@@ -52,6 +52,7 @@ async def test_list_vpn_tunnels_success(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -71,6 +72,7 @@ async def test_list_vpn_tunnels_pagination(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -89,6 +91,7 @@ async def test_list_vpn_tunnels_empty(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -120,6 +123,7 @@ async def test_list_vpn_tunnels_full_details(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -164,6 +168,7 @@ async def test_list_vpn_servers_success(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -183,6 +188,7 @@ async def test_list_vpn_servers_empty(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -200,6 +206,7 @@ async def test_list_vpn_servers_pagination(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -230,6 +237,7 @@ async def test_list_vpn_servers_full_details(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)

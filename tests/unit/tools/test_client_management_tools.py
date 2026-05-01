@@ -51,6 +51,7 @@ async def test_block_client_success(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_clients_response)
     mock_client.post = AsyncMock(return_value=mock_block_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -112,6 +113,7 @@ async def test_block_client_not_found(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_clients_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -152,6 +154,7 @@ async def test_unblock_client_success(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.post = AsyncMock(return_value=mock_unblock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -226,6 +229,7 @@ async def test_reconnect_client_success(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_clients_response)
     mock_client.post = AsyncMock(return_value=mock_reconnect_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -287,6 +291,7 @@ async def test_reconnect_client_not_found(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_clients_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -327,6 +332,7 @@ async def test_authorize_guest_success(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.post = AsyncMock(return_value=mock_auth_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -354,6 +360,7 @@ async def test_authorize_guest_with_limits(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.post = AsyncMock(return_value=mock_auth_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -440,6 +447,7 @@ async def test_limit_bandwidth_download_only(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.post = AsyncMock(return_value=mock_limit_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -474,6 +482,7 @@ async def test_limit_bandwidth_both(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.post = AsyncMock(return_value=mock_limit_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -506,6 +515,7 @@ async def test_limit_bandwidth_upload_only(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.post = AsyncMock(return_value=mock_limit_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -619,6 +629,7 @@ async def test_block_client_list_response(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_clients_response)
     mock_client.post = AsyncMock(return_value=mock_block_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -645,6 +656,7 @@ async def test_reconnect_client_list_response(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_clients_response)
     mock_client.post = AsyncMock(return_value=mock_reconnect_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -675,6 +687,7 @@ async def test_block_client_multiple_clients(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.get = AsyncMock(return_value=mock_clients_response)
     mock_client.post = AsyncMock(return_value=mock_block_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -699,6 +712,7 @@ async def test_authorize_guest_minimal(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.post = AsyncMock(return_value=mock_auth_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)

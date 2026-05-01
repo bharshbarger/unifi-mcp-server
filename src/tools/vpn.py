@@ -31,6 +31,7 @@ async def list_vpn_tunnels(
 
     async with UniFiClient(settings) as client:
         await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         response = await client.get(f"/integration/v1/sites/{site_id}/vpn/site-to-site-tunnels")
         tunnels_data: list[dict[str, Any]] = (
@@ -69,6 +70,7 @@ async def list_vpn_servers(
 
     async with UniFiClient(settings) as client:
         await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         response = await client.get(f"/integration/v1/sites/{site_id}/vpn/servers")
         servers_data: list[dict[str, Any]] = (

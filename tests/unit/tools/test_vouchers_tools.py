@@ -60,6 +60,7 @@ async def test_list_vouchers_success(mock_settings, sample_voucher):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.is_authenticated = True
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -79,6 +80,7 @@ async def test_list_vouchers_with_filter(mock_settings, sample_voucher):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.is_authenticated = True
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -99,6 +101,7 @@ async def test_list_vouchers_pagination(mock_settings, sample_voucher):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.is_authenticated = True
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -120,6 +123,7 @@ async def test_list_vouchers_empty(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.is_authenticated = True
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -138,6 +142,7 @@ async def test_list_vouchers_authenticates_if_needed(mock_settings, sample_vouch
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.is_authenticated = False
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -161,6 +166,7 @@ async def test_get_voucher_success(mock_settings, sample_voucher):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.is_authenticated = True
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -180,6 +186,7 @@ async def test_get_voucher_authenticates_if_needed(mock_settings, sample_voucher
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.is_authenticated = False
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -226,6 +233,7 @@ async def test_create_vouchers_success(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.is_authenticated = True
     mock_client.post = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -247,6 +255,7 @@ async def test_create_vouchers_with_limits(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.is_authenticated = True
     mock_client.post = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -281,6 +290,7 @@ async def test_create_vouchers_dry_run(mock_settings):
     """Test voucher creation dry run."""
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.is_authenticated = True
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -314,6 +324,7 @@ async def test_delete_voucher_success(mock_settings):
     """Test successful voucher deletion."""
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.is_authenticated = True
     mock_client.delete = AsyncMock(return_value={})
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -332,6 +343,7 @@ async def test_delete_voucher_dry_run(mock_settings):
     """Test voucher deletion dry run."""
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.is_authenticated = True
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -366,6 +378,7 @@ async def test_bulk_delete_vouchers_success(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.is_authenticated = True
     mock_client.delete = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
@@ -386,6 +399,7 @@ async def test_bulk_delete_vouchers_dry_run(mock_settings):
     """Test bulk voucher deletion dry run."""
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.is_authenticated = True
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -415,6 +429,7 @@ async def test_bulk_delete_vouchers_authenticates_if_needed(mock_settings):
 
     mock_client = MagicMock()
     mock_client.authenticate = AsyncMock()
+    mock_client.resolve_site_id = AsyncMock(side_effect=lambda x: x)
     mock_client.is_authenticated = False
     mock_client.delete = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)

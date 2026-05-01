@@ -39,6 +39,7 @@ async def list_radius_profiles(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         response = await client.get(f"/ea/sites/{site_id}/rest/radiusprofile")
         data = response if isinstance(response, list) else response.get("data", [])
@@ -66,6 +67,7 @@ async def get_radius_profile(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         response = await client.get(f"/ea/sites/{site_id}/rest/radiusprofile/{profile_id}")
         data = response if isinstance(response, list) else response.get("data", response)
@@ -117,6 +119,7 @@ async def create_radius_profile(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         # Build request payload
         payload: dict[str, Any] = {
@@ -222,6 +225,7 @@ async def update_radius_profile(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         # Build update payload with only provided fields
         payload: dict[str, Any] = {}
@@ -321,6 +325,7 @@ async def delete_radius_profile(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         if coerce_bool(dry_run):
             logger.info(sanitize_log_message(f"[DRY RUN] Would delete RADIUS profile {profile_id}"))
@@ -364,6 +369,7 @@ async def list_radius_accounts(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         response = await client.get(f"/ea/sites/{site_id}/rest/account")
         data = response if isinstance(response, list) else response.get("data", [])
@@ -416,6 +422,7 @@ async def create_radius_account(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         # Build request payload using correct API field names
         payload: dict[str, Any] = {
@@ -491,6 +498,7 @@ async def get_radius_account(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         response = await client.get(f"/ea/sites/{site_id}/rest/account/{account_id}")
         data = response if isinstance(response, list) else response.get("data", response)
@@ -568,6 +576,7 @@ async def update_radius_account(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         if coerce_bool(dry_run):
             payload_safe = payload.copy()
@@ -630,6 +639,7 @@ async def delete_radius_account(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         if coerce_bool(dry_run):
             logger.info(sanitize_log_message(f"[DRY RUN] Would delete RADIUS account {account_id}"))
@@ -673,6 +683,7 @@ async def get_guest_portal_config(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         response = await client.get(f"/integration/v1/sites/{site_id}/guest-portal/config")
         data = response if isinstance(response, list) else response.get("data", response)
@@ -722,6 +733,7 @@ async def configure_guest_portal(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         # Build update payload
         payload: dict[str, Any] = {}
@@ -810,6 +822,7 @@ async def list_hotspot_packages(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         response = await client.get(f"/integration/v1/sites/{site_id}/hotspot/packages")
         data = response if isinstance(response, list) else response.get("data", [])
@@ -857,6 +870,7 @@ async def create_hotspot_package(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         # Build request payload
         payload: dict[str, Any] = {
@@ -927,6 +941,7 @@ async def get_hotspot_package(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         response = await client.get(
             f"/integration/v1/sites/{site_id}/hotspot/packages/{package_id}"
@@ -1011,6 +1026,7 @@ async def update_hotspot_package(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         if coerce_bool(dry_run):
             logger.info(
@@ -1067,6 +1083,7 @@ async def delete_hotspot_package(
 
         if not client.is_authenticated:
             await client.authenticate()
+        site_id = await client.resolve_site_id(site_id)
 
         if coerce_bool(dry_run):
             logger.info(

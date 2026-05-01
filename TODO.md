@@ -16,7 +16,6 @@ If a task isn't tracked in one of those, it lives below.
 
 These came out of recent sessions and are too small to belong in `DEVELOPMENT_PLAN.md`. Pick them up opportunistically.
 
-- **`list_firewall_policies` 500 passthrough.** When Zone-Based Firewall is not configured, the controller returns a 500 with an HTML body. Should be detected and surfaced as a typed `NotConfiguredError` like `list_firewall_zones` already does (which returns a 400 with `api.firewall.zone-based-firewall-not-configured`).
 - **WLAN passphrase exposure in `list_wlans`.** Response includes `x_passphrase` in plaintext. Design call: redact by default, opt-in via flag to include? Affects any caller that pipes WLAN data into a less-trusted context.
 - **Duplicate `list_radius_profiles` registration warning.** Startup logs `Component already exists: tool:list_radius_profiles@`. Likely a double `@server.tool` decorator in `src/tools/radius.py`.
 - **Cosmetic — `Settings.resolve_secrets_from_keychain` docstring.** References `__pydantic_private__`; the implementation actually uses `object.__setattr__(self, "_secret_sources", sources)`.

@@ -146,6 +146,86 @@ class TestListFirewallPolicies:
                 await list_firewall_policies("default", local_settings)
 
     @pytest.mark.asyncio
+    async def test_list_firewall_policies_zbf_not_configured_400(
+        self, local_settings: Settings
+    ) -> None:
+        # Definitive signal: 400 with the structured controller error code.
+        from src.tools.firewall_policies import list_firewall_policies
+        from src.utils.exceptions import APIError, NotConfiguredError
+
+        zbf_response = {
+            "statusCode": 400,
+            "statusName": "BAD_REQUEST",
+            "code": "api.firewall.zone-based-firewall-not-configured",
+            "message": "Zone Based Firewall is not configured",
+        }
+
+        with patch("src.tools.firewall_policies.UniFiClient") as MockClient:
+            mock_client = AsyncMock()
+            MockClient.return_value.__aenter__.return_value = mock_client
+            mock_client.is_authenticated = True
+            mock_client.get.side_effect = APIError(
+                "API request failed", status_code=400, response_data=zbf_response
+            )
+
+            with pytest.raises(NotConfiguredError) as exc_info:
+                await list_firewall_policies("default", local_settings)
+
+            assert exc_info.value.feature == "zone_based_firewall"
+            assert exc_info.value.status_code == 400
+            assert "not configured" in exc_info.value.message.lower()
+
+    @pytest.mark.asyncio
+    async def test_list_firewall_policies_zbf_not_configured_500(
+        self, local_settings: Settings
+    ) -> None:
+        # Heuristic signal: 500 with no JSON body (controller returns Tomcat HTML).
+        # On the v2 firewall-policies endpoint this is in practice ZBF-not-configured.
+        from src.tools.firewall_policies import list_firewall_policies
+        from src.utils.exceptions import APIError, NotConfiguredError
+
+        with patch("src.tools.firewall_policies.UniFiClient") as MockClient:
+            mock_client = AsyncMock()
+            MockClient.return_value.__aenter__.return_value = mock_client
+            mock_client.is_authenticated = True
+            mock_client.get.side_effect = APIError(
+                "API request failed: <html>HTTP Status 500</html>",
+                status_code=500,
+                response_data=None,
+            )
+
+            with pytest.raises(NotConfiguredError) as exc_info:
+                await list_firewall_policies("default", local_settings)
+
+            assert exc_info.value.feature == "zone_based_firewall"
+            assert exc_info.value.status_code == 500
+            # Be honest about the inference — message says "appears" not "is".
+            assert "appears" in exc_info.value.message.lower()
+
+    @pytest.mark.asyncio
+    async def test_list_firewall_policies_other_apierror_passes_through(
+        self, local_settings: Settings
+    ) -> None:
+        # A generic 503 (or anything not matching the ZBF heuristics) must NOT be
+        # remapped to NotConfiguredError — it should bubble up as a plain APIError.
+        from src.tools.firewall_policies import list_firewall_policies
+        from src.utils.exceptions import APIError, NotConfiguredError
+
+        with patch("src.tools.firewall_policies.UniFiClient") as MockClient:
+            mock_client = AsyncMock()
+            MockClient.return_value.__aenter__.return_value = mock_client
+            mock_client.is_authenticated = True
+            mock_client.get.side_effect = APIError(
+                "Service unavailable", status_code=503, response_data=None
+            )
+
+            with pytest.raises(APIError) as exc_info:
+                await list_firewall_policies("default", local_settings)
+
+            assert not isinstance(exc_info.value, NotConfiguredError)
+            assert exc_info.value.status_code == 503
+
+    @pytest.mark.asyncio
     async def test_list_firewall_policies_correct_endpoint(
         self, local_settings: Settings, sample_policy_response: list[dict]
     ) -> None:

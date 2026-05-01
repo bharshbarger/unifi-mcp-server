@@ -85,6 +85,30 @@ class ResourceNotFoundError(APIError):
         self.resource_id = resource_id
 
 
+class NotConfiguredError(APIError):
+    """Raised when a controller feature must be configured before its API can be used."""
+
+    def __init__(
+        self,
+        feature: str,
+        message: str | None = None,
+        status_code: int | None = None,
+        response_data: dict[str, Any] | None = None,
+    ) -> None:
+        """Initialize not-configured error.
+
+        Args:
+            feature: Short name of the feature (e.g., "zone_based_firewall")
+            message: Human-readable explanation; a default is composed if omitted
+            status_code: HTTP status code that triggered the detection
+            response_data: Raw API response data, if any
+        """
+        if message is None:
+            message = f"{feature} is not configured on this controller"
+        super().__init__(message, status_code=status_code, response_data=response_data)
+        self.feature = feature
+
+
 class ValidationError(UniFiMCPException):
     """Raised when input validation fails."""
 

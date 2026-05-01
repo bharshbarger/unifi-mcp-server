@@ -9,7 +9,14 @@ from ..models.firewall_policy import (
     FirewallPolicyCreate,
     FirewallZoneV2Mapping,
 )
-from ..utils import APIError, ResourceNotFoundError, get_logger, log_audit, sanitize_log_message
+from ..utils import (
+    APIError,
+    NotConfiguredError,
+    ResourceNotFoundError,
+    get_logger,
+    log_audit,
+    sanitize_log_message,
+)
 from ..utils.validators import coerce_bool
 
 logger = get_logger(__name__)
@@ -22,6 +29,35 @@ _zone_cache: dict[str, dict[str, str]] = {}
 
 _VALID_IP_VERSIONS = ("IPV4", "IPV6", "BOTH")
 _VALID_PORT_MATCHING_TYPES = ("ANY", "SPECIFIC", "OBJECT")
+_ZBF_NOT_CONFIGURED_CODE = "api.firewall.zone-based-firewall-not-configured"
+
+
+def _raise_zbf_not_configured(err: APIError) -> None:
+    # Two ZBF-not-configured signals observed in the wild:
+    #   1. 400 with structured JSON: {"code": "api.firewall.zone-based-firewall-not-configured", ...}
+    #      Definitive — re-raise as NotConfiguredError.
+    #   2. 500 with a Tomcat HTML error page (no JSON body) on the v2 firewall-policies endpoint.
+    #      Heuristic — likely the same precondition; we say "appears not to be configured" to
+    #      stay honest about the inference.
+    response = err.response_data or {}
+    if isinstance(response, dict) and response.get("code") == _ZBF_NOT_CONFIGURED_CODE:
+        raise NotConfiguredError(
+            feature="zone_based_firewall",
+            message="Zone-Based Firewall is not configured on this controller",
+            status_code=err.status_code,
+            response_data=response,
+        ) from err
+    if err.status_code == 500:
+        raise NotConfiguredError(
+            feature="zone_based_firewall",
+            message=(
+                "Zone-Based Firewall appears not to be configured "
+                "(controller returned 500 on /firewall-policies). "
+                "If ZBF is configured, this is a different error — check controller logs."
+            ),
+            status_code=err.status_code,
+            response_data=response if isinstance(response, dict) else None,
+        ) from err
 
 
 def _build_match_target(
@@ -361,7 +397,8 @@ async def list_firewall_policies(
 
     Raises:
         NotImplementedError: When using cloud API (v2 endpoints require local access)
-        APIError: When API request fails
+        NotConfiguredError: When Zone-Based Firewall is not configured on the controller
+        APIError: When API request fails for any other reason
 
     Note:
         Cloud API does not support v2 endpoints. Configure UNIFI_API_TYPE=local
@@ -376,7 +413,11 @@ async def list_firewall_policies(
             await client.authenticate()
 
         endpoint = f"{settings.get_v2_api_path(site_id)}/firewall-policies"
-        response = await client.get(endpoint)
+        try:
+            response = await client.get(endpoint)
+        except APIError as err:
+            _raise_zbf_not_configured(err)
+            raise
 
         policies_data = response if isinstance(response, list) else response.get("data", [])
 

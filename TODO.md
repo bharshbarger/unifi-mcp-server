@@ -16,6 +16,7 @@ If a task isn't tracked in one of those, it lives below.
 
 These came out of recent sessions and are too small to belong in `DEVELOPMENT_PLAN.md`. Pick them up opportunistically.
 
+- **Switching API site-UUID resolution bug.** `list_lags`, `list_switch_stacks` (and likely `get_lag_details`, `get_switch_stack`, `list_mclag_domains`, `get_mclag_domain`) call `/integration/v1/sites/{site_id}/switching/...` with the literal `"default"` and fail with `400 api.request.argument-type-mismatch: 'default' is not a valid 'siteId' value`. The integration API requires the site UUID — see `reference_unifi_integration_api_uses_uuid_not_default` (memory). Other integration-API tools (e.g. `list_firewall_groups`) already do this resolution; the Switching tools added in `c48384b` regressed on the pattern. Verified live against the UCK-G2 on 2026-05-01.
 - **WLAN passphrase exposure in `list_wlans`.** Response includes `x_passphrase` in plaintext. Design call: redact by default, opt-in via flag to include? Affects any caller that pipes WLAN data into a less-trusted context.
 - **Duplicate `list_radius_profiles` registration warning.** Startup logs `Component already exists: tool:list_radius_profiles@`. Likely a double `@server.tool` decorator in `src/tools/radius.py`.
 - **Cosmetic — `Settings.resolve_secrets_from_keychain` docstring.** References `__pydantic_private__`; the implementation actually uses `object.__setattr__(self, "_secret_sources", sources)`.

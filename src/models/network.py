@@ -1,6 +1,6 @@
 """Network data model."""
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class Network(BaseModel):
@@ -14,6 +14,15 @@ class Network(BaseModel):
     vlan_enabled: bool | None = Field(None, description="VLAN assignment enabled")
     vlan_id: int | None = Field(None, description="VLAN ID number", alias="vlan")
     enabled: bool | None = Field(None, description="Whether network is enabled")
+
+    @field_validator("vlan_id", mode="before")
+    @classmethod
+    def _coerce_blank_vlan_to_none(cls, v: object) -> object:
+        # Local controller returns vlan="" for VLAN-disabled networks;
+        # treat that the same as a missing field rather than failing int coercion.
+        if isinstance(v, str) and v.strip() == "":
+            return None
+        return v
 
     # IP configuration
     ip_subnet: str | None = Field(None, description="IP subnet (CIDR notation)")

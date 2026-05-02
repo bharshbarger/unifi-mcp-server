@@ -223,8 +223,10 @@ class Settings(BaseSettings):
             2. macOS Keychain (service ``unifi-mcp-server``).
             3. Empty string — required only for ``api_key`` (raises below).
 
-        Tracks the source of each resolved key on ``__pydantic_private__`` so
-        startup logging can report whether keys came from env or Keychain.
+        Tracks the source of each resolved key on a ``_secret_sources``
+        attribute set via ``object.__setattr__`` (so it bypasses the Pydantic
+        field machinery) so startup logging can report whether keys came
+        from env or Keychain.
         ``site_manager_api_key`` is allowed to remain empty; callers fall back
         to ``api_key`` via :meth:`resolved_site_manager_api_key`.
         """

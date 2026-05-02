@@ -7,12 +7,13 @@ class WANConnection(BaseModel):
     """WAN connection model."""
 
     id: str = Field(..., alias="_id", description="WAN connection identifier")
-    site_id: str = Field(..., description="Site identifier")
+    site_id: str | None = Field(None, description="Site identifier")
     name: str = Field(..., description="WAN connection name")
 
-    # Connection type
-    wan_type: str = Field(..., description="WAN type (dhcp/static/pppoe)")
-    interface: str = Field(..., description="Physical interface (eth0/eth1/etc)")
+    # Connection type. The integration-API list response omits these fields;
+    # they're populated by the per-WAN detail endpoint and the legacy v1 API.
+    wan_type: str | None = Field(None, description="WAN type (dhcp/static/pppoe)")
+    interface: str | None = Field(None, description="Physical interface (eth0/eth1/etc)")
 
     # IP configuration
     ip_address: str | None = Field(None, description="WAN IP address")
@@ -21,7 +22,7 @@ class WANConnection(BaseModel):
     dns_servers: list[str] = Field(default_factory=list, description="DNS server IPs")
 
     # Connection status
-    status: str = Field(..., description="Connection status (online/offline/connecting)")
+    status: str | None = Field(None, description="Connection status (online/offline/connecting)")
     uptime: int | None = Field(None, description="Connection uptime in seconds")
 
     # Statistics

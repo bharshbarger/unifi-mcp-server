@@ -6,11 +6,20 @@ from ..api.client import UniFiClient
 from ..config import Settings
 from ..models.radius import GuestPortalConfig, HotspotPackage, RADIUSAccount, RADIUSProfile
 from ..utils import (
+    NotConfiguredError,
+    ResourceNotFoundError,
     audit_action,
     coerce_bool,
     get_logger,
     sanitize_log_message,
     validate_confirmation,
+)
+
+
+_GUEST_PORTAL_NOT_CONFIGURED_MSG = (
+    "Guest portal is not configured on this controller "
+    "(no hotspot/guest-portal endpoints available). "
+    "Enable a guest WLAN with portal authentication first."
 )
 
 logger = get_logger(__name__)
@@ -685,7 +694,16 @@ async def get_guest_portal_config(
             await client.authenticate()
         site_id = await client.resolve_site_id(site_id)
 
-        response = await client.get(f"/integration/v1/sites/{site_id}/guest-portal/config")
+        try:
+            response = await client.get(
+                f"/integration/v1/sites/{site_id}/guest-portal/config"
+            )
+        except ResourceNotFoundError as err:
+            raise NotConfiguredError(
+                feature="guest_portal",
+                message=_GUEST_PORTAL_NOT_CONFIGURED_MSG,
+                status_code=404,
+            ) from err
         data = response if isinstance(response, list) else response.get("data", response)
         if isinstance(data, list):
             data = data[0] if data else {}
@@ -824,7 +842,16 @@ async def list_hotspot_packages(
             await client.authenticate()
         site_id = await client.resolve_site_id(site_id)
 
-        response = await client.get(f"/integration/v1/sites/{site_id}/hotspot/packages")
+        try:
+            response = await client.get(
+                f"/integration/v1/sites/{site_id}/hotspot/packages"
+            )
+        except ResourceNotFoundError as err:
+            raise NotConfiguredError(
+                feature="guest_portal",
+                message=_GUEST_PORTAL_NOT_CONFIGURED_MSG,
+                status_code=404,
+            ) from err
         data = response if isinstance(response, list) else response.get("data", [])
 
         return [HotspotPackage(**package).model_dump() for package in data]

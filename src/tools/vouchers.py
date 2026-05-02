@@ -6,11 +6,20 @@ from ..api.client import UniFiClient
 from ..config import Settings
 from ..models import Voucher
 from ..utils import (
+    NotConfiguredError,
+    ResourceNotFoundError,
     audit_action,
     coerce_bool,
     get_logger,
     sanitize_log_message,
     validate_confirmation,
+)
+
+
+_GUEST_PORTAL_NOT_CONFIGURED_MSG = (
+    "Guest portal is not configured on this controller "
+    "(no hotspot/voucher endpoints available). "
+    "Enable a guest WLAN with portal authentication first."
 )
 
 logger = get_logger(__name__)
@@ -50,7 +59,16 @@ async def list_vouchers(
         if filter_expr:
             params["filter"] = filter_expr
 
-        response = await client.get(f"/integration/v1/sites/{site_id}/vouchers", params=params)
+        try:
+            response = await client.get(
+                f"/integration/v1/sites/{site_id}/vouchers", params=params
+            )
+        except ResourceNotFoundError as err:
+            raise NotConfiguredError(
+                feature="guest_portal",
+                message=_GUEST_PORTAL_NOT_CONFIGURED_MSG,
+                status_code=404,
+            ) from err
         data = response if isinstance(response, list) else response.get("data", [])
 
         return [Voucher(**voucher).model_dump() for voucher in data]

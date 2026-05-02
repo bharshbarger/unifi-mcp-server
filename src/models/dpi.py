@@ -1,6 +1,6 @@
 """Deep Packet Inspection (DPI) models."""
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class DPICategory(BaseModel):
@@ -12,6 +12,16 @@ class DPICategory(BaseModel):
 
     # Application count
     app_count: int | None = Field(None, description="Number of applications in this category")
+
+    @field_validator("id", mode="before")
+    @classmethod
+    def _coerce_int_id_to_str(cls, v: object) -> object:
+        # Local controller returns numeric category ids (e.g. 0, 1, 2) as
+        # bare ints; the model declares str so callers can treat all id
+        # fields uniformly.
+        if isinstance(v, int) and not isinstance(v, bool):
+            return str(v)
+        return v
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 

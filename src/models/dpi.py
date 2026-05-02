@@ -31,7 +31,7 @@ class DPIApplication(BaseModel):
 
     id: str = Field(..., alias="_id", description="Application identifier")
     name: str = Field(..., description="Application name")
-    category_id: str = Field(..., description="Category identifier")
+    category_id: str | None = Field(None, description="Category identifier")
     category_name: str | None = Field(None, description="Category name")
 
     # Application metadata
@@ -42,6 +42,15 @@ class DPIApplication(BaseModel):
         default_factory=list, description="Protocols used by this application"
     )
     ports: list[int] = Field(default_factory=list, description="Common ports used")
+
+    @field_validator("id", "category_id", mode="before")
+    @classmethod
+    def _coerce_int_id_to_str(cls, v: object) -> object:
+        # Local controller returns numeric ids as bare ints (matches the
+        # DPICategory fix above). Stringify to match the field type.
+        if isinstance(v, int) and not isinstance(v, bool):
+            return str(v)
+        return v
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
